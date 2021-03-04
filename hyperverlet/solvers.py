@@ -47,13 +47,11 @@ class HyperEulerSolver(BaseSolver):
 
 class VelocityVerletSolver(BaseSolver):
     def forward(self, func: Callable, q: torch.Tensor, p: torch.Tensor, m: torch.Tensor, t, dt, **kwargs):
-        double_mass = 2 * m
+        _, dp = func(q, p, m, t)
+        q_next = q + p * dt / m + (dp / (2 * m)) * (dt ** 2)
 
-        dq, dp = func(q, p, m, t)
-        q_next = q + dq * dt + (dp / double_mass) * (dt ** 2)
-
-        dq_next, dp_next = func(q_next, p, m, t)
-        p_next = p + ((dp + dq_next) / m) * dt   # ((dq + dq_next) / double_mass) * dt is acceleration, multiply by mass to get force, which is average dp
+        _, dp_next = func(q_next, p, m, t)
+        p_next = p + ((dp + dp_next) / 2) * dt
 
         return q_next, p_next
 
@@ -68,12 +66,12 @@ class HyperVelocityVerletSolver(BaseSolver):
     def forward(self, func: Callable, q: torch.Tensor, p: torch.Tensor, m: torch.Tensor, t, dt, **kwargs):
         double_mass = 2 * m
 
-        dq, dp = func(q, p, m, t)
+        _, dp = func(q, p, m, t)
         hq = self.hypersolver_q(q, p, m, t, dt)
-        q_next = q + dq * dt + (dp / double_mass) * (dt ** 2) + hq * (dt ** 2)
+        q_next = q + p * dt / m + (dp / (2 * m)) * (dt ** 2) + hq * (dt ** 2)
 
         dq_next, dp_next = func(q_next, p, m, t)
         hp = self.hypersolver_p(q_next, p, m, t, dt)
-        p_next = p + ((dp + dq_next) / m) * dt + hp * (dt ** 2)   # ((dq + dq_next) / double_mass) * dt is acceleration, multiply by mass to get force, which is average dp
+        p_next = p + ((dp + dp_next) / 2) * dt + hp * (dt ** 2)
 
         return q_next, p_next
