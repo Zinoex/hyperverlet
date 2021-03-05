@@ -1,10 +1,10 @@
-import time
-
 import torch
 from torch import optim, nn
 import matplotlib.pyplot as plt
 from tqdm import trange
+from math import pi
 import random
+import time
 
 from hyperverlet.experiments import Pendulum
 from hyperverlet.solvers import HyperEulerSolver, EulerSolver, VelocityVerletSolver, HyperVelocityVerletSolver, \
@@ -19,7 +19,7 @@ traj_len = 1000001
 duration = 10000
 trajectory = torch.linspace(0, duration, traj_len).to(device)
 mass = torch.tensor([0.9]).to(device)
-q0 = torch.tensor([1.5707963268]).to(device)
+q0 = torch.tensor([pi / 2]).to(device)
 p0 = torch.tensor([0.0]).to(device)
 coarsing_factor = 500
 

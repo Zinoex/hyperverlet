@@ -72,7 +72,11 @@ class HyperEulerSolver(BaseSolver, HyperSolverMixin):
         dq, dp = func(q, p, m, t)
         hq, hp = self.hypersolver(q, p, dq, dp, m, t, dt)
 
-        return q + dq * dt + hq * (dt ** 2), p + dp * dt + hp * (dt ** 2)
+        q_next = q + dq * dt + hq * (dt ** 2)
+        p_next = p + dp * dt + hp * (dt ** 2)
+
+        return q_next, p_next
+
 
     def residual(self, func: Callable, q: torch.Tensor, q_next: torch.Tensor, p: torch.Tensor, p_next: torch.Tensor, m: torch.Tensor, t, dt, **kwargs):
         dq, dp = func(q, p, m, t)
