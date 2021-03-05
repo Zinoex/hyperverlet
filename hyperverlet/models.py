@@ -2,7 +2,7 @@ import torch
 from torch import nn
 
 
-class PendulumResidual(nn.Module):
+class PendulumBlock(nn.Module):
     def __init__(self, features):
         super().__init__()
 
@@ -18,18 +18,26 @@ class PendulumResidual(nn.Module):
 class PendulumMLP(nn.Module):
     def __init__(self):
         super().__init__()
-        self.h_dim = 128
+        self.h_dim = 64
 
-        self.model = nn.Sequential(
-            nn.Linear(4, self.h_dim),
+        self.model_q = nn.Sequential(
+            nn.Linear(2, self.h_dim),
             nn.PReLU(),
-            PendulumResidual(self.h_dim),
-            nn.Linear(self.h_dim, 2)
+            PendulumBlock(self.h_dim),
+            nn.Linear(self.h_dim, 1)
+        )
+
+        self.model_p = nn.Sequential(
+            nn.Linear(2, self.h_dim),
+            nn.PReLU(),
+            PendulumBlock(self.h_dim),
+            nn.Linear(self.h_dim, 1)
         )
 
     def forward(self, q, p, dq, dp, m, t, dt):
-        x = torch.cat([p, q, dq, dp], dim=0)
-        x = self.model(x)
-        x = x.split(1, dim=0)
+        q = torch.cat([q, dq], dim=0)
+        q = self.model_q(q)
+        p = torch.cat([p, dp], dim=0)
+        p = self.model_p(p)
 
-        return x
+        return q, p
