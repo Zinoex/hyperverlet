@@ -24,6 +24,8 @@ class PendulumMLP(nn.Module):
             nn.Linear(2, self.h_dim),
             nn.PReLU(),
             PendulumBlock(self.h_dim),
+            PendulumBlock(self.h_dim),
+            PendulumBlock(self.h_dim),
             nn.Linear(self.h_dim, 1)
         )
 
@@ -31,13 +33,22 @@ class PendulumMLP(nn.Module):
             nn.Linear(2, self.h_dim),
             nn.PReLU(),
             PendulumBlock(self.h_dim),
+            PendulumBlock(self.h_dim),
+            PendulumBlock(self.h_dim),
             nn.Linear(self.h_dim, 1)
         )
 
-    def forward(self, q, p, dq, dp, m, t, dt):
-        q = torch.cat([q, dq], dim=0)
-        q = self.model_q(q)
-        p = torch.cat([p, dp], dim=0)
-        p = self.model_p(p)
+    def forward(self, q, p, dq, dp, m, t, dt, include_q=True, include_p=True):
+        if include_q:
+            q = torch.cat([q, dq], dim=0)
+            q = self.model_q(q)
+        else:
+            q = None
+
+        if include_p:
+            p = torch.cat([p, dp], dim=0)
+            p = self.model_p(p)
+        else:
+            p = None
 
         return q, p

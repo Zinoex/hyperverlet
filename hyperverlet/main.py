@@ -15,13 +15,14 @@ device = torch.device('cpu')
 pendulum = Pendulum(l=0.5).to(device)
 solver = ThirdOrderRuthSolver().to(device)
 
-traj_len = 1000001
-duration = 10000
+traj_len = 100001
+duration = 1000
 trajectory = torch.linspace(0, duration, traj_len).to(device)
 mass = torch.tensor([0.9]).to(device)
 q0 = torch.tensor([pi / 2]).to(device)
 p0 = torch.tensor([0.0]).to(device)
-coarsing_factor = 500
+coarsing_factor = 20
+assert (traj_len - 1) % coarsing_factor == 0
 
 t1 = time.time()
 q_base, p_base = solver.trajectory(pendulum, q0, p0, mass, trajectory)
@@ -31,7 +32,7 @@ print(f'data generation took: {t2 - t1}s')
 q_base, p_base = torch.cat([q_base[:1], q_base[1::coarsing_factor]], dim=0), torch.cat([p_base[:1], p_base[1::coarsing_factor]], dim=0)
 trajectory = torch.linspace(0, duration, int((traj_len - 1) / coarsing_factor) + 1).to(device)
 
-solver = HyperEulerSolver(PendulumMLP()).to(device)
+solver = HyperVelocityVerletSolver(PendulumMLP()).to(device)
 optimizer = optim.AdamW(solver.parameters(), lr=0.5 * 1e-2)
 criterion = nn.MSELoss()
 
