@@ -52,3 +52,40 @@ class PendulumMLP(nn.Module):
             p = None
 
         return q, p
+
+
+class LennardJonesMLP(nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.h_dim = 64
+
+        self.model_q = nn.Sequential(
+            nn.Linear(2, self.h_dim),
+            nn.PReLU(),
+            PendulumBlock(self.h_dim),
+            PendulumBlock(self.h_dim),
+            nn.Linear(self.h_dim, 1)
+        )
+
+        self.model_p = nn.Sequential(
+            nn.Linear(2, self.h_dim),
+            nn.PReLU(),
+            PendulumBlock(self.h_dim),
+            PendulumBlock(self.h_dim),
+            nn.Linear(self.h_dim, 1)
+        )
+
+    def forward(self, q, p, dq, dp, m, t, dt, include_q=True, include_p=True):
+        if include_q:
+            q = torch.stack([q, dq], dim=-1)
+            q = self.model_q(q).squeeze(-1)
+        else:
+            q = None
+
+        if include_p:
+            p = torch.stack([p, dp], dim=-1)
+            p = self.model_p(p).squeeze(-1)
+        else:
+            p = None
+
+        return q, p
