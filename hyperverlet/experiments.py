@@ -28,8 +28,9 @@ class LenardJones(nn.Module):
         self.sigma = sigma
 
         self.num_particles = 10
-        self.q0 = torch.randn((self.num_particles, 3))
-        self.p0 = torch.randn((self.num_particles, 3))
+        self.q0 = torch.rand((self.num_particles, 3)) * 5
+        self.p0 = (torch.rand_like(self.q0) * 2 - 1) * torch.tensor([0.03]).sqrt()
+        self.p0 = self.p0 - self.p0.mean(axis=0)
         self.mass = torch.ones((self.num_particles, 1))
 
     def forward(self, q, p, m, t):
@@ -49,12 +50,14 @@ class LenardJones(nn.Module):
         sigma12 = self.sigma ** 12
         sigma6 = self.sigma ** 6
 
+        r = r.fill_diagonal_(1)
+
         r13 = r ** 13
         r7 = r ** 7
 
         inner = sigma12 / r13 - 0.5 * sigma6 / r7
 
-        direction = disp / r.fill_diagonal_(1).unsqueeze(-1)
+        direction = disp / r.unsqueeze(-1)
 
         return -prefix * inner.fill_diagonal_(0).unsqueeze(-1) * direction
 

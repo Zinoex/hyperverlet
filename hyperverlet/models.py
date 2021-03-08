@@ -60,31 +60,33 @@ class LennardJonesMLP(nn.Module):
         self.h_dim = 64
 
         self.model_q = nn.Sequential(
-            nn.Linear(2, self.h_dim),
+            nn.Linear(6, self.h_dim),
             nn.PReLU(),
             PendulumBlock(self.h_dim),
             PendulumBlock(self.h_dim),
-            nn.Linear(self.h_dim, 1)
+            nn.Linear(self.h_dim, 3)
         )
 
         self.model_p = nn.Sequential(
-            nn.Linear(2, self.h_dim),
+            nn.Linear(6, self.h_dim),
             nn.PReLU(),
             PendulumBlock(self.h_dim),
             PendulumBlock(self.h_dim),
-            nn.Linear(self.h_dim, 1)
+            nn.Linear(self.h_dim, 3)
         )
+
+        # TODO: Try a GNN model for interactions and permutation equivariance
 
     def forward(self, q, p, dq, dp, m, t, dt, include_q=True, include_p=True):
         if include_q:
-            q = torch.stack([q, dq], dim=-1)
-            q = self.model_q(q).squeeze(-1)
+            q = torch.cat([q, dq], dim=-1)
+            q = self.model_q(q)
         else:
             q = None
 
         if include_p:
-            p = torch.stack([p, dp], dim=-1)
-            p = self.model_p(p).squeeze(-1)
+            p = torch.cat([p, dp], dim=-1)
+            p = self.model_p(p)
         else:
             p = None
 

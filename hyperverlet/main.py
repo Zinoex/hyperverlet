@@ -20,10 +20,10 @@ device = torch.device('cpu')
 experiment = LenardJones().to(device)
 solver = ThirdOrderRuthSolver().to(device)
 
-traj_len = 60001
-duration = 6
+traj_len = 10 * 6000 + 1
+duration = 10 * 0.6
 trajectory = torch.linspace(0, duration, traj_len).to(device)
-coarsening_factor = 1
+coarsening_factor = 500
 assert (traj_len - 1) % coarsening_factor == 0
 
 t1 = time.time()
@@ -75,7 +75,9 @@ if __name__ == '__main__':
         fig = plt.figure()
         ax = fig.add_subplot(111, projection='3d')
 
-        ax.scatter(q[::500, :, 0].flatten(), q[::500, :, 1].flatten(), q[::500, :, 2].flatten(), marker='x')
+        plot_every = max(1, 500 // coarsening_factor)
+
+        ax.scatter(q[::plot_every, :, 0].flatten(), q[::plot_every, :, 1].flatten(), q[::plot_every, :, 2].flatten(), marker='x')
         # plt.scatter(q, p, marker='x')
         # plt.xlabel('q')
         # plt.ylabel('p')
