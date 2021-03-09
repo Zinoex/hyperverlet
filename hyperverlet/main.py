@@ -10,6 +10,7 @@ from hyperverlet.experiments import Pendulum, LenardJones
 from hyperverlet.solvers import HyperEulerSolver, EulerSolver, VelocityVerletSolver, HyperVelocityVerletSolver, \
     StormerVerletSolver, ThirdOrderRuthSolver, FourthOrderRuthSolver
 from hyperverlet.models import PendulumMLP, LennardJonesMLP
+from hyperverlet.train import train
 from hyperverlet.utils import seed_randomness
 
 
@@ -35,29 +36,12 @@ q_base, p_base = torch.cat([q_base[:1], q_base[1::coarsening_factor]], dim=0), t
 trajectory = torch.linspace(0, duration, int((traj_len - 1) / coarsening_factor) + 1).to(device)
 
 solver = HyperVelocityVerletSolver(LennardJonesMLP()).to(device)
-optimizer = optim.AdamW(solver.parameters(), lr=0.5 * 1e-2)
+# solver = VelocityVerletSolver()
 criterion = nn.MSELoss()
 
-# for iteration in trange(1000):
-#     optimizer.zero_grad(set_to_none=True)
-#
-#     batch_size = 4
-#     if iteration < -1:
-#         start = 0
-#     else:
-#         start = random.randint(0, trajectory.size(0) - batch_size)
-#
-#     end = start + batch_size
-#
-#     q, p = solver.trajectory(experiment, q_base[start], p_base[start], experiment.mass, trajectory[start:end])
-#     loss = criterion(q, q_base[start:end]) + criterion(p, p_base[start:end])
-#     # loss = solver.loss(experiment, q_base[start:end], p_base[start:end], experiment.mass, trajectory[start:end])
-#     loss.backward()
-#     optimizer.step()
-#
-#     print(f'loss: {loss.item()}')
+if solver.trainable:
+    train(solver, experiment, q_base, p_base, trajectory)
 
-solver = VelocityVerletSolver()
 
 if __name__ == '__main__':
     with torch.no_grad():
@@ -66,8 +50,8 @@ if __name__ == '__main__':
         t2 = time.time()
         print(f'solving took: {t2 - t1}s')
 
-        loss = criterion(q, q_base) + criterion(p, p_base)
-        print(f'final loss: {loss.item()}')
+        q_loss, p_loss = criterion(q, q_base), criterion(p, p_base)
+        print(f'final loss: {q_loss.item(), p_loss}')
 
         # plt.quiver(q[:-1, :, 0], q[:-1, :, 1], q[1:, :, 0] - q[:-1, :, 0], q[1:, :, 1] - q[:-1, :, 1], scale_units='xy', angles='xy', scale=1)
         # color = np.stack([np.full((trajectory.size(0),), 'r'), np.full((trajectory.size(0),), 'g'), np.full((trajectory.size(0),), 'b')], axis=1)
