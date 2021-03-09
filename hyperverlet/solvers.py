@@ -6,6 +6,7 @@ from tqdm import tqdm
 
 
 class BaseSolver(nn.Module):
+    trainable = False
 
     def forward(self, func: Callable, q: torch.Tensor, p: torch.Tensor, m: torch.Tensor, t, dt, **kwargs):
         raise NotImplemented()
@@ -67,6 +68,8 @@ class EulerSolver(BaseSolver):
 
 
 class HyperEulerSolver(BaseSolver, HyperSolverMixin):
+    trainable = True
+
     def __init__(self, hypersolver):
         super().__init__()
 
@@ -120,6 +123,8 @@ class StormerVerletSolver(BaseSolver):
 
 
 class HyperStormerVerletSolver(StormerVerletSolver):
+    trainable = True
+
     def __init__(self, hypersolver):
         super().__init__()
 
@@ -144,6 +149,8 @@ class VelocityVerletSolver(BaseSolver):
 
 
 class HyperVelocityVerletSolver(BaseSolver, HyperSolverMixin):
+    trainable = True
+
     def __init__(self, hypersolver):
         super().__init__()
 
