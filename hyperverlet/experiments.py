@@ -1,6 +1,31 @@
+import abc
+
 import torch
-from torch import nn
 from math import pi
+
+from torch import nn
+from torch.utils.data import Dataset
+
+from hyperverlet.transforms import Coarsening
+
+
+class ExperimentDataset(Dataset, abc.ABC):
+    def __init__(self, base_solver, duration, num_samples, num_configurations, coarsening_factor):
+        self.base_solver = base_solver
+        self.duration = duration
+        self.num_samples = num_samples
+        self.num_configurations = num_configurations
+        self.coarsening = Coarsening(coarsening_factor, num_samples)
+
+        self.experiment, self.q0, self.p0, self.mass, self.trajectory = self.initial_conditions()
+        self.q, self.p = self.base_solver.trajectory(self.experiment, self.q0, self.p0, self.mass, self.trajectory)
+
+    def __len__(self):
+        return self.coarsening.new_trajectory_length * self.num_configurations
+
+    @abc.abstractmethod
+    def initial_conditions(self):
+        raise NotImplementedError()
 
 
 class Pendulum(nn.Module):
@@ -10,14 +35,24 @@ class Pendulum(nn.Module):
         self.l = l
         self.g = g
 
-        self.q0 = torch.tensor([pi / 2])
-        self.p0 = torch.tensor([0.0])
-        self.mass = torch.tensor([m])
+        self.register_buffer('q0', torch.tensor([pi / 2]))
+        self.register_buffer('p0', torch.tensor([0.0]))
+        self.register_buffer('mass', torch.tensor([m]))
 
     def forward(self, q, p, m, t):
         dq = p / (m * self.l ** 2)
         dp = -m * self.g * self.l * torch.sin(q)
         return dq, dp
+
+
+class PendulumDataset(ExperimentDataset):
+
+    def __init__(self, base_solver, duration, num_samples, num_configurations, coarsening_factor, l, g=9.807):
+        self.l = l
+        self.g = g
+
+    def initial_conditions(self):
+        return self.experiment, self.q0, self.p0, self.mass, self.trajectory
 
 
 class LenardJones(nn.Module):
@@ -28,10 +63,10 @@ class LenardJones(nn.Module):
         self.sigma = sigma
 
         self.num_particles = 10
-        self.q0 = torch.rand((self.num_particles, 3)) * 5
-        self.p0 = (torch.rand_like(self.q0) * 2 - 1) * torch.tensor([0.03]).sqrt()
-        self.p0 = self.p0 - self.p0.mean(axis=0)
-        self.mass = torch.ones((self.num_particles, 1))
+        self.register_buffer('q0', torch.rand((self.num_particles, 3)) * 5)
+        p0 = (torch.rand_like(self.q0) * 2 - 1) * torch.tensor([0.03]).sqrt()
+        self.register_buffer('p0', p0 - p0.mean(axis=0))
+        self.register_buffer('mass', torch.ones((self.num_particles, 1)))
 
     def forward(self, q, p, m, t):
         # q = q.requires_grad_(True)
