@@ -25,7 +25,7 @@ trajectory = torch.linspace(0, duration, traj_len, device=device)
 
 q_base, p_base = timer(lambda: solver.trajectory(experiment, experiment.q0, experiment.p0, experiment.mass, trajectory), 'data generation')
 
-coarsening = Coarsening(coarsening_factor=250, trajectory_length=traj_len)
+coarsening = Coarsening(coarsening_factor=2000, trajectory_length=traj_len)
 q_base, p_base, trajectory = coarsening(q_base, p_base, trajectory)
 
 

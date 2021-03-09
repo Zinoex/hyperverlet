@@ -76,16 +76,24 @@ def pendulum_plot(time, m, g, l, q, p, plot_every=1):
     te = calc_total_energy(ke, pe)
 
     fig = plt.figure(figsize=(80, 60))
-    gs = GridSpec(1, 2)
+    gs = GridSpec(2, 3)
 
-    ax1 = fig.add_subplot(gs[0, 0])
-    ax2 = fig.add_subplot(gs[0, 1])
+    ax1 = fig.add_subplot(gs[:, :2])
+    ax2 = fig.add_subplot(gs[0, 2])
+    ax3 = fig.add_subplot(gs[1, 2])
+
+    # PLOT - 3: Phase space
+    ax3.set_title("Phase space")
+    ax3.set_xlabel("q")
+    ax3.set_ylabel("p")
+    ax3.set_xlim(q.min() * 1.05, q.max() * 1.05)
+    ax3.set_ylim(p.min() * 1.05, p.max() * 1.05)
 
     # PLOT - 2: Energy
     ax2.scatter(time[0], te[0], label=r'$E_{sys}$')
     ax2.scatter(time[0], ke[0], label=r'KE')
     ax2.scatter(time[0], pe[0], label=r'PE')
-    ax2.legend()
+    ax2.legend(loc="lower left")
 
     for i in range(1, len(q)):
         # PLOT - 1: Model
@@ -109,6 +117,9 @@ def pendulum_plot(time, m, g, l, q, p, plot_every=1):
                  color='orange')
         ax2.plot([time[i - 1], time[i]], [pe[i - 1], pe[i]],
                  color='green')
+
+        # PLOT - 3: Phase space
+        ax3.plot(q[i], p[i], marker='x', color='black')
 
         plt.pause(1e-11)
 
