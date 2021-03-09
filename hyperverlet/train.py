@@ -22,12 +22,12 @@ def train(solver, experiment, q_base, p_base, trajectory, trajectory_fitting=Tru
         end = start + batch_size
 
         if trajectory_fitting:
-            q, p = solver.trajectory(experiment, q_base[start], p_base[start], experiment.mass, trajectory[start:end])
+            q, p = solver.trajectory(experiment, q_base[start], p_base[start], experiment.mass, trajectory[start:end], disable_print=True)
             loss = criterion(q, q_base[start:end]) + criterion(p, p_base[start:end])
         else:
             loss = solver.loss(experiment, q_base[start:end], p_base[start:end], experiment.mass, trajectory[start:end])
 
         loss.backward()
         optimizer.step()
-
-        print(f'loss: {loss.item()}')
+        if iteration % 100 == 0:
+            print(f'loss: {loss.item()}')

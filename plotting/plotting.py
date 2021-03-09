@@ -66,9 +66,10 @@ def mss_plot(time: np.array, q, p, gt_q, gt_p, label="Our Solver"):
 
 
 def pendulum_plot(time, m, g, l, q, p, plot_every=1):
-    q = q[::plot_every]
-    p = p[::plot_every]
-    time = time[::plot_every]
+    q = q.cpu().detach().numpy()[::plot_every]
+    p = p.cpu().detach().numpy()[::plot_every]
+    time = time.cpu().detach().numpy()[::plot_every]
+    m = m.cpu().detach().numpy()
 
     pe = calc_potential_energy(m, g, l, q)
     ke = calc_kinetic_energy(m, l, p)
@@ -86,17 +87,15 @@ def pendulum_plot(time, m, g, l, q, p, plot_every=1):
     ax2.scatter(time[0], pe[0], label=r'PE')
     ax2.legend()
 
-    dt = time[1] - time[0]
-
     for i in range(1, len(q)):
         # PLOT - 1: Model
         ax1.clear()
 
-        x, y = l * np.sin(q[i]), - l * np.cos(q[i])
+        x = l * np.sin(q[i])
+        y = - l * np.cos(q[i])
 
-        ax1.plot([0, x], [0, y], linewidth=3)
-        ax1.scatter(x, y, color='red', marker='o',
-                    s=500, alpha=0.8)
+        ax1.plot([0, x[0]], [0, y[0]], linewidth=3)
+        ax1.scatter(x, y, color='red', marker='o', s=500, alpha=0.8)
         ax1.set_xlabel('X', fontweight='bold', fontsize=14)
         ax1.set_ylabel('Y', fontweight='bold', fontsize=14)
         ax1.set_xlim([-l - 0.5, l + 0.5])
@@ -111,7 +110,7 @@ def pendulum_plot(time, m, g, l, q, p, plot_every=1):
         ax2.plot([time[i - 1], time[i]], [pe[i - 1], pe[i]],
                  color='green')
 
-        plt.pause(dt * 1e-7)
+        plt.pause(1e-11)
 
 
 def plot_3d_pos(q, plot_every=1, show=True):
@@ -141,6 +140,7 @@ def plot_2d_pos(q, plot_every=1, show=True):
 
     if show:
         plt.show()
+
 
 def plot_phasespace(q, p, show=True):
     fig = plt.figure()

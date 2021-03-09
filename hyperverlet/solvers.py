@@ -11,7 +11,7 @@ class BaseSolver(nn.Module):
     def forward(self, func: Callable, q: torch.Tensor, p: torch.Tensor, m: torch.Tensor, t, dt, **kwargs):
         raise NotImplemented()
 
-    def trajectory(self, func: Callable, q0: torch.Tensor, p0: torch.Tensor, m: torch.Tensor, trajectory: torch.Tensor, **kwargs):
+    def trajectory(self, func: Callable, q0: torch.Tensor, p0: torch.Tensor, m: torch.Tensor, trajectory: torch.Tensor, disable_print=True, **kwargs):
         # q0, p0, m, trajectory = q0.detach(), p0.detach(), m.detach(), trajectory.detach()
 
         q_traj = torch.zeros((trajectory.size(0), *q0.size()), dtype=q0.dtype, device=q0.device)
@@ -22,7 +22,7 @@ class BaseSolver(nn.Module):
 
         dtrajectory = trajectory[1:] - trajectory[:-1]
 
-        for i, (t, dt) in enumerate(zip(tqdm(trajectory[:-1]), dtrajectory)):
+        for i, (t, dt) in enumerate(zip(tqdm(trajectory[:-1], disable=disable_print), dtrajectory)):
             q, p = q.detach(), p.detach()
             q, p = self(func, q, p, m, t, dt, **kwargs)
             q_traj[i + 1], p_traj[i + 1] = q, p
