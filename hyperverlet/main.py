@@ -1,15 +1,12 @@
 import torch
-from torch import optim, nn
+from torch import nn
 import matplotlib.pyplot as plt
-from tqdm import trange
-import random
-import time
-import numpy as np
 
 from hyperverlet.experiments import Pendulum, LenardJones
 from hyperverlet.solvers import HyperEulerSolver, EulerSolver, VelocityVerletSolver, HyperVelocityVerletSolver, \
     StormerVerletSolver, ThirdOrderRuthSolver, FourthOrderRuthSolver
 from hyperverlet.models import PendulumMLP, LennardJonesMLP
+from hyperverlet.timer import timer
 from hyperverlet.train import train
 from hyperverlet.utils import seed_randomness
 
@@ -27,10 +24,7 @@ trajectory = torch.linspace(0, duration, traj_len).to(device)
 coarsening_factor = 500
 assert (traj_len - 1) % coarsening_factor == 0
 
-t1 = time.time()
-q_base, p_base = solver.trajectory(experiment, experiment.q0, experiment.p0, experiment.mass, trajectory)
-t2 = time.time()
-print(f'data generation took: {t2 - t1}s')
+q_base, p_base = timer(lambda: solver.trajectory(experiment, experiment.q0, experiment.p0, experiment.mass, trajectory), 'data generation')
 
 q_base, p_base = torch.cat([q_base[:1], q_base[1::coarsening_factor]], dim=0), torch.cat([p_base[:1], p_base[1::coarsening_factor]], dim=0)
 trajectory = torch.linspace(0, duration, int((traj_len - 1) / coarsening_factor) + 1).to(device)
@@ -45,10 +39,7 @@ if solver.trainable:
 
 if __name__ == '__main__':
     with torch.no_grad():
-        t1 = time.time()
-        q, p = solver.trajectory(experiment, experiment.q0, experiment.p0, experiment.mass, trajectory)
-        t2 = time.time()
-        print(f'solving took: {t2 - t1}s')
+        q, p = timer(lambda: solver.trajectory(experiment, experiment.q0, experiment.p0, experiment.mass, trajectory), 'solving')
 
         q_loss, p_loss = criterion(q, q_base), criterion(p, p_base)
         print(f'final loss: {q_loss.item(), p_loss}')
