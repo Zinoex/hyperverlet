@@ -7,10 +7,10 @@ from tqdm import trange
 def train(solver, experiment, q_base, p_base, trajectory, trajectory_fitting=True):
     assert solver.trainable, 'Solver is not trainable'
 
-    optimizer = optim.AdamW(solver.parameters(), lr=0.5 * 1e-2)
+    optimizer = optim.AdamW(solver.parameters(), lr=1e-4)
     criterion = nn.MSELoss()
 
-    for iteration in trange(10000, desc='Training iteration'):
+    for iteration in trange(100000, desc='Training iteration'):
         optimizer.zero_grad(set_to_none=True)
 
         batch_size = 4
@@ -28,6 +28,7 @@ def train(solver, experiment, q_base, p_base, trajectory, trajectory_fitting=Tru
             loss = solver.loss(experiment, q_base[start:end + 1], p_base[start:end + 1], experiment.mass, trajectory[start:end + 1])
 
         loss.backward()
+        nn.utils.clip_grad_norm_(solver.parameters(), 1)
         optimizer.step()
 
         if iteration % 100 == 0:
