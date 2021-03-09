@@ -4,6 +4,7 @@ import torch
 class Coarsening:
     def __init__(self, coarsening_factor, trajectory_length=None):
         self.coarsening_factor = coarsening_factor
+        self.trajectory_length = trajectory_length
 
         if trajectory_length is not None:
             assert (trajectory_length - 1) % coarsening_factor == 0
@@ -14,3 +15,7 @@ class Coarsening:
 
     def coarse(self, x):
         return torch.cat([x[:1], x[1::self.coarsening_factor]], dim=0)
+
+    @property
+    def new_trajectory_length(self):
+        return (self.trajectory_length - 1) // self.coarsening_factor + 1
