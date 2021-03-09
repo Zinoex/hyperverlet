@@ -21,7 +21,7 @@ class PendulumMLP(nn.Module):
         self.h_dim = 64
 
         self.model_q = nn.Sequential(
-            nn.Linear(2, self.h_dim),
+            nn.Linear(4, self.h_dim),
             nn.PReLU(),
             PendulumBlock(self.h_dim),
             PendulumBlock(self.h_dim),
@@ -30,7 +30,7 @@ class PendulumMLP(nn.Module):
         )
 
         self.model_p = nn.Sequential(
-            nn.Linear(2, self.h_dim),
+            nn.Linear(4, self.h_dim),
             nn.PReLU(),
             PendulumBlock(self.h_dim),
             PendulumBlock(self.h_dim),
@@ -40,18 +40,18 @@ class PendulumMLP(nn.Module):
 
     def forward(self, q, p, dq, dp, m, t, dt, include_q=True, include_p=True):
         if include_q:
-            q = torch.cat([q, dq], dim=0)
-            q = self.model_q(q)
+            hq = torch.cat([q, dq, p, dp], dim=0)
+            hq = self.model_q(hq)
         else:
-            q = None
+            hq = None
 
         if include_p:
-            p = torch.cat([p, dp], dim=0)
-            p = self.model_p(p)
+            hp = torch.cat([q, dq, p, dp], dim=0)
+            hp = self.model_p(hp)
         else:
-            p = None
+            hp = None
 
-        return q, p
+        return hq, hp
 
 
 class LennardJonesMLP(nn.Module):
@@ -60,16 +60,18 @@ class LennardJonesMLP(nn.Module):
         self.h_dim = 64
 
         self.model_q = nn.Sequential(
-            nn.Linear(6, self.h_dim),
+            nn.Linear(12, self.h_dim),
             nn.PReLU(),
+            PendulumBlock(self.h_dim),
             PendulumBlock(self.h_dim),
             PendulumBlock(self.h_dim),
             nn.Linear(self.h_dim, 3)
         )
 
         self.model_p = nn.Sequential(
-            nn.Linear(6, self.h_dim),
+            nn.Linear(12, self.h_dim),
             nn.PReLU(),
+            PendulumBlock(self.h_dim),
             PendulumBlock(self.h_dim),
             PendulumBlock(self.h_dim),
             nn.Linear(self.h_dim, 3)
@@ -79,13 +81,13 @@ class LennardJonesMLP(nn.Module):
 
     def forward(self, q, p, dq, dp, m, t, dt, include_q=True, include_p=True):
         if include_q:
-            q = torch.cat([q, dq], dim=-1)
+            q = torch.cat([q, dq, p, dp], dim=-1)
             q = self.model_q(q)
         else:
             q = None
 
         if include_p:
-            p = torch.cat([p, dp], dim=-1)
+            p = torch.cat([q, dq, p, dp], dim=-1)
             p = self.model_p(p)
         else:
             p = None
