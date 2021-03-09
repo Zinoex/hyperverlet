@@ -140,7 +140,7 @@ class HyperStormerVerletSolver(StormerVerletSolver):
 class VelocityVerletSolver(BaseSolver):
     def forward(self, func: Callable, q: torch.Tensor, p: torch.Tensor, m: torch.Tensor, t, dt, **kwargs):
         dq, dp = func(q, p, m, t)
-        q_next = q + dq * dt / m + (dp / (2 * m)) * (dt ** 2)
+        q_next = q + dq * dt + (dp / (2 * m)) * (dt ** 2)
 
         _, dp_next = func(q_next, p, m, t)
         p_next = p + ((dp + dp_next) / 2) * dt
@@ -159,7 +159,7 @@ class HyperVelocityVerletSolver(BaseSolver, HyperSolverMixin):
     def forward(self, func: Callable, q: torch.Tensor, p: torch.Tensor, m: torch.Tensor, t, dt, **kwargs):
         dq, dp = func(q, p, m, t, **kwargs)
         hq, hp = self.hypersolver(q, p, dq, dp, m, t, dt, include_p=False)
-        q_next = q + dq * dt / m + (dp / (2 * m)) * (dt ** 2) + hq * (dt ** 2)
+        q_next = q + dq * dt + (dp / (2 * m)) * (dt ** 2) + hq * (dt ** 2)
 
         dq_next, dp_next = func(q_next, p, m, t, **kwargs)
         hq, hp = self.hypersolver(q_next, p, dq_next, dp_next, m, t, dt, include_q=False)

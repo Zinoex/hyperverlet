@@ -1,8 +1,8 @@
 import numpy as np
 
-from LenardJones import LenardJones
-from MassSpringSystem import MassSpringSystem
-from Pendulum import Pendulum
+from md_fun.LenardJones import LenardJones
+from md_fun.MassSpringSystem import MassSpringSystem
+from md_fun.Pendulum import Pendulum
 
 if __name__ == '__main__':
     program = "pendulum"

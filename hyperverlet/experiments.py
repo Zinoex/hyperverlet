@@ -4,7 +4,7 @@ from math import pi
 
 
 class Pendulum(nn.Module):
-    def __init__(self, l, g=9.807):
+    def __init__(self, l, m=0.9, g=9.807):
         super().__init__()
 
         self.l = l
@@ -12,7 +12,7 @@ class Pendulum(nn.Module):
 
         self.q0 = torch.tensor([pi / 2])
         self.p0 = torch.tensor([0.0])
-        self.mass = torch.tensor([0.9])
+        self.mass = torch.tensor([m])
 
     def forward(self, q, p, m, t):
         dq = p / (m * self.l ** 2)

@@ -24,8 +24,8 @@ class Pendulum:
         self.l = l
 
         # list of position, velocity, and time
-        self.res_e = [e]
-        self.res_w = [w]
+        self.q = [e]
+        self.p = [w]
         self.time = []
 
         # accelaration
@@ -35,8 +35,8 @@ class Pendulum:
         self.Beeman(g, l, Tmax, delta_t, e, w)
 
         # Energy
-        self.KineticEnergy = 0.5 * m * (l * np.array(self.res_w)) ** 2
-        self.PotentialEnergy = -m * g * l * np.cos(np.array(self.res_e))
+        self.KineticEnergy = 0.5 * m * (l * np.array(self.p)) ** 2
+        self.PotentialEnergy = -m * g * l * np.cos(np.array(self.q))
         self.TotalEnergy = self.KineticEnergy + self.PotentialEnergy
 
     def Beeman(self, g, l, Tmax, delta_t, e, w):
@@ -52,8 +52,8 @@ class Pendulum:
 
         a1 = self.Acc(e, g, l)
 
-        self.res_w.append(w)
-        self.res_e.append(e)
+        self.p.append(w)
+        self.q.append(e)
 
         # Step - 2 : Beeman Algorithm
         while (t <= Tmax):
@@ -63,14 +63,14 @@ class Pendulum:
 
             w += (5 * a2 + 8 * a1 - ao) * delta_t / 12
 
-            self.res_w.append(w)
-            self.res_e.append(e)
+            self.p.append(w)
+            self.q.append(e)
 
             ao = a1
             a1 = a2
             t += delta_t
 
-        self.time = np.linspace(0, t, len(self.res_e))
+        self.time = np.linspace(0, t, len(self.q))
 
     def PlotTrajectory(self):
 
@@ -86,11 +86,11 @@ class Pendulum:
         ax2.scatter(self.time[0], self.PotentialEnergy[0], label=r'PE')
         ax2.legend()
 
-        for i in range(1, len(self.res_e)):
+        for i in range(1, len(self.q)):
             # PLOT - 1: Model
             ax1.clear()
 
-            x, y = self.l * np.sin(self.res_e[i]), - self.l * np.cos(self.res_e[i])
+            x, y = self.l * np.sin(self.q[i]), - self.l * np.cos(self.q[i])
 
             ax1.plot([0, x], [0, y], linewidth=3)
             ax1.scatter(x, y, color='red', marker='o',

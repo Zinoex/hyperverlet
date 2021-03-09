@@ -2,6 +2,8 @@ import numpy as np
 from matplotlib import pyplot as plt
 from matplotlib.gridspec import GridSpec
 
+from energy.pendul_energy import calc_potential_energy, calc_kinetic_energy, calc_total_energy
+
 
 def lj_plot(time: np.array, pe: np.array, ke: np.array, te: np.array, dist: np.array, eps, sigma):
     fig = plt.figure(figsize=(80, 60))
@@ -62,7 +64,15 @@ def mss_plot(time: np.array, q, p, gt_q, gt_p, label="Our Solver"):
 
     plt.show()
 
-def pendulum_plot(time, te, ke, pe, q, p, l):
+
+def pendulum_plot(time, m, g, l, q, p, plot_every=1):
+    q = q[::plot_every]
+    p = p[::plot_every]
+    time = time[::plot_every]
+
+    pe = calc_potential_energy(m, g, l, q)
+    ke = calc_kinetic_energy(m, l, p)
+    te = calc_total_energy(ke, pe)
 
     fig = plt.figure(figsize=(80, 60))
     gs = GridSpec(1, 2)
@@ -75,6 +85,8 @@ def pendulum_plot(time, te, ke, pe, q, p, l):
     ax2.scatter(time[0], ke[0], label=r'KE')
     ax2.scatter(time[0], pe[0], label=r'PE')
     ax2.legend()
+
+    dt = time[1] - time[0]
 
     for i in range(1, len(q)):
         # PLOT - 1: Model
@@ -89,6 +101,8 @@ def pendulum_plot(time, te, ke, pe, q, p, l):
         ax1.set_ylabel('Y', fontweight='bold', fontsize=14)
         ax1.set_xlim([-l - 0.5, l + 0.5])
         ax1.set_ylim([-l - 0.5, l + 0.5])
+        ax1.set_aspect('equal')
+
 
         # PLOT - 2: Energy
         ax2.plot([time[i - 1], time[i]], [te[i - 1], te[i]], color='blue')
@@ -97,4 +111,46 @@ def pendulum_plot(time, te, ke, pe, q, p, l):
         ax2.plot([time[i - 1], time[i]], [pe[i - 1], pe[i]],
                  color='green')
 
-        plt.pause(1E-11)
+        plt.pause(dt * 1e-7)
+
+
+def plot_3d_pos(q, plot_every=1, show=True):
+    fig = plt.figure()
+    ax = fig.add_subplot(111, projection='3d')
+
+    ax.scatter(q[::plot_every, :, 0].flatten(), q[::plot_every, :, 1].flatten(), q[::plot_every, :, 2].flatten(), marker='x')
+
+    ax.set_title("Particle trajectories")
+    ax.set_xlabel("X-axis")
+    ax.set_ylabel("Y-axis")
+    ax.set_zlabel("Z-axis")
+
+    if show:
+        plt.show()
+
+
+def plot_2d_pos(q, plot_every=1, show=True):
+    fig = plt.figure()
+    ax = fig.add_subplot()
+
+    ax.scatter(q[::plot_every, :, 0].flatten(), q[::plot_every, :, 1].flatten(), marker='x')
+
+    ax.set_title("Particle trajectories")
+    ax.set_xlabel("X-axis")
+    ax.set_ylabel("Y-axis")
+
+    if show:
+        plt.show()
+
+def plot_phasespace(q, p, show=True):
+    fig = plt.figure()
+    ax = fig.add_subplot()
+
+    ax.scatter(p, q, marker='x')
+
+    ax.set_title("Phase space")
+    ax.set_xlabel("p")
+    ax.set_ylabel("q")
+
+    if show:
+        plt.show()
