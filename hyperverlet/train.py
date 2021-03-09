@@ -10,24 +10,25 @@ def train(solver, experiment, q_base, p_base, trajectory, trajectory_fitting=Tru
     optimizer = optim.AdamW(solver.parameters(), lr=0.5 * 1e-2)
     criterion = nn.MSELoss()
 
-    for iteration in trange(1000, desc='Training iteration'):
+    for iteration in trange(10000, desc='Training iteration'):
         optimizer.zero_grad(set_to_none=True)
 
         batch_size = 4
         if iteration < -1:
             start = 0
         else:
-            start = random.randint(0, trajectory.size(0) - batch_size)
+            start = random.randint(0, trajectory.size(0) - batch_size - 1)
 
         end = start + batch_size
 
         if trajectory_fitting:
-            q, p = solver.trajectory(experiment, q_base[start], p_base[start], experiment.mass, trajectory[start:end], disable_print=True)
-            loss = criterion(q, q_base[start:end]) + criterion(p, p_base[start:end])
+            q, p = solver.trajectory(experiment, q_base[start], p_base[start], experiment.mass, trajectory[start:end + 1], disable_print=True)
+            loss = criterion(q, q_base[start:end + 1]) + criterion(p, p_base[start:end + 1])
         else:
-            loss = solver.loss(experiment, q_base[start:end], p_base[start:end], experiment.mass, trajectory[start:end])
+            loss = solver.loss(experiment, q_base[start:end + 1], p_base[start:end + 1], experiment.mass, trajectory[start:end + 1])
 
         loss.backward()
         optimizer.step()
+
         if iteration % 100 == 0:
             print(f'loss: {loss.item()}')
