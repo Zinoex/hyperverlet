@@ -16,8 +16,8 @@ seed_randomness()
 device = torch.device('cpu')
 
 # Dataset creation
-traj_len = 10 * 6000 + 1
-duration = 10 * 0.6
+traj_len = 100 * 6000 + 1
+duration = 100 * 0.6
 num_config = 10
 coarsening_factor = 2000
 base_solver = ThirdOrderRuthSolver().to(device)
@@ -32,10 +32,10 @@ if solver.trainable:
     train(solver, train_dataset, device)
 
 
-# if __name__ == '__main__':
-#     q, p = test(solver, test_dataset)
-#
-#     # plt.quiver(q[:-1, :, 0], q[:-1, :, 1], q[1:, :, 0] - q[:-1, :, 0], q[1:, :, 1] - q[:-1, :, 1], scale_units='xy', angles='xy', scale=1)
-#     # color = np.stack([np.full((trajectory.size(0),), 'r'), np.full((trajectory.size(0),), 'g'), np.full((trajectory.size(0),), 'b')], axis=1)
-#
-#     pendulum_plot(trajectory, experiment.mass, experiment.g, experiment.l, q, p, plot_every=1)
+if __name__ == '__main__':
+    q, q_base, p, p_base, mass, trajectory, extra_args = test(solver, test_dataset, device)
+
+    # plt.quiver(q[:-1, :, 0], q[:-1, :, 1], q[1:, :, 0] - q[:-1, :, 0], q[1:, :, 1] - q[:-1, :, 1], scale_units='xy', angles='xy', scale=1)
+    # color = np.stack([np.full((trajectory.size(0),), 'r'), np.full((trajectory.size(0),), 'g'), np.full((trajectory.size(0),), 'b')], axis=1)
+
+    pendulum_plot(trajectory, mass, test_dataset.experiment.g, extra_args['length'], q, p, plot_every=1)
