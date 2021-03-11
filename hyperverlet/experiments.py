@@ -4,6 +4,7 @@ from math import pi
 from torch import nn
 from torch.utils.data import Dataset
 
+from hyperverlet.timer import timer
 from hyperverlet.transforms import Coarsening
 
 
@@ -18,8 +19,7 @@ class ExperimentDataset(Dataset):
         self.configuration_length = self.coarsening.new_trajectory_length - self.sequence_length
 
         self.trajectory = torch.linspace(0, duration, num_samples)
-        # Første parameter base_solver bør være eksperiment, men den kender vi jo ikke i base_solveren?
-        self.q, self.p = self.base_solver.trajectory(self.experiment, self.q0, self.p0, self.mass, self.trajectory, **self.extra_args)
+        self.q, self.p = timer(lambda: self.base_solver.trajectory(self.experiment, self.q0, self.p0, self.mass, self.trajectory, **self.extra_args), 'data generation')
 
     def __len__(self):
         return self.configuration_length * self.num_configurations
@@ -31,9 +31,11 @@ class ExperimentDataset(Dataset):
         config_idx, time_idx = idx // self.configuration_length, idx % self.configuration_length
 
         return {
-            'q': self.q[time_idx:time_idx + self.sequence_length, config_idx],
-            'p': self.p[time_idx:time_idx + self.sequence_length, config_idx],
-            'mass': self.mass[config_idx]
+            'q': self.q[time_idx:time_idx + self.sequence_length + 1, config_idx],
+            'p': self.p[time_idx:time_idx + self.sequence_length + 1, config_idx],
+            'mass': self.mass[config_idx],
+            'trajectory': self.trajectory[time_idx:time_idx + self.sequence_length + 1],
+            'extra_args': self.extra_args
         }
 
 
@@ -70,10 +72,13 @@ class PendulumDataset(ExperimentDataset):
         config_idx, time_idx = idx // self.configuration_length, idx % self.configuration_length
 
         return {
-            'q': self.q[time_idx:time_idx + self.sequence_length, config_idx],
-            'p': self.p[time_idx:time_idx + self.sequence_length, config_idx],
+            'q': self.q[time_idx:time_idx + self.sequence_length + 1, config_idx],
+            'p': self.p[time_idx:time_idx + self.sequence_length + 1, config_idx],
             'mass': self.mass[config_idx],
-            'extra_args': self.extra_args
+            'trajectory': self.trajectory[time_idx:time_idx + self.sequence_length + 1],
+            'extra_args': {
+                'length': self.extra_args['length'][config_idx]
+            }
         }
 
 

@@ -18,6 +18,7 @@ class BaseSolver(nn.Module):
         q_traj[0], p_traj[0] = q0, p0
         q, p = q0, p0
 
+        trajectory = trajectory.unsqueeze(-1)
         dtrajectory = trajectory[1:] - trajectory[:-1]
 
         for i, (t, dt) in enumerate(zip(tqdm(trajectory[:-1], disable=disable_print), dtrajectory)):
