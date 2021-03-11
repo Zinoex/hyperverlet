@@ -1,0 +1,12 @@
+{
+  "dataset_args": {
+    "dataset": "pendulum",
+    "gt_solver": "ThirdOrderRuthSolver",
+    "solver": "HyperVelocityVerletSolver",
+    "hyper_solver": "PendulumModel",
+    "duration": 60,
+    "trajectory_length": 60001,
+    "num_configurations": 10,
+    "coarsening_factor": 200
+  }
+}

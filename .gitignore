@@ -130,3 +130,7 @@ dmypy.json
 
 # IDE specific
 .idea
+
+# Project specific
+/configurations/*
+!/configurations/template.json
