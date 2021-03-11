@@ -18,6 +18,7 @@ class ExperimentDataset(Dataset):
         self.configuration_length = self.coarsening.new_trajectory_length - self.sequence_length
 
         self.trajectory = torch.linspace(0, duration, num_samples)
+        # Første parameter base_solver bør være eksperiment, men den kender vi jo ikke i base_solveren?
         self.q, self.p = self.base_solver.trajectory(self.experiment, self.q0, self.p0, self.mass, self.trajectory, **self.extra_args)
 
     def __len__(self):
@@ -72,7 +73,7 @@ class PendulumDataset(ExperimentDataset):
             'q': self.q[time_idx:time_idx + self.sequence_length, config_idx],
             'p': self.p[time_idx:time_idx + self.sequence_length, config_idx],
             'mass': self.mass[config_idx],
-            'length': self.extra_args['length']
+            'extra_args': self.extra_args
         }
 
 
