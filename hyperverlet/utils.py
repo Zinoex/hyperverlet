@@ -1,6 +1,12 @@
 import random
 import torch
 import numpy as np
+import json
+
+
+def load_config(path):
+    with open(path, 'r') as f:
+        return json.load(f)
 
 
 def seed_randomness(seed=42):

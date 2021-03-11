@@ -2,7 +2,7 @@ import numpy as np
 from matplotlib import pyplot as plt
 from matplotlib.gridspec import GridSpec
 
-from energy.pendul_energy import calc_potential_energy, calc_kinetic_energy, calc_total_energy
+from hyperverlet.energy.pendulum import calc_potential_energy, calc_kinetic_energy, calc_total_energy
 
 
 def lj_plot(time: np.array, pe: np.array, ke: np.array, te: np.array, dist: np.array, eps, sigma):
@@ -65,11 +65,13 @@ def mss_plot(time: np.array, q, p, gt_q, gt_p, label="Our Solver"):
     plt.show()
 
 
-def pendulum_plot(time, m, g, l, q, p, plot_every=1):
+def pendulum_plot(q, p, time, m, g, l, plot_every=1):
     q = q.cpu().detach().numpy()[::plot_every]
     p = p.cpu().detach().numpy()[::plot_every]
     time = time.cpu().detach().numpy()[::plot_every]
     m = m.cpu().detach().numpy()
+    l = l.cpu().detach().numpy()
+    l = 0.9
 
     pe = calc_potential_energy(m, g, l, q)
     ke = calc_kinetic_energy(m, l, p)

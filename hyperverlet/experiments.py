@@ -15,27 +15,44 @@ class ExperimentDataset(Dataset):
         self.num_samples = num_samples
         self.num_configurations = num_configurations
         self.coarsening = Coarsening(coarsening_factor, num_samples)
-        self.sequence_length = sequence_length or self.coarsening.new_trajectory_length
-        self.configuration_length = self.coarsening.new_trajectory_length - self.sequence_length
+        self.sequence_length = sequence_length
 
         self.trajectory = torch.linspace(0, duration, num_samples)
-        self.q, self.p = self.base_solver.trajectory(self.experiment, self.q0, self.p0, self.mass, self.trajectory, **self.extra_args)
         self.q, self.p = timer(lambda: self.base_solver.trajectory(self.experiment, self.q0, self.p0, self.mass, self.trajectory, **self.extra_args), 'data generation')
 
+        self.q, self.p, self.trajectory = self.coarsening(self.q, self.p, self.trajectory)
+
     def __len__(self):
-        return self.configuration_length * self.num_configurations
+        if self.sequence_length is None:
+            return self.num_configurations
+        else:
+            configuration_length = self.coarsening.new_trajectory_length - self.sequence_length
+            return configuration_length * self.num_configurations
 
     def __getitem__(self, idx):
         if torch.is_tensor(idx):
             idx = idx.tolist()
 
-        config_idx, time_idx = idx // self.configuration_length, idx % self.configuration_length
+        q = self.q
+        p = self.p
+        trajectory = self.trajectory
+
+        if self.sequence_length is None:
+            config_idx = idx
+        else:
+            configuration_length = self.coarsening.new_trajectory_length - self.sequence_length
+
+            config_idx, time_idx = idx // configuration_length, idx % configuration_length
+
+            q = q[time_idx:time_idx + self.sequence_length + 1]
+            p = p[time_idx:time_idx + self.sequence_length + 1]
+            trajectory = trajectory[time_idx:time_idx + self.sequence_length + 1]
 
         return {
-            'q': self.q[time_idx:time_idx + self.sequence_length + 1, config_idx],
-            'p': self.p[time_idx:time_idx + self.sequence_length + 1, config_idx],
+            'q': q[:, config_idx],
+            'p': p[:, config_idx],
             'mass': self.mass[config_idx],
-            'trajectory': self.trajectory[time_idx:time_idx + self.sequence_length + 1],
+            'trajectory': trajectory,
             'extra_args': self.extra_args
         }
 
@@ -47,6 +64,7 @@ class Pendulum(nn.Module):
         self.g = g
 
     def forward(self, q, p, m, t, length, **kwargs):
+        length = 0.9
         dq = p / (m * length ** 2)
         dp = -m * self.g * length * torch.sin(q)
         return dq, dp
@@ -57,11 +75,11 @@ class PendulumDataset(ExperimentDataset):
                  length_mean=1.0, length_std=0.5, mass_mean=0.9, mass_std=0.1, g=9.807):
 
         self.experiment = Pendulum(g)
-        self.q0 = (torch.rand(num_configurations, 1) * 2 - 1) * pi
+        self.q0 = (torch.rand(num_configurations, 1) * 2 - 1) * (pi / 2)
         self.p0 = torch.randn(num_configurations, 1) * 0.1
         self.mass = torch.randn(num_configurations, 1) * mass_std + mass_mean
         self.extra_args = {
-            'length': torch.randn(num_configurations, 1) * length_std + length_mean
+            'length': torch.full((num_configurations, 1), 0.9)  # torch.randn(num_configurations, 1) * length_std + length_mean
         }
 
         super().__init__(base_solver, duration, num_samples, num_configurations, coarsening_factor, sequence_length)
@@ -70,13 +88,26 @@ class PendulumDataset(ExperimentDataset):
         if torch.is_tensor(idx):
             idx = idx.tolist()
 
-        config_idx, time_idx = idx // self.configuration_length, idx % self.configuration_length
+        q = self.q
+        p = self.p
+        trajectory = self.trajectory
+
+        if self.sequence_length is None:
+            config_idx = idx
+        else:
+            configuration_length = self.coarsening.new_trajectory_length - self.sequence_length
+
+            config_idx, time_idx = idx // configuration_length, idx % configuration_length
+
+            q = q[time_idx:time_idx + self.sequence_length + 1]
+            p = p[time_idx:time_idx + self.sequence_length + 1]
+            trajectory = trajectory[time_idx:time_idx + self.sequence_length + 1]
 
         return {
-            'q': self.q[time_idx:time_idx + self.sequence_length + 1, config_idx],
-            'p': self.p[time_idx:time_idx + self.sequence_length + 1, config_idx],
+            'q': q[:, config_idx],
+            'p': p[:, config_idx],
             'mass': self.mass[config_idx],
-            'trajectory': self.trajectory[time_idx:time_idx + self.sequence_length + 1],
+            'trajectory': trajectory,
             'extra_args': {
                 'length': self.extra_args['length'][config_idx]
             }

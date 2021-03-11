@@ -4,6 +4,8 @@ import torch
 from torch import nn
 from tqdm import tqdm
 
+from hyperverlet.energy.pendulum import calc_potential_energy, calc_kinetic_energy
+
 
 class BaseSolver(nn.Module):
     trainable = False

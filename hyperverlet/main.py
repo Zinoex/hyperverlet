@@ -1,19 +1,11 @@
 import torch
-import matplotlib.pyplot as plt
 
-from factories.dataset_factory import construct_dataset
-from factories.solver_factory import construct_solver
-from hyperverlet.experiments import Pendulum, LenardJones, PendulumDataset
-from hyperverlet.solvers import HyperEulerSolver, EulerSolver, VelocityVerletSolver, HyperVelocityVerletSolver, \
-    StormerVerletSolver, ThirdOrderRuthSolver, FourthOrderRuthSolver
-from hyperverlet.models import PendulumModel, LennardJonesMLP
+from hyperverlet.factories.dataset_factory import construct_dataset
+from hyperverlet.factories.solver_factory import construct_solver
 from hyperverlet.test import test
-from hyperverlet.timer import timer
 from hyperverlet.train import train
-from hyperverlet.transforms import Coarsening
-from hyperverlet.utils import seed_randomness
-from misc.misc import load_config
-from plotting.plotting import plot_3d_pos, plot_phasespace, pendulum_plot, plot_2d_pos
+from hyperverlet.utils import seed_randomness, load_config
+from hyperverlet.plotting.plotting import pendulum_plot
 
 
 def main(config_path):
@@ -35,7 +27,7 @@ def main(config_path):
 
     q, q_base, p, p_base, mass, trajectory, extra_args = test(solver, test_dataset, device)
 
-    pendulum_plot(trajectory, mass, test_dataset.experiment.g, extra_args['length'], q, p, plot_every=1)
+    pendulum_plot(q, p, trajectory, mass, test_dataset.experiment.g, extra_args['length'], plot_every=10)
 
 
 if __name__ == '__main__':

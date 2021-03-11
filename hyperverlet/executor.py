@@ -1,7 +1,7 @@
 import torch
 from torch.utils.data import DataLoader
 
-from factories.dataset_factory import construct_dataset
+from hyperverlet.factories.dataset_factory import construct_dataset
 
 
 class Executor:
