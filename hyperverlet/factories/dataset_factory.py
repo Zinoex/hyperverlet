@@ -12,7 +12,7 @@ def construct_dataset(config_args):
 
     gt_solver = construct_solver(gt_solver_name)
     if dataset == 'pendulum':
-        train_ds = PendulumDataset(gt_solver, duration, traj_len, num_config, coarsening_factor, sequence_length=1)
+        train_ds = PendulumDataset(gt_solver, duration, traj_len, num_config, coarsening_factor, sequence_length=50)
         test_ds = PendulumDataset(gt_solver, duration, traj_len, 1, coarsening_factor, sequence_length=None)
     else:
         raise NotImplementedError

@@ -24,7 +24,7 @@ class BaseSolver(nn.Module):
         dtrajectory = trajectory[1:] - trajectory[:-1]
 
         for i, (t, dt) in enumerate(zip(tqdm(trajectory[:-1], disable=disable_print), dtrajectory)):
-            q, p = q.detach(), p.detach()
+            # q, p = q.detach(), p.detach()
             q, p = self(func, q, p, m, t, dt, **kwargs)
             q_traj[i + 1], p_traj[i + 1] = q, p
 

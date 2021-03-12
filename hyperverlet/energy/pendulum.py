@@ -2,8 +2,7 @@ import numpy as np
 
 
 def calc_kinetic_energy(m, l, p):
-    omega = p / m
-    v = l * omega
+    v = p / (m * l)
     return 0.5 * m * v ** 2
 
 
