@@ -105,12 +105,13 @@ class SpringMassDataset(ExperimentDataset):
     def __init__(self, base_solver, duration, num_samples, num_configurations, coarsening_factor, sequence_length=None, mass_mean=0.9, mass_std=0.1):
 
         self.experiment = SpringMass()
-        self.q0 = (torch.rand(num_configurations, 1) * 2 - 1) * (pi / 2)
+        length = sample_parameterized_truncated_normal((num_configurations, 1), 0.8, 0.35, 0.1, 1.5)
+        self.q0 = torch.rand(num_configurations, 1) * length * 2
         self.p0 = torch.randn(num_configurations, 1) * 0.1
         self.mass = torch.randn(num_configurations, 1) * mass_std + mass_mean
         self.extra_args = {
-            'length': sample_parameterized_truncated_normal((num_configurations, 3), 0.8, 0.35, 0.1, 1.5),
-            'k': sample_parameterized_truncated_normal((num_configurations, 3), 0.8, 0.35, 0.1, 1.5)
+            'length': length,
+            'k': sample_parameterized_truncated_normal((num_configurations, 1), 0.8, 0.35, 0.1, 1.5)
         }
 
         super().__init__(base_solver, duration, num_samples, num_configurations, coarsening_factor, sequence_length)
