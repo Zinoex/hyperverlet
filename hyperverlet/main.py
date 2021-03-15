@@ -6,10 +6,16 @@ from hyperverlet.test import test
 from hyperverlet.train import train
 from hyperverlet.utils import seed_randomness, load_config
 from hyperverlet.plotting.plotting import pendulum_plot
+from argparse import ArgumentParser
+
+
+def parse_arguments():
+    parser = ArgumentParser()
+    parser.add_argument('--config-path', type=str, required=True, help="Path to the configuration file")
+    return parser.parse_args()
 
 
 def main(config_path):
-    # Project initialization
     seed_randomness()
     device = torch.device('cpu')
 
@@ -33,5 +39,5 @@ def main(config_path):
 
 
 if __name__ == '__main__':
-    path = '../configurations/pendulum/velocityverlet.json'
-    main(path)
+    args = parse_arguments()
+    main(args.config_path)
