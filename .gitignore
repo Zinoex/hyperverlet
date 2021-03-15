@@ -132,5 +132,3 @@ dmypy.json
 .idea
 
 # Project specific
-/configurations/*
-!/configurations/template.json

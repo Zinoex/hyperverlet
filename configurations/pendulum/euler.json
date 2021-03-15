@@ -1,0 +1,12 @@
+{
+  "dataset_args": {
+    "dataset": "pendulum",
+    "gt_solver": "VelocityVerletSolver",
+    "solver": "EulerSolver",
+    "hyper_solver": "PendulumModel",
+    "duration": 6,
+    "trajectory_length": 600001,
+    "num_configurations": 1000,
+    "coarsening_factor": 1
+  }
+}
