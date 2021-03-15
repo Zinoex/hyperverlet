@@ -30,7 +30,7 @@ class PendulumMLP(nn.Sequential):
 class PendulumModel(nn.Module):
     def __init__(self):
         super().__init__()
-        self.h_dim = 64
+        self.h_dim = 16
 
         self.model_q = PendulumMLP(self.h_dim)
         self.model_p = PendulumMLP(self.h_dim)
