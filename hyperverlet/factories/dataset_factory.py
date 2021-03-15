@@ -1,5 +1,5 @@
 from hyperverlet.factories.solver_factory import construct_solver
-from hyperverlet.experiments import PendulumDataset
+from hyperverlet.experiments import PendulumDataset, SpringMassDataset
 
 
 def construct_dataset(config_args):
@@ -14,6 +14,9 @@ def construct_dataset(config_args):
     if dataset == 'pendulum':
         train_ds = PendulumDataset(gt_solver, duration, traj_len, num_config, coarsening_factor, sequence_length=50)
         test_ds = PendulumDataset(gt_solver, duration, traj_len, 1, coarsening_factor, sequence_length=None)
+    elif dataset == 'spring_mass':
+        train_ds = SpringMassDataset(gt_solver, duration, traj_len, num_config, coarsening_factor, sequence_length=50)
+        test_ds = SpringMassDataset(gt_solver, duration, traj_len, 1, coarsening_factor, sequence_length=None)
     else:
         raise NotImplementedError
 
