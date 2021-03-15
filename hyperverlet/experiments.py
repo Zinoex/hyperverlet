@@ -115,11 +115,6 @@ class PendulumDataset(ExperimentDataset):
 
 
 class SpringMass(nn.Module):
-    def __init__(self, g=9.807):
-        super().__init__()
-
-        self.g = g
-
     def forward(self, q, p, m, t, length, k, **kwargs):
         dq = p / m
         dp = -k * (q - length)
