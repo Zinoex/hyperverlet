@@ -27,9 +27,11 @@ def main(config_path):
 
     q, q_base, p, p_base, mass, trajectory, extra_args = test(solver, test_dataset, device)
 
-    pendulum_plot(q, p, trajectory, mass, test_dataset.experiment.g, extra_args['length'], plot_every=10)
+    dataset = dataset_config['dataset']
+    if dataset == 'pendulum':
+        pendulum_plot(q, p, trajectory, mass, test_dataset.experiment.g, extra_args['length'], plot_every=10)
 
 
 if __name__ == '__main__':
-    path = '../configurations/template.json'
+    path = '../configurations/pendulum/velocityverlet.json'
     main(path)
