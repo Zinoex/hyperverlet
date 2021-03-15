@@ -53,8 +53,11 @@ class ExperimentDataset(Dataset):
             'p': p[:, config_idx],
             'mass': self.mass[config_idx],
             'trajectory': trajectory,
-            'extra_args': self.extra_args
+            'extra_args': self.config_extra_args(config_idx)
         }
+
+    def config_extra_args(self, config_idx):
+        return self.extra_args
 
 
 class Pendulum(nn.Module):
@@ -84,48 +87,24 @@ class PendulumDataset(ExperimentDataset):
 
         super().__init__(base_solver, duration, num_samples, num_configurations, coarsening_factor, sequence_length)
 
-    def __getitem__(self, idx):
-        if torch.is_tensor(idx):
-            idx = idx.tolist()
-
-        q = self.q
-        p = self.p
-        trajectory = self.trajectory
-
-        if self.sequence_length is None:
-            config_idx = idx
-        else:
-            configuration_length = self.coarsening.new_trajectory_length - self.sequence_length
-
-            config_idx, time_idx = idx // configuration_length, idx % configuration_length
-
-            q = q[time_idx:time_idx + self.sequence_length + 1]
-            p = p[time_idx:time_idx + self.sequence_length + 1]
-            trajectory = trajectory[time_idx:time_idx + self.sequence_length + 1]
-
+    def config_extra_args(self, config_idx):
         return {
-            'q': q[:, config_idx],
-            'p': p[:, config_idx],
-            'mass': self.mass[config_idx],
-            'trajectory': trajectory,
-            'extra_args': {
-                'length': self.extra_args['length'][config_idx]
-            }
+            'length': self.extra_args['length'][config_idx]
         }
 
 
 class SpringMass(nn.Module):
     def forward(self, q, p, m, t, length, k, **kwargs):
         dq = p / m
-        dp = -k * (q - length)
+        dp = k * (q - length)
         return dq, dp
 
 
 class SpringMassDataset(ExperimentDataset):
     def __init__(self, base_solver, duration, num_samples, num_configurations, coarsening_factor, sequence_length=None,
-                 length_mean=1.0, length_std=0.5, k_mean=1.0, k_std=0.5, mass_mean=0.9, mass_std=0.1, g=9.807):
+                 length_mean=1.0, length_std=0.5, k_mean=1.0, k_std=0.5, mass_mean=0.9, mass_std=0.1):
 
-        self.experiment = Pendulum(g)
+        self.experiment = SpringMass()
         self.q0 = (torch.rand(num_configurations, 1) * 2 - 1) * (pi / 2)
         self.p0 = torch.randn(num_configurations, 1) * 0.1
         self.mass = torch.randn(num_configurations, 1) * mass_std + mass_mean
@@ -136,34 +115,10 @@ class SpringMassDataset(ExperimentDataset):
 
         super().__init__(base_solver, duration, num_samples, num_configurations, coarsening_factor, sequence_length)
 
-    def __getitem__(self, idx):
-        if torch.is_tensor(idx):
-            idx = idx.tolist()
-
-        q = self.q
-        p = self.p
-        trajectory = self.trajectory
-
-        if self.sequence_length is None:
-            config_idx = idx
-        else:
-            configuration_length = self.coarsening.new_trajectory_length - self.sequence_length
-
-            config_idx, time_idx = idx // configuration_length, idx % configuration_length
-
-            q = q[time_idx:time_idx + self.sequence_length + 1]
-            p = p[time_idx:time_idx + self.sequence_length + 1]
-            trajectory = trajectory[time_idx:time_idx + self.sequence_length + 1]
-
+    def config_extra_args(self, config_idx):
         return {
-            'q': q[:, config_idx],
-            'p': p[:, config_idx],
-            'mass': self.mass[config_idx],
-            'trajectory': trajectory,
-            'extra_args': {
-                'length': self.extra_args['length'][config_idx],
-                'k': self.extra_args['k'][config_idx]
-            }
+            'length': self.extra_args['length'][config_idx],
+            'k': self.extra_args['k'][config_idx]
         }
 
 
