@@ -1,10 +1,11 @@
-from hyperverlet.models import PendulumModel, LennardJonesMLP
+from hyperverlet.models import PendulumModel, LennardJonesMLP, SpringMassModel
 from hyperverlet.solvers import *
 
 
 def construct_solver(solver_name, hyper_solver=None):
     hyper_solvers = {
         "PendulumModel": PendulumModel(),
+        "SpringMassModel": SpringMassModel(),
         "LennardJonesMLP": LennardJonesMLP()
     }
     if hyper_solver is not None:
