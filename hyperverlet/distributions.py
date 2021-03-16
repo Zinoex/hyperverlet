@@ -5,8 +5,8 @@ import torch
 def parameterized_truncated_normal(uniform, mu, sigma, a, b):
     normal = torch.distributions.normal.Normal(0, 1)
 
-    alpha = (a - mu) / sigma
-    beta = (b - mu) / sigma
+    alpha = torch.tensor((a - mu) / sigma)
+    beta = torch.tensor((b - mu) / sigma)
 
     alpha_normal_cdf = normal.cdf(alpha)
     p = alpha_normal_cdf + (normal.cdf(beta) - alpha_normal_cdf) * uniform
