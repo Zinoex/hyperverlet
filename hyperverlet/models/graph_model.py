@@ -34,7 +34,7 @@ class GraphNetwork(nn.Module):
             if idx < self.message_passing_steps:
                 v, e = layer(v, graph.edge_index, e)
 
-        return self.graph_decoder(*v)
+        return self.graph_decoder(v)
 
 
 class GraphEncoder(nn.Module):
@@ -48,7 +48,6 @@ class GraphEncoder(nn.Module):
         self.n_dense = encoder_args['n_dense']
         self.activate_last = encoder_args['activate_last']
         self.layer_norm = encoder_args['layer_norm']
-        self.vel_hdim = encoder_args['velocity_embedding_size']
         self.particle_type_hdim = encoder_args['particle_embedding_size']
         include_distance_to_boundary = encoder_args['include_distance_to_boundary']
 
@@ -58,7 +57,7 @@ class GraphEncoder(nn.Module):
             self.boundary_dim = 0
 
         self.edge_encoder = NDenseBlock(self.euclidean_dim, self.h_dim, self.n_dense, activate_last=self.activate_last, layer_norm=self.layer_norm)
-        self.node_encoder = NDenseBlock(self.vel_hdim + self.boundary_dim + self.particle_type_hdim, self.h_dim, self.n_dense, activate_last=self.activate_last, layer_norm=self.layer_norm)
+        self.node_encoder = NDenseBlock(self.boundary_dim + self.particle_type_hdim, self.h_dim, self.n_dense, activate_last=self.activate_last, layer_norm=self.layer_norm)
 
         def forward(self, x, edge_attr):
             return self.node_encoder(x), self.edge_encoder(edge_attr)
@@ -75,7 +74,7 @@ class EdgeModel(nn.Module):
         super(EdgeModel, self).__init__()
 
         # EdgeModel settings
-        edge_model_args = model_args['edge_model_args']
+        edge_model_args = model_args['edge_model']
         self.h_dim = edge_model_args['h_dim']
         self.n_dense = edge_model_args['n_dense']
         self.activate_last = edge_model_args['activate_last']
@@ -92,7 +91,7 @@ class NodeModel(nn.Module):
         super(NodeModel, self).__init__()
 
         # NodeModel settings
-        node_model_args = model_args['node_model_args']
+        node_model_args = model_args['node_model']
         self.h_dim = node_model_args['h_dim']
         self.n_dense = node_model_args['n_dense']
         self.activate_last = node_model_args['activate_last']
@@ -119,5 +118,5 @@ class GraphDecoder(nn.Module):
 
         self.node_decoder = NDenseBlock(self.h_dim, self.h_dim, self.n_dense, Linear(self.h_dim, self.euclidean_dim), activate_last=True)
 
-    def forward(self, *v):
-        return self.node_decoder(*v)
+    def forward(self, v):
+        return self.node_decoder(v)
