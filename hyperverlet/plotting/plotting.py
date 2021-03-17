@@ -73,7 +73,8 @@ def spring_mass_plot(q, p, time, m, k, l, plot_every=1):
     time = time.cpu().detach().numpy()[::plot_every]
     m = m.cpu().detach().numpy()
     l = l.cpu().detach().numpy()
-
+    k = k.cpu().detach().numpy()
+    
     # Plotted bob circle radius
     r = 0.05
     wall_top = 0.5
@@ -111,7 +112,7 @@ def spring_mass_plot(q, p, time, m, k, l, plot_every=1):
         _plot_spring(q[i], ax1)
 
         c0 = Circle((0, 0), r / 2, fc='k', zorder=10)
-        c1 = Circle((q[i], 0), r, fc='r', ec='r', zorder=10)
+        c1 = Circle((q[i, 0], 0), r, fc='r', ec='r', zorder=10)
         ax1.add_patch(c0)
         ax1.add_patch(c1)
         # Add wall
