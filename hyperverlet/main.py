@@ -2,10 +2,11 @@ import torch
 
 from hyperverlet.factories.dataset_factory import construct_dataset
 from hyperverlet.factories.solver_factory import construct_solver
+from hyperverlet.plotting.pendulum import pendulum_plot
+from hyperverlet.plotting.spring_mass import spring_mass_plot
 from hyperverlet.test import test
 from hyperverlet.train import train
 from hyperverlet.utils import seed_randomness, load_config
-from hyperverlet.plotting.plotting import pendulum_plot, plot_3d_pos, plot_2d_pos, spring_mass_plot
 from argparse import ArgumentParser
 
 
