@@ -3,7 +3,7 @@
     "dataset": "pendulum",
     "gt_solver": "VelocityVerletSolver",
     "solver": "VelocityVerletSolver",
-    "hyper_solver": "PendulumModel",
+    "nn_module": "configurations/pendulum/nn_model_pendulum.json",
     "duration": 6,
     "trajectory_length": 600001,
     "num_configurations": 1,

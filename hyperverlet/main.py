@@ -28,7 +28,7 @@ def main(config_path):
     train_dataset, test_dataset = construct_dataset(dataset_config)
 
     test_solver = dataset_config['solver']
-    hyper_solver = dataset_config.get("hyper_solver")
+    hyper_solver = dataset_config.get("nn_module")
     solver = construct_solver(test_solver, hyper_solver)
 
     if solver.trainable:

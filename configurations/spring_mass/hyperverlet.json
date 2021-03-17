@@ -3,7 +3,7 @@
     "dataset": "spring_mass",
     "gt_solver": "VelocityVerletSolver",
     "solver": "HyperVelocityVerletSolver",
-    "hyper_solver": "SpringMassModel",
+    "nn_module": "configurations/pendulum/nn_model_spring_mass.json",
     "duration": 300,
     "trajectory_length": 300001,
     "num_configurations": 1000,
