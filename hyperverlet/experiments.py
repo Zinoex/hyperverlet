@@ -124,25 +124,28 @@ class SpringMassDataset(ExperimentDataset):
 
 
 class ThreeBodySpringMass(nn.Module):
-    def forward(self, q, p, m, t, k, **kwargs):
+    def forward(self, q, p, m, t, k, length, **kwargs):
         disp = self.displacement(q)
         r = self.distance(disp)
         # acceleration = force / mass
         dq = p / m
-        dp = self.force(r, disp, k).sum(axis=1)
+        dp = self.force(r, disp, k, length).sum(axis=-2)
+
         return dq, dp
 
-    def force(self, r, disp, k):
-        direction = disp / r.unsqueeze(-1)
-        return -k * r * direction
+    def force(self, r, disp, k, length):
+        r = (r + torch.eye(3, 3)).unsqueeze(-1)
+        direction = disp / r
+
+        return -k.unsqueeze(-1) * (r - length.unsqueeze(-1)) * direction
 
     def displacement(self, q):
-        a = torch.unsqueeze(q, 1)
-        b = torch.unsqueeze(q, 0)
+        a = torch.unsqueeze(q, -2)
+        b = torch.unsqueeze(q, -3)
         return a - b
 
     def distance(self, disp):
-        return disp.norm(dim=2)
+        return disp.norm(dim=-1)
 
 
 class ThreeBodySpringMassDataset(ExperimentDataset):
@@ -150,20 +153,20 @@ class ThreeBodySpringMassDataset(ExperimentDataset):
 
         self.experiment = ThreeBodySpringMass()
         length = sample_parameterized_truncated_normal((num_configurations, 3), 0.8, 0.35, 0.1, 1.5)
-        self.q0 = torch.rand(num_configurations, 3, 2) * length.max(axis=1) * 2
+        self.q0 = torch.rand(num_configurations, 3, 2) * length.max(dim=1, keepdim=True)[0].unsqueeze(2) * 2
 
         # Don't judge, just accept
         length_matrix = torch.zeros((num_configurations, 3, 3))
-        upper_triangle_index = torch.triu_indices(4, 3, 1)
-        length_matrix[:, upper_triangle_index] = length
+        upper_triangle_first, upper_triangle_second = torch.triu_indices(4, 3, 1)
+        length_matrix[:, upper_triangle_first, upper_triangle_second] = length
         length_matrix += length_matrix.transpose(1, 2)
 
         k_matrix = torch.zeros((num_configurations, 3, 3))
-        k_matrix[:, upper_triangle_index] = sample_parameterized_truncated_normal((num_configurations, 3), 0.8, 0.35, 0.1, 1.5)
+        k_matrix[:, upper_triangle_first, upper_triangle_second] = sample_parameterized_truncated_normal((num_configurations, 3), 0.8, 0.35, 0.1, 1.5)
         k_matrix += k_matrix.transpose(1, 2)
 
         self.p0 = torch.randn(num_configurations, 3, 2) * 0.1
-        self.mass = torch.randn(num_configurations, 1) * mass_std + mass_mean
+        self.mass = torch.randn(num_configurations, 3, 1) * mass_std + mass_mean
         self.extra_args = {
             'length': length_matrix,
             # The spring constant
@@ -175,8 +178,7 @@ class ThreeBodySpringMassDataset(ExperimentDataset):
     def config_extra_args(self, config_idx):
         return {
             'length': self.extra_args['length'][config_idx],
-            'alpha': self.extra_args['alpha'][config_idx],
-            'epsilon': self.extra_args['epsilon'][config_idx],
+            'k': self.extra_args['k'][config_idx]
         }
 
 
