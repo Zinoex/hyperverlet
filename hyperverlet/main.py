@@ -5,7 +5,7 @@ from hyperverlet.factories.solver_factory import construct_solver
 from hyperverlet.test import test
 from hyperverlet.train import train
 from hyperverlet.utils import seed_randomness, load_config
-from hyperverlet.plotting.plotting import pendulum_plot
+from hyperverlet.plotting.plotting import pendulum_plot, plot_3d_pos, plot_2d_pos, spring_mass_plot
 from argparse import ArgumentParser
 
 
@@ -36,6 +36,8 @@ def main(config_path):
     dataset = dataset_config['dataset']
     if dataset == 'pendulum':
         pendulum_plot(q, p, trajectory, mass, test_dataset.experiment.g, extra_args['length'], plot_every=10)
+    if dataset == 'spring_mass':
+        spring_mass_plot(q, p, trajectory, mass, extra_args['k'], extra_args['length'], plot_every=100)
 
 
 if __name__ == '__main__':
