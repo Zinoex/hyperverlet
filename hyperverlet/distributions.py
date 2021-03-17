@@ -2,7 +2,7 @@ import numpy as np
 import torch
 
 
-def parameterized_truncated_normal(uniform, mu, sigma, a, b):
+def parameterized_truncated_normal(uniform, mu, sigma, a, b) -> torch.Tensor:
     normal = torch.distributions.normal.Normal(0, 1)
 
     alpha = torch.tensor((a - mu) / sigma)
@@ -20,5 +20,5 @@ def parameterized_truncated_normal(uniform, mu, sigma, a, b):
     return x
 
 
-def sample_parameterized_truncated_normal(shape, mu, sigma, a, b):
+def sample_parameterized_truncated_normal(shape, mu, sigma, a, b) -> torch.Tensor:
     return parameterized_truncated_normal(torch.rand(shape), mu, sigma, a, b)

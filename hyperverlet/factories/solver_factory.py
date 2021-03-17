@@ -6,6 +6,7 @@ def construct_solver(solver_name, hyper_solver=None):
     hyper_solvers = {
         "PendulumModel": PendulumModel(),
         "SpringMassModel": SpringMassModel(),
+        "ThreeBodySpringMassModel": SpringMassModel(),
         "LennardJonesMLP": LennardJonesMLP()
     }
     if hyper_solver is not None:
