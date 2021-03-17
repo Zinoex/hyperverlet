@@ -1,6 +1,7 @@
 /*
 /*/
 
+!nn_model_template.json
 !/template.json
 !/pendulum
 !/pendulum/*

@@ -1,0 +1,31 @@
+{
+  "model_args": {
+    "shared": false,
+    "message_passing_steps": 10,
+    "euclidean_dim": 2
+  },
+  "encoder_args": {
+    "h_dim": 64,
+    "n_dense": 3,
+    "activate_last": true,
+    "layer_norm": true,
+    "particle_embedding_size": 16,
+    "include_distance_to_boundary": false
+  },
+  "edge_model": {
+    "h_dim": 64,
+    "n_dense": 3,
+    "activate_last": true,
+    "layer_norm": true
+  },
+  "node_model": {
+    "h_dim": 64,
+    "n_dense": 3,
+    "activate_last": true,
+    "layer_norm": true
+  },
+  "decoder_args": {
+    "h_dim": 64,
+    "n_dense": 2
+  }
+}
