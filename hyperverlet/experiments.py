@@ -8,6 +8,8 @@ from hyperverlet.distributions import sample_parameterized_truncated_normal
 from hyperverlet.timer import timer
 from hyperverlet.transforms import Coarsening
 
+from hyperverlet.energy import three_body_spring_mass
+
 
 class ExperimentDataset(Dataset):
     def __init__(self, base_solver, duration, num_samples, num_configurations, coarsening_factor, sequence_length=None):
@@ -129,15 +131,16 @@ class ThreeBodySpringMass(nn.Module):
         r = self.distance(disp)
         # acceleration = force / mass
         dq = p / m
-        dp = self.force(r, disp, k, length).sum(axis=-2)
+        dp = self.force(r, disp, k, length).sum(axis=-2) * 2
 
         return dq, dp
 
     def force(self, r, disp, k, length):
-        r = (r + torch.eye(3, 3)).unsqueeze(-1)
-        direction = disp / r
+        num_particles = k.size(1)
+        r_prime = (r + torch.eye(num_particles, num_particles, device=r.device)).unsqueeze(-1)
+        direction = disp / r_prime
 
-        return -k.unsqueeze(-1) * (r - length.unsqueeze(-1)) * direction
+        return -(k * (r - length)).unsqueeze(-1) * direction
 
     def displacement(self, q):
         a = torch.unsqueeze(q, -2)
@@ -151,27 +154,39 @@ class ThreeBodySpringMass(nn.Module):
 class ThreeBodySpringMassDataset(ExperimentDataset):
     def __init__(self, base_solver, duration, num_samples, num_configurations, coarsening_factor, sequence_length=None, mass_mean=0.9, mass_std=0.1):
 
+        num_particles = 3
+
         self.experiment = ThreeBodySpringMass()
-        length = sample_parameterized_truncated_normal((num_configurations, 3), 0.8, 0.35, 0.1, 1.5)
-        self.q0 = torch.rand(num_configurations, 3, 2) * length.max(dim=1, keepdim=True)[0].unsqueeze(2) * 2
+        length = sample_parameterized_truncated_normal((num_configurations, (num_particles * (num_particles - 1) // 2)), 0.8, 0.1, 0.1, 1.5)
+        self.q0 = torch.rand(num_configurations, num_particles, 2) * length.max(dim=1, keepdim=True)[0].unsqueeze(2) * 2
 
         # Don't judge, just accept
-        length_matrix = torch.zeros((num_configurations, 3, 3))
-        upper_triangle_first, upper_triangle_second = torch.triu_indices(4, 3, 1)
-        length_matrix[:, upper_triangle_first, upper_triangle_second] = length
-        length_matrix += length_matrix.transpose(1, 2)
+        first_index = [i for i in range(0, num_particles) for j in range(i + 1, num_particles)]
+        second_index = [j for i in range(0, num_particles) for j in range(i + 1, num_particles)]
 
-        k_matrix = torch.zeros((num_configurations, 3, 3))
-        k_matrix[:, upper_triangle_first, upper_triangle_second] = sample_parameterized_truncated_normal((num_configurations, 3), 0.8, 0.35, 0.1, 1.5)
-        k_matrix += k_matrix.transpose(1, 2)
+        length_matrix = torch.zeros((num_configurations, num_particles, num_particles))
+        length_matrix[:, first_index, second_index] = length
+        length_matrix = length_matrix + length_matrix.transpose(1, 2)
 
-        self.p0 = torch.randn(num_configurations, 3, 2) * 0.1
-        self.mass = torch.randn(num_configurations, 3, 1) * mass_std + mass_mean
+        k_matrix = torch.zeros((num_configurations, num_particles, num_particles))
+        k_matrix[:, first_index, second_index] = sample_parameterized_truncated_normal((num_configurations, (num_particles * (num_particles - 1) // 2)), 0.8, 0.35, 0.1, 1.5)
+        k_matrix = k_matrix + k_matrix.transpose(1, 2)
+
+        self.p0 = torch.randn(num_configurations, num_particles, 2) * 0.1
+        self.mass = torch.randn(num_configurations, num_particles, 1) * mass_std + mass_mean
         self.extra_args = {
             'length': length_matrix,
             # The spring constant
             'k': k_matrix
         }
+
+        pe = three_body_spring_mass.calc_potential_energy(k_matrix.numpy(), self.q0.numpy(), length_matrix.numpy())
+        ke = three_body_spring_mass.calc_kinetic_energy(self.mass.numpy(), self.p0.numpy())
+        te = three_body_spring_mass.calc_total_energy(ke, pe)
+
+        print('ke', ke)
+        print('pe', pe)
+        print('te', te)
 
         super().__init__(base_solver, duration, num_samples, num_configurations, coarsening_factor, sequence_length)
 

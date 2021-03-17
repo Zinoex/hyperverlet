@@ -1,4 +1,6 @@
-from hyperverlet.models import PendulumModel, LennardJonesMLP, SpringMassModel
+from hyperverlet.models.lennard_jones import LennardJonesMLP
+from hyperverlet.models.pendulum import PendulumModel
+from hyperverlet.models.spring_mass import SpringMassModel
 from hyperverlet.solvers import *
 
 

@@ -4,7 +4,7 @@ from matplotlib.gridspec import GridSpec
 from matplotlib.patches import Circle
 
 from hyperverlet.energy import spring_mass
-from hyperverlet.plotting.energy import init_energy_plot, update_energy_plot
+from hyperverlet.plotting.energy import init_energy_plot, update_energy_plot, plot_energy
 from hyperverlet.plotting.phasespace import init_phasespace_plot, update_phasespace_plot
 
 
@@ -30,11 +30,11 @@ def _plot_spring(l, ax):
     ax.plot(xs, ys, c='k', lw=2)
 
 
-def spring_mass_plot(q, p, time, m, k, l, plot_every=1):
+def spring_mass_plot(q, p, trajectory, m, k, l, plot_every=1):
     # Detatch and trim data
     q = q.cpu().detach().numpy()[::plot_every]
     p = p.cpu().detach().numpy()[::plot_every]
-    time = time.cpu().detach().numpy()[::plot_every]
+    trajectory = trajectory.cpu().detach().numpy()[::plot_every]
     m = m.cpu().detach().numpy()
     l = l.cpu().detach().numpy()
     k = k.cpu().detach().numpy()
@@ -45,8 +45,8 @@ def spring_mass_plot(q, p, time, m, k, l, plot_every=1):
     wall_bottom = -0.5
 
     # Calculate energy of the system
-    pe = spring_mass.calc_potential_energy(m, p)
-    ke = spring_mass.calc_kinetic_energy(k, q, l)
+    ke = spring_mass.calc_kinetic_energy(m, p)
+    pe = spring_mass.calc_potential_energy(k, q, l)
     te = spring_mass.calc_total_energy(ke, pe)
 
     # Create grid spec
@@ -57,7 +57,7 @@ def spring_mass_plot(q, p, time, m, k, l, plot_every=1):
     ax3 = fig.add_subplot(gs[1, 2])
 
     # PLOT - 2: Energy
-    init_energy_plot(ax2, time, te, ke, pe)
+    init_energy_plot(ax2, trajectory, te, ke, pe)
 
     # PLOT - 3: Phase space setup
     init_phasespace_plot(ax3, q, p)
@@ -80,9 +80,26 @@ def spring_mass_plot(q, p, time, m, k, l, plot_every=1):
         ax1.set_aspect('equal')
 
         # PLOT - 2: Energy
-        update_energy_plot(ax2, time, i, te, ke, pe)
+        update_energy_plot(ax2, trajectory, i, te, ke, pe)
 
         # PLOT - 3: Phase space
         update_phasespace_plot(ax3, q, p, i)
 
         plt.pause(1e-11)
+
+
+def spring_mass_energy_plot(q, p, trajectory, m, k, l, plot_every=1):
+    # Detatch and trim data
+    q = q.cpu().detach().numpy()[::plot_every]
+    p = p.cpu().detach().numpy()[::plot_every]
+    trajectory = trajectory.cpu().detach().numpy()[::plot_every]
+    m = m.cpu().detach().numpy()
+    l = l.cpu().detach().numpy()
+    k = k.cpu().detach().numpy()
+
+    # Calculate energy of the system
+    ke = spring_mass.calc_kinetic_energy(m, p)
+    pe = spring_mass.calc_potential_energy(k, q, l)
+    te = spring_mass.calc_total_energy(ke, pe)
+
+    plot_energy(trajectory, te, ke, pe)
