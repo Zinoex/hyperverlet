@@ -76,6 +76,8 @@ def spring_mass_plot(q, p, time, m, k, l, plot_every=1):
 
     # Plotted bob circle radius
     r = 0.05
+    wall_top = 0.5
+    wall_bottom = -0.5
 
     # Calculate energy of the system
     pe = spring_mass.calc_potential_energy(m, p)
@@ -112,9 +114,11 @@ def spring_mass_plot(q, p, time, m, k, l, plot_every=1):
         c1 = Circle((q[i], 0), r, fc='r', ec='r', zorder=10)
         ax1.add_patch(c0)
         ax1.add_patch(c1)
+        # Add wall
+        ax1.vlines(0, wall_bottom, wall_top, linestyles="solid", color='k', linewidth=7.0)
 
         ax1.set_xlim(-r, np.max(q) * 1.05 + r)
-        ax1.set_ylim(-np.max(l) - r, np.max(l) + r)
+        ax1.set_ylim(wall_bottom * 1.05, wall_top * 1.05)
         ax1.set_aspect('equal')
 
         # PLOT - 2: Energy
