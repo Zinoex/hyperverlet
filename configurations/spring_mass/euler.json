@@ -4,7 +4,7 @@
     "gt_solver": "VelocityVerletSolver",
     "solver": "EulerSolver",
     "hyper_solver": "SpringMassModel",
-    "duration": 6,
+    "duration": 600,
     "trajectory_length": 600001,
     "num_configurations": 1000,
     "coarsening_factor": 10

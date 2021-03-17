@@ -97,7 +97,7 @@ class PendulumDataset(ExperimentDataset):
 class SpringMass(nn.Module):
     def forward(self, q, p, m, t, length, k, **kwargs):
         dq = p / m
-        dp = k * (q - length)
+        dp = -k * (q - length)
         return dq, dp
 
 

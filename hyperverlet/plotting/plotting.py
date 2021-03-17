@@ -102,8 +102,15 @@ def spring_mass_plot(q, p, time, m, k, l, plot_every=1):
     ax3.set_title("Phase space")
     ax3.set_xlabel("q")
     ax3.set_ylabel("p")
-    ax3.set_xlim(q.min() * 1.05, q.max() * 1.05)
-    ax3.set_ylim(p.min() * 1.05, p.max() * 1.05)
+
+    q_half_range_ext = (q.max() - q.min()) * 1.05 / 2
+    q_mid = (q.min() + q.max()) / 2
+
+    p_half_range_ext = (p.max() - p.min()) * 1.05 / 2
+    p_mid = (p.min() + p.max()) / 2
+
+    ax3.set_xlim(q_mid - q_half_range_ext, q_mid + q_half_range_ext)
+    ax3.set_ylim(p_mid - p_half_range_ext, p_mid + p_half_range_ext)
 
     for i in range(1, q.shape[0]):
         # PLOT - 1: Model

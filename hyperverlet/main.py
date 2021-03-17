@@ -37,7 +37,7 @@ def main(config_path):
     if dataset == 'pendulum':
         pendulum_plot(q, p, trajectory, mass, test_dataset.experiment.g, extra_args['length'], plot_every=10)
     if dataset == 'spring_mass':
-        spring_mass_plot(q, p, trajectory, mass, extra_args['k'], extra_args['length'], plot_every=100)
+        spring_mass_plot(q, p, trajectory, mass, extra_args['k'], extra_args['length'], plot_every=1)
 
 
 if __name__ == '__main__':
