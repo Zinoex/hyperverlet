@@ -4,9 +4,9 @@
     "gt_solver": "VelocityVerletSolver",
     "solver": "VelocityVerletSolver",
     "hyper_solver": "SpringMassModel",
-    "duration": 600,
-    "trajectory_length": 600001,
-    "num_configurations": 1000,
-    "coarsening_factor": 100
+    "duration": 300,
+    "trajectory_length": 300001,
+    "num_configurations": 1,
+    "coarsening_factor": 25
   }
 }

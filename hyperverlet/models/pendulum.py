@@ -9,8 +9,8 @@ class PendulumModel(nn.Module):
         super().__init__()
         self.h_dim = 16
 
-        self.model_q = SingleAxisMLP(6, self.h_dim)
-        self.model_p = SingleAxisMLP(6, self.h_dim)
+        self.model_q = SingleAxisMLP(4, self.h_dim)
+        self.model_p = SingleAxisMLP(4, self.h_dim)
 
     def forward(self, q, p, dq, dp, m, t, dt, length, include_q=True, include_p=True, **kwargs):
         if include_q:
