@@ -5,12 +5,14 @@ from hyperverlet.models.utils import SingleAxisMLP
 
 
 class PendulumModel(nn.Module):
-    def __init__(self):
+    def __init__(self, model_args):
         super().__init__()
-        self.h_dim = 16
+        self.h_dim = model_args['h_dim']
+        self.q_input_dim = model_args['q_input_dim']
+        self.p_input_dim = model_args['p_input_dim']
 
-        self.model_q = SingleAxisMLP(4, self.h_dim)
-        self.model_p = SingleAxisMLP(4, self.h_dim)
+        self.model_q = SingleAxisMLP(self.q_input_dim, self.h_dim)
+        self.model_p = SingleAxisMLP(self.p_input_dim, self.h_dim)
 
     def forward(self, q, p, dq, dp, m, t, dt, length, include_q=True, include_p=True, **kwargs):
         if include_q:

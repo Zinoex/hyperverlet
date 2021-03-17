@@ -1,26 +1,26 @@
-from hyperverlet.models import PendulumModel, LennardJonesMLP, SpringMassModel
+from hyperverlet.factories.model_factory import construct_model
 from hyperverlet.solvers import *
 
 
-def construct_solver(solver_name, hyper_solver=None):
-    hyper_solvers = {
-        "PendulumModel": PendulumModel(),
-        "SpringMassModel": SpringMassModel(),
-        "ThreeBodySpringMassModel": SpringMassModel(),
-        "LennardJonesMLP": LennardJonesMLP()
-    }
-    if hyper_solver is not None:
-        hyper_solver = hyper_solvers[hyper_solver]
+def construct_solver(solver_name, model_path=None):
+    if model_path is not None:
+        hyper_solver = construct_model(model_path)
 
     solvers = {
-        "HyperSolverMixin": HyperSolverMixin(),
-        "HyperEulerSolver": HyperEulerSolver(hyper_solver),
-        "EulerSolver": EulerSolver(),
-        "StormerVerletSolver": StormerVerletSolver(),
-        "HyperStormerVerletSolver": HyperStormerVerletSolver(hyper_solver),
-        "VelocityVerletSolver": VelocityVerletSolver(),
-        "HyperVelocityVerletSolver": HyperVelocityVerletSolver(hyper_solver),
-        "ThirdOrderRuthSolver": ThirdOrderRuthSolver(),
-        "FourthOrderRuthSolver": FourthOrderRuthSolver()
+        "HyperSolverMixin": HyperSolverMixin,
+        "HyperEulerSolver": HyperEulerSolver,
+        "EulerSolver": EulerSolver,
+        "StormerVerletSolver": StormerVerletSolver,
+        "HyperStormerVerletSolver": HyperStormerVerletSolver,
+        "VelocityVerletSolver": VelocityVerletSolver,
+        "HyperVelocityVerletSolver": HyperVelocityVerletSolver,
+        "ThirdOrderRuthSolver": ThirdOrderRuthSolver,
+        "FourthOrderRuthSolver": FourthOrderRuthSolver
     }
-    return solvers[solver_name]
+
+    solver = solvers[solver_name]
+
+    if solver.trainable:
+        return solver(hyper_solver)
+    else:
+        return solver()

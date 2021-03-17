@@ -1,4 +1,5 @@
 {
+  "module": "GraphModel",
   "model_args": {
     "shared": false,
     "message_passing_steps": 10,
