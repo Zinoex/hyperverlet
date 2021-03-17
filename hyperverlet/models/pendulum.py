@@ -14,13 +14,13 @@ class PendulumModel(nn.Module):
 
     def forward(self, q, p, dq, dp, m, t, dt, length, include_q=True, include_p=True, **kwargs):
         if include_q:
-            hq = torch.cat([q, dq, p, dp, m, length], dim=-1)
+            hq = torch.cat([q, dq, m, length], dim=-1)
             hq = self.model_q(hq)
         else:
             hq = None
 
         if include_p:
-            hp = torch.cat([q, dq, p, dp, m, length], dim=-1)
+            hp = torch.cat([p, dp, m, length], dim=-1)
             hp = self.model_p(hp)
         else:
             hp = None
