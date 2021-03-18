@@ -1,0 +1,12 @@
+{
+  "dataset_args": {
+    "dataset": "spring_mass",
+    "gt_solver": "VelocityVerletSolver",
+    "solver": "HyperVelocityVerletSolver",
+    "hyper_solver": "SpringMassModel",
+    "duration": 6,
+    "trajectory_length": 600001,
+    "num_configurations": 100,
+    "coarsening_factor": 1000
+  }
+}
