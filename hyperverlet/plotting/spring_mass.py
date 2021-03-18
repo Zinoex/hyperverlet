@@ -1,4 +1,5 @@
 import numpy as np
+import math
 from matplotlib import pyplot as plt
 from matplotlib.gridspec import GridSpec
 from matplotlib.patches import Circle
@@ -6,28 +7,7 @@ from matplotlib.patches import Circle
 from hyperverlet.energy import spring_mass
 from hyperverlet.plotting.energy import init_energy_plot, update_energy_plot, plot_energy
 from hyperverlet.plotting.phasespace import init_phasespace_plot, update_phasespace_plot
-
-
-def _plot_spring(l, ax):
-    """Plot the spring from (0,0) to (x,y) as the projection of a helix."""
-    theta = np.pi / 2
-
-    # Spring turn radius, number of turns
-    rs, ns = 0.05, 25
-    # Number of data points for the helix
-    Ns = 1000
-    # We don't draw coils all the way to the end of the pendulum:
-    # pad a bit from the anchor and from the bob by these number of points
-    ipad1, ipad2 = 100, 150
-    w = np.linspace(0, l, Ns).flatten()
-    # Set up the helix along the x-axis ...
-    xp = np.zeros(Ns)
-    xp[ipad1:-ipad2] = rs * np.sin(2 * np.pi * ns * w[ipad1:-ipad2] / l)
-    # ... then rotate it to align with  the pendulum and plot.
-    R = np.array([[np.cos(theta), -np.sin(theta)],
-                  [np.sin(theta), np.cos(theta)]])
-    xs, ys = - R @ np.vstack((xp, w))
-    ax.plot(xs, ys, c='k', lw=2)
+from hyperverlet.plotting.utils import plot_spring
 
 
 def spring_mass_plot(q, p, trajectory, m, k, l, plot_every=1):
@@ -66,7 +46,11 @@ def spring_mass_plot(q, p, trajectory, m, k, l, plot_every=1):
         # PLOT - 1: Model
         ax1.clear()
 
-        _plot_spring(q[i], ax1)
+        ax1.set_xlim(-r, np.max(q) * 1.05 + r)
+        ax1.set_ylim(wall_bottom * 1.05, wall_top * 1.05)
+        ax1.set_aspect('equal')
+
+        plot_spring(q[i], ax1)
 
         c0 = Circle((0, 0), r / 2, fc='k', zorder=10)
         c1 = Circle((q[i, 0], 0), r, fc='r', ec='r', zorder=10)
@@ -75,10 +59,6 @@ def spring_mass_plot(q, p, trajectory, m, k, l, plot_every=1):
         # Add wall
         ax1.vlines(0, wall_bottom, wall_top, linestyles="solid", color='k', linewidth=7.0)
 
-        ax1.set_xlim(-r, np.max(q) * 1.05 + r)
-        ax1.set_ylim(wall_bottom * 1.05, wall_top * 1.05)
-        ax1.set_aspect('equal')
-
         # PLOT - 2: Energy
         update_energy_plot(ax2, trajectory, i, te, ke, pe)
 
@@ -86,6 +66,16 @@ def spring_mass_plot(q, p, trajectory, m, k, l, plot_every=1):
         update_phasespace_plot(ax3, q, p, i)
 
         plt.pause(1e-11)
+
+
+def calc_theta(p1, p2):
+    vec = p2 - p1
+
+    return np.arctan2(vec[1], vec[0]) + np.pi / 2
+
+
+def calc_dist_2d(p1, p2):
+    return np.linalg.norm(p1 - p2)
 
 
 def spring_mass_energy_plot(q, p, trajectory, m, k, l, plot_every=1):
