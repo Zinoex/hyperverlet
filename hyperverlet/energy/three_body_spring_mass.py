@@ -1,5 +1,4 @@
 import numpy as np
-import torch
 
 
 def calc_kinetic_energy(m, p):

@@ -7,3 +7,4 @@ tensorboard
 torch
 GitPython
 seaborn
+sympy
