@@ -131,7 +131,7 @@ class ThreeBodySpringMass(nn.Module):
         r = self.distance(disp)
         # acceleration = force / mass
         dq = p / m
-        dp = self.force(r, disp, k, length).sum(axis=-2) * 2
+        dp = self.force(r, disp, k, length).sum(axis=-2)
 
         return dq, dp
 
@@ -140,11 +140,14 @@ class ThreeBodySpringMass(nn.Module):
         r_prime = (r + torch.eye(num_particles, num_particles, device=r.device)).unsqueeze(-1)
         direction = disp / r_prime
 
-        return -(k * (r - length)).unsqueeze(-1) * direction
+        offset = r - length
+
+        return -2 * (k * offset).unsqueeze(-1) * direction
 
     def displacement(self, q):
         a = torch.unsqueeze(q, -2)
         b = torch.unsqueeze(q, -3)
+
         return a - b
 
     def distance(self, disp):
@@ -155,10 +158,12 @@ class ThreeBodySpringMassDataset(ExperimentDataset):
     def __init__(self, base_solver, duration, num_samples, num_configurations, coarsening_factor, sequence_length=None, mass_mean=0.9, mass_std=0.1):
 
         num_particles = 3
+        num_springs = num_particles * (num_particles - 1) // 2
+        num_euclid = 2
 
         self.experiment = ThreeBodySpringMass()
-        length = sample_parameterized_truncated_normal((num_configurations, (num_particles * (num_particles - 1) // 2)), 0.8, 0.1, 0.1, 1.5)
-        self.q0 = torch.rand(num_configurations, num_particles, 2) * length.max(dim=1, keepdim=True)[0].unsqueeze(2) * 2
+        length = sample_parameterized_truncated_normal((num_configurations, num_springs), 0.8, 0.1, 0.1, 1.5)
+        self.q0 = torch.rand(num_configurations, num_particles, num_euclid) * length.max(dim=1, keepdim=True)[0].unsqueeze(2) * 2
 
         # Don't judge, just accept
         first_index = [i for i in range(0, num_particles) for j in range(i + 1, num_particles)]
@@ -169,10 +174,10 @@ class ThreeBodySpringMassDataset(ExperimentDataset):
         length_matrix = length_matrix + length_matrix.transpose(1, 2)
 
         k_matrix = torch.zeros((num_configurations, num_particles, num_particles))
-        k_matrix[:, first_index, second_index] = sample_parameterized_truncated_normal((num_configurations, (num_particles * (num_particles - 1) // 2)), 0.8, 0.35, 0.1, 1.5)
+        k_matrix[:, first_index, second_index] = sample_parameterized_truncated_normal((num_configurations, num_springs), 0.8, 0.35, 0.1, 1.5)
         k_matrix = k_matrix + k_matrix.transpose(1, 2)
 
-        self.p0 = torch.randn(num_configurations, num_particles, 2) * 0.1
+        self.p0 = torch.randn(num_configurations, num_particles, num_euclid) * 0.1
         self.mass = torch.randn(num_configurations, num_particles, 1) * mass_std + mass_mean
         self.extra_args = {
             'length': length_matrix,
