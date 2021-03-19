@@ -26,23 +26,19 @@ def three_body_spring_mass_plot(q, p, trajectory, m, k, l, plot_every=1):
 
     # Create grid spec
     fig = plt.figure(figsize=(80, 60))
-    gs = GridSpec(2, 3)
-    ax1 = fig.add_subplot(gs[:, :2])
-    ax2 = fig.add_subplot(gs[0, 2])
-    ax3 = fig.add_subplot(gs[1, 2])
+    gs = GridSpec(1, 2)
+    ax1 = fig.add_subplot(gs[0, 0])
+    ax2 = fig.add_subplot(gs[0, 1])
 
     # PLOT - 2: Energy
     init_energy_plot(ax2, trajectory, te, ke, pe)
 
-    # PLOT - 3: Phase space setup
-    init_phasespace_plot(ax3, q, p)
 
     # Plotted bob circle radius
     r = 0.02
     num_particles = q.shape[1]
     xlim = q[:, :, 0]
     ylim = q[:, :, 1]
-
     for i in range(1, q.shape[0]):
         # PLOT - 1: Model
         ax1.clear()
@@ -66,9 +62,6 @@ def three_body_spring_mass_plot(q, p, trajectory, m, k, l, plot_every=1):
 
         # PLOT - 2: Energy
         update_energy_plot(ax2, trajectory, i, te, ke, pe)
-
-        # PLOT - 3: Phase space
-        update_phasespace_plot(ax3, q, p, i)
 
         plt.pause(1e-11)
 
