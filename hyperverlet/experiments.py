@@ -8,8 +8,6 @@ from hyperverlet.distributions import sample_parameterized_truncated_normal
 from hyperverlet.timer import timer
 from hyperverlet.transforms import Coarsening
 
-from hyperverlet.energy import three_body_spring_mass
-
 
 class ExperimentDataset(Dataset):
     def __init__(self, base_solver, duration, num_samples, num_configurations, coarsening_factor, sequence_length=None):
@@ -184,14 +182,6 @@ class ThreeBodySpringMassDataset(ExperimentDataset):
             # The spring constant
             'k': k_matrix
         }
-
-        pe = three_body_spring_mass.calc_potential_energy(k_matrix.numpy(), self.q0.numpy(), length_matrix.numpy())
-        ke = three_body_spring_mass.calc_kinetic_energy(self.mass.numpy(), self.p0.numpy())
-        te = three_body_spring_mass.calc_total_energy(ke, pe)
-
-        print('ke', ke)
-        print('pe', pe)
-        print('te', te)
 
         super().__init__(base_solver, duration, num_samples, num_configurations, coarsening_factor, sequence_length)
 

@@ -160,6 +160,8 @@ class HyperVelocityVerletSolver(BaseSolver, HyperSolverMixin):
     def forward(self, func: Callable, q: torch.Tensor, p: torch.Tensor, m: torch.Tensor, t, dt, **kwargs):
         dq, dp = func(q, p, m, t, **kwargs)
         hq, hp = self.hypersolver(q, p, dq, dp, m, t, dt, include_p=False, **kwargs)
+
+        dt = dt.view(-1, *[1 for _ in range(len(dq.size()) - 1)])
         q_next = q + dq * dt + (dp / (2 * m)) * (dt ** 2) + hq * (dt ** 2)
 
         dq_next, dp_next = func(q_next, p, m, t, **kwargs)

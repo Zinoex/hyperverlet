@@ -1,6 +1,6 @@
 {
-  "module": "PendulumModel",
-  "h_dim": 16,
-  "q_input_dim": 4,
-  "p_input_dim": 4
+  "module": "SpringMassModel",
+  "h_dim": 64,
+  "q_input_dim": 5,
+  "p_input_dim": 5
 }

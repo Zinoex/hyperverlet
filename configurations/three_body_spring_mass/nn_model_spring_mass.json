@@ -1,0 +1,6 @@
+{
+  "module": "ThreeBodySpringMassModel",
+  "h_dim": 64,
+  "q_input_dim": 3,
+  "p_input_dim": 3
+}
