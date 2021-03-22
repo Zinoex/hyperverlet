@@ -74,22 +74,32 @@ class ThreeBodySpringMassGraphModel(nn.Module):
 
         edge_index, edge_attr = self.preprocess_edges(num_particles, length, k)
 
+        edge_attr = edge_attr.unsqueeze(1).repeat(1, spatial_dim, 1)
+
         if len(q.size()) == 3:
             m = m.repeat(1, 1, 2)
-            edge_attr = edge_attr.unsqueeze(1).repeat(1, spatial_dim, 1)
         else:
             m = m.repeat(1, 2)
-            edge_attr = edge_attr.unsqueeze(0).repeat(spatial_dim, 1)
 
         if include_q:
             node_attr = torch.stack([q, dq, m], dim=-1).view(-1, spatial_dim, 3)
-            hq = self.model_q(node_attr, edge_attr, edge_index).view(-1, num_particles, spatial_dim)
+            hq = self.model_q(node_attr, edge_attr, edge_index)
+
+            if len(q.size()) == 3:
+                hq = hq.view(-1, num_particles, spatial_dim)
+            else:
+                hq = hq.view(num_particles, spatial_dim)
         else:
             hq = None
 
         if include_p:
             node_attr = torch.stack([p, dp, m], dim=-1).view(-1, spatial_dim, 3)
-            hp = self.model_p(node_attr, edge_attr, edge_index).view(-1, num_particles, spatial_dim)
+            hp = self.model_p(node_attr, edge_attr, edge_index)
+
+            if len(q.size()) == 3:
+                hp = hp.view(-1, num_particles, spatial_dim)
+            else:
+                hp = hp.view(num_particles, spatial_dim)
         else:
             hp = None
 

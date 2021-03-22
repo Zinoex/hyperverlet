@@ -7,6 +7,6 @@
     "duration": 10,
     "trajectory_length": 100001,
     "num_configurations": 1,
-    "coarsening_factor": 40
+    "coarsening_factor": 10
   }
 }
