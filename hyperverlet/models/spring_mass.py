@@ -1,7 +1,7 @@
 import torch
 from torch import nn
 
-from hyperverlet.models.utils import SingleAxisMLP
+from hyperverlet.models.misc import SingleAxisMLP
 
 
 class SpringMassModel(nn.Module):

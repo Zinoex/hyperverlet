@@ -1,18 +1,8 @@
 {
   "module": "GraphModel",
-  "model_args": {
-    "shared": false,
-    "message_passing_steps": 10,
-    "euclidean_dim": 2
-  },
-  "encoder_args": {
-    "h_dim": 64,
-    "n_dense": 3,
-    "activate_last": true,
-    "layer_norm": true,
-    "particle_embedding_size": 16,
-    "include_distance_to_boundary": false
-  },
+  "shared": false,
+  "message_passing_steps": 10,
+  "spatial_dim": 2,
   "edge_model": {
     "h_dim": 64,
     "n_dense": 3,
@@ -25,8 +15,17 @@
     "activate_last": true,
     "layer_norm": true
   },
+  "encoder_args": {
+    "h_dim": 64,
+    "n_dense": 3,
+    "activate_last": true,
+    "layer_norm": true,
+    "node_input_dim": 3,
+    "edge_input_dim": 2
+  },
   "decoder_args": {
     "h_dim": 64,
-    "n_dense": 2
+    "n_dense": 2,
+    "node_output_dim": 1
   }
 }
