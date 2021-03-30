@@ -2,7 +2,7 @@ import torch
 from torch import nn
 
 from hyperverlet.timer import timer
-from hyperverlet.utils import send_to_device
+from hyperverlet.utils import send_to_device, torch_to_numpy
 
 
 def test(solver, dataset, device):
@@ -22,4 +22,12 @@ def test(solver, dataset, device):
         q_loss, p_loss = criterion(q, q_base), criterion(p, p_base)
         print(f'final loss: {q_loss.item(), p_loss.item()}')
 
-    return q, q_base, p, p_base, mass, trajectory, extra_args
+    return {
+        "q": q.cpu().detach().numpy(),
+        "q_base": q_base.cpu().detach().numpy(),
+        "p": p.cpu().detach().numpy(),
+        "p_base": p_base.cpu().detach().numpy(),
+        "mass": mass.cpu().detach().numpy(),
+        "trajectory": trajectory.cpu().detach().numpy(),
+        "extra_args": torch_to_numpy(send_to_device(extra_args, torch.device("cpu"), non_blocking=True))
+    }

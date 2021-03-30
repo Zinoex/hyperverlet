@@ -7,7 +7,13 @@ from hyperverlet.plotting.energy import init_energy_plot, update_energy_plot, pl
 from hyperverlet.plotting.phasespace import init_phasespace_plot, update_phasespace_plot
 
 
-def pendulum_plot(q, p, trajectory, m, g, l, plot_every=1):
+def pendulum_plot(result_dict, g, plot_every=1):
+    q = result_dict["q"]
+    p = result_dict["p"]
+    trajectory = result_dict["trajectory"]
+    m = result_dict["mass"]
+    l = result_dict["extra_args"]["length"]
+
     q = q.cpu().detach().numpy()[::plot_every]
     p = p.cpu().detach().numpy()[::plot_every]
     trajectory = trajectory.cpu().detach().numpy()[::plot_every]
@@ -56,7 +62,7 @@ def pendulum_plot(q, p, trajectory, m, g, l, plot_every=1):
         plt.pause(1e-11)
 
 
-def spring_mass_energy_plot(q, p, trajectory, m, k, l, plot_every=1):
+def spring_mass_energy_plot(q, p, trajectory, m, k, l, g, plot_every=1):
     # Detatch and trim data
     q = q.cpu().detach().numpy()[::plot_every]
     p = p.cpu().detach().numpy()[::plot_every]

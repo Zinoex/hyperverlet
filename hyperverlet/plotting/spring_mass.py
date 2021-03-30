@@ -10,14 +10,19 @@ from hyperverlet.plotting.phasespace import init_phasespace_plot, update_phasesp
 from hyperverlet.plotting.utils import plot_spring
 
 
-def spring_mass_plot(q, p, trajectory, m, k, l, plot_every=1):
+def spring_mass_plot(result_dict, plot_every=1):
+    q = result_dict["q"]
+    p = result_dict["p"]
+    trajectory = result_dict["trajectory"]
+    m = result_dict["mass"]
+    l = result_dict["extra_args"]["length"]
+    k = result_dict["extra_args"]["k"]
+
     # Detatch and trim data
-    q = q.cpu().detach().numpy()[::plot_every]
-    p = p.cpu().detach().numpy()[::plot_every]
-    trajectory = trajectory.cpu().detach().numpy()[::plot_every]
-    m = m.cpu().detach().numpy()
-    l = l.cpu().detach().numpy()
-    k = k.cpu().detach().numpy()
+    q = q[::plot_every]
+    p = p[::plot_every]
+    trajectory = trajectory[::plot_every]
+    k = k
 
     # Plotted bob circle radius
     r = 0.05

@@ -1,4 +1,6 @@
 {
+  "train": true,
+  "plot": true,
   "train_args": {
     "epoch": 10,
     "batch_size": 100

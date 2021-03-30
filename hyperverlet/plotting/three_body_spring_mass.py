@@ -11,16 +11,20 @@ from hyperverlet.plotting.spring_mass import calc_theta, calc_dist_2d
 from hyperverlet.plotting.utils import plot_spring, set_limits, plot_spring_3d
 
 
-def three_body_spring_mass_plot(q, p, trajectory, m, k, l, plot_every=1, show_trail=True, show_springs=False):
+def three_body_spring_mass_plot(result_dict, plot_every=1, show_trail=True, show_springs=False):
+    q = result_dict["q"]
+    p = result_dict["p"]
+    trajectory = result_dict["trajectory"]
+    m = result_dict["mass"]
+    l = result_dict["extra_args"]["length"]
+    k = result_dict["extra_args"]["k"]
+
     euclidean_dim = q.shape[-1]
 
     # Detatch and trim data
-    q = q.cpu().detach().numpy()[::plot_every]
-    p = p.cpu().detach().numpy()[::plot_every]
-    trajectory = trajectory.cpu().detach().numpy()[::plot_every]
-    m = m.cpu().detach().numpy()
-    l = l.cpu().detach().numpy()
-    k = k.cpu().detach().numpy()
+    q = q[::plot_every]
+    p = p[::plot_every]
+    trajectory = trajectory[::plot_every]
 
     # Calculate energy of the system
     ke = three_body_spring_mass.calc_kinetic_energy(m, p)

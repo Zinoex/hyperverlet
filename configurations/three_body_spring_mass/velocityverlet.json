@@ -1,4 +1,7 @@
 {
+  "train": true,
+  "plot": true,
+  "save_path": "results/velocity_verlet.pickle",
   "train_args": {
     "epoch": 10,
     "batch_size": 100
