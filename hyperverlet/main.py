@@ -42,7 +42,7 @@ def main(config_path):
     elif dataset == 'spring_mass':
         spring_mass_plot(q, p, trajectory, mass, extra_args['k'], extra_args['length'], plot_every=1)
     elif dataset == 'three_body_spring_mass':
-        three_body_spring_mass_plot(q, p, trajectory, mass, extra_args['k'], extra_args['length'], plot_every=10)
+        three_body_spring_mass_plot(q, p, trajectory, mass, extra_args['k'], extra_args['length'], plot_every=30, show_trail=True, show_springs=True)
         #three_body_spring_mass_energy_plot(q, p, trajectory, mass, extra_args['k'], extra_args['length'], plot_every=1)
         #plot_2d_pos(q, plot_every=100)
 
