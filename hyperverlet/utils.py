@@ -34,5 +34,5 @@ def send_to_device(extra_args, device, non_blocking=False):
 
 def torch_to_numpy(extra_args):
     return {
-        k: v.cpu() for k, v in extra_args.items
+        k: v.cpu() for k, v in extra_args.items()
     }
