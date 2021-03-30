@@ -7,7 +7,7 @@ from matplotlib.gridspec import GridSpec
 from matplotlib.patches import Circle
 import seaborn as sns
 
-from hyperverlet.plotting.spring_mass import calc_theta, calc_dist_2d, calc_theta_3d
+from hyperverlet.plotting.spring_mass import calc_theta, calc_dist_2d
 from hyperverlet.plotting.utils import plot_spring, set_limits, plot_spring_3d
 
 

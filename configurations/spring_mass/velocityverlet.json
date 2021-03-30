@@ -1,11 +1,20 @@
 {
+  "train_args": {
+    "epoch": 10,
+    "batch_size": 100
+  },
+  "model_args": {
+    "solver": "VelocityVerletSolver",
+    "nn_module": "configurations/spring_mass/nn_model_spring_mass.json"
+  },
   "dataset_args": {
     "dataset": "spring_mass",
-    "gt_solver": "VelocityVerletSolver",
-    "solver": "VelocityVerletSolver",
-    "nn_module": "configurations/spring_mass/nn_model_spring_mass.json",
-    "duration": 300,
-    "trajectory_length": 300001,
+    "gt_solver": "FourthOrderRuthSolver",
+    "train_duration": 300,
+    "train_trajectory_length": 300001,
+    "train_sequence_length": 50,
+    "test_duration": 300,
+    "test_trajectory_length": 300001,
     "num_configurations": 1,
     "coarsening_factor": 25
   }

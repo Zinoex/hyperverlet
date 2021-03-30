@@ -1,12 +1,21 @@
 {
+  "train_args": {
+    "epoch": 10,
+    "batch_size": 100
+  },
+  "model_args": {
+    "solver": "EulerSolver",
+    "nn_module": "configurations/pendulum/nn_model_pendulum.json"
+  },
   "dataset_args": {
     "dataset": "pendulum",
-    "gt_solver": "VelocityVerletSolver",
-    "solver": "HyperVelocityVerletSolver",
-    "hyper_solver": "PendulumModel",
-    "duration": 6,
-    "trajectory_length": 600001,
-    "num_configurations": 1000,
-    "coarsening_factor": 1000
+    "gt_solver": "FourthOrderRuthSolver",
+    "train_duration": 6,
+    "train_trajectory_length": 600001,
+    "train_sequence_length": 50,
+    "test_duration": 6,
+    "test_trajectory_length": 600001,
+    "num_configurations": 1,
+    "coarsening_factor": 10
   }
 }

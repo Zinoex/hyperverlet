@@ -23,20 +23,17 @@ def main(config_path):
     device = torch.device('cpu')
 
     config = load_config(config_path)
-    dataset_config = config["dataset_args"]
 
-    train_dataset, test_dataset = construct_dataset(dataset_config)
-
-    test_solver = dataset_config['solver']
-    hyper_solver = dataset_config.get("nn_module")
-    solver = construct_solver(test_solver, hyper_solver)
+    train_dataset, test_dataset = construct_dataset(config)
+    solver = construct_solver(config)
 
     if solver.trainable:
         train(solver, train_dataset, device)
 
     q, q_base, p, p_base, mass, trajectory, extra_args = test(solver, test_dataset, device)
 
-    dataset = dataset_config['dataset']
+    dataset = config["dataset_args"]['dataset']
+
     if dataset == 'pendulum':
         pendulum_plot(q, p, trajectory, mass, test_dataset.experiment.g, extra_args['length'], plot_every=10)
     elif dataset == 'spring_mass':
