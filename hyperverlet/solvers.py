@@ -205,8 +205,38 @@ class HyperVelocityVerletSolver(BaseSolver, HyperSolverMixin):
         return torch.mean((q_res - q_model) ** 2) + torch.mean((p_res - p_model) ** 2)
 
 
-class ThirdOrderRuthSolver(BaseSolver):
+class SymplecticSolver(BaseSolver):
+    def __init__(self, c, d):
+        super().__init__()
+
+        assert len(c) == len(d)
+
+        self.c = c
+        self.d = d
+
     def forward(self, func: Callable, q: torch.Tensor, p: torch.Tensor, m: torch.Tensor, t, dt, **kwargs):
+        for c, d in zip(self.c, self.d):
+            dq, dp = func(q, p, m, t, **kwargs)
+            q = q + c * dq * dt
+
+            dq, dp = func(q, p, m, t, **kwargs)
+            p = p + d * dp * dt
+
+        return q, p
+
+
+class LeapfrogSolver(SymplecticSolver):
+    def __init__(self):
+        one_half = 1 / 2
+
+        super().__init__(
+            c=[0, 1],
+            d=[one_half, one_half]
+        )
+
+
+class ThirdOrderRuthSolver(SymplecticSolver):
+    def __init__(self):
         c1 = 1
         c2 = -2 / 3
         c3 = 2 / 3
@@ -214,50 +244,27 @@ class ThirdOrderRuthSolver(BaseSolver):
         d2 = 3 / 4
         d3 = 7 / 24
 
-        q, p = q.detach(), p.detach()
-        q = q + c1 * (p / m) * dt
-        dq, dp = func(q, p, m, t, **kwargs)
-        p = p + d1 * dp * dt
-
-        q, p = q.detach(), p.detach()
-        q = q + c2 * (p / m) * dt
-        dq, dp = func(q, p, m, t, **kwargs)
-        p = p + d2 * dp * dt
-
-        q, p = q.detach(), p.detach()
-        q = q + c3 * (p / m) * dt
-        dq, dp = func(q, p, m, t, **kwargs)
-        p = p + d3 * dp * dt
-
-        return q, p
+        super().__init__(
+            c=[c1, c2, c3],
+            d=[d1, d2, d3]
+        )
 
 
-class FourthOrderRuthSolver(BaseSolver):
-    def forward(self, func: Callable, q: torch.Tensor, p: torch.Tensor, m: torch.Tensor, t, dt, **kwargs):
+class FourthOrderRuthSolver(SymplecticSolver):
+    def __init__(self):
         two_power_one_third = 2 ** (1 / 3)
-        c1 = 1 / (2 * (2 - two_power_one_third))
-        c2 = (1 - two_power_one_third) / (2 * (2 - two_power_one_third))
-        c3 = (1 - two_power_one_third) / (2 * (2 - two_power_one_third))
-        c4 = 1 / (2 * (2 - two_power_one_third))
-        d1 = 1 / (2 - two_power_one_third)
-        d2 = two_power_one_third / (2 - two_power_one_third)
-        d3 = 1 / (2 - two_power_one_third)
+        two_minus_two_power_one_third = 2 - two_power_one_third
+
+        c1 = 1 / (2 * two_minus_two_power_one_third)
+        c2 = (1 - two_power_one_third) / (2 * two_minus_two_power_one_third)
+        c3 = c2
+        c4 = c1
+        d1 = 1 / two_minus_two_power_one_third
+        d2 = -two_power_one_third / two_minus_two_power_one_third
+        d3 = d1
         d4 = 0
 
-        q = q + c1 * (p / m) * dt
-        dq, dp = func(q, p, m, t, **kwargs)
-        p = p + d1 * dp * dt
-
-        q = q + c2 * (p / m) * dt
-        dq, dp = func(q, p, m, t, **kwargs)
-        p = p + d2 * dp * dt
-
-        q = q + c3 * (p / m) * dt
-        dq, dp = func(q, p, m, t, **kwargs)
-        p = p + d3 * dp * dt
-
-        q = q + c4 * (p / m) * dt
-        dq, dp = func(q, p, m, t, **kwargs)
-        p = p + d4 * dp * dt
-
-        return q, p
+        super().__init__(
+            c=[c1, c2, c3, c4],
+            d=[d1, d2, d3, d4]
+        )
