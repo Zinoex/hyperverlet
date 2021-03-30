@@ -13,7 +13,7 @@ def train(solver, dataset, device, trajectory_fitting=True):
     optimizer = optim.AdamW(solver.parameters(), lr=1e-4)
     criterion = nn.MSELoss()
 
-    loader = DataLoader(dataset, num_workers=8, pin_memory=True, batch_size=100, shuffle=True)
+    loader = DataLoader(dataset, num_workers=8, pin_memory=device.type == 'cuda', batch_size=100, shuffle=True)
 
     for epoch in trange(10, desc='Epoch'):
         for iteration, batch in enumerate(tqdm(loader, desc='Training iteration')):

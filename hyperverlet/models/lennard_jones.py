@@ -1,7 +1,7 @@
 import torch
 from torch import nn
 
-from hyperverlet.models.utils import Block
+from hyperverlet.models.misc import Block
 
 
 class LennardJonesMLP(nn.Module):
