@@ -4,8 +4,8 @@ from hyperverlet.experiments import PendulumDataset, SpringMassDataset, ThreeBod
 
 def construct_dataset(config):
     dataset_config = config["dataset_args"]
-
     dataset = dataset_config['dataset']
+
     gt_solver_name = dataset_config['gt_solver']
 
     train_duration = dataset_config['train_duration']
@@ -19,7 +19,8 @@ def construct_dataset(config):
     num_config = dataset_config['num_configurations']
     coarsening_factor = dataset_config['coarsening_factor']
 
-    gt_solver = construct_solver(config)
+    gt_solver = construct_solver(gt_solver_name)
+
     if dataset == 'pendulum':
         train_ds = PendulumDataset(gt_solver, train_duration, train_trajectory_length, num_config, coarsening_factor, sequence_length=train_sequence_length)
         test_ds = PendulumDataset(gt_solver, test_duration, test_trajectory_length, 1, coarsening_factor, sequence_length=None)

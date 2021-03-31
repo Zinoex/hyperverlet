@@ -2,11 +2,7 @@ from hyperverlet.factories.model_factory import construct_model
 from hyperverlet.solvers import *
 
 
-def construct_solver(config):
-    dataset_config = config["model_args"]
-
-    solver_name = dataset_config['solver']
-    model_path = dataset_config.get("nn_module")
+def construct_solver(solver_name, model_path=None):
 
     if model_path is not None:
         hyper_solver = construct_model(model_path)

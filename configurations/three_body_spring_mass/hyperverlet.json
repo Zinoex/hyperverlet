@@ -1,9 +1,9 @@
 {
-  "train": true,
-  "plot": true,
+  "save_path": "results/tbsm/HyperVelocityVerletSolver.pickle",
   "train_args": {
     "epoch": 10,
-    "batch_size": 100
+    "batch_size": 100,
+    "num_workers": 8
   },
   "model_args": {
     "solver": "HyperVelocityVerletSolver",
@@ -19,5 +19,8 @@
     "test_trajectory_length": 100001,
     "num_configurations": 100,
     "coarsening_factor": 100
+  },
+  "plotting": {
+    "plot_every": 1
   }
 }

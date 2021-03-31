@@ -7,21 +7,17 @@ from hyperverlet.plotting.energy import init_energy_plot, update_energy_plot, pl
 from hyperverlet.plotting.phasespace import init_phasespace_plot, update_phasespace_plot
 
 
-def pendulum_plot(result_dict, g, plot_every=1):
-    q = result_dict["q"]
-    p = result_dict["p"]
-    trajectory = result_dict["trajectory"]
+def pendulum_plot(result_dict, plot_every=1):
+    q = result_dict["q"][::plot_every]
+    p = result_dict["p"][::plot_every]
+    trajectory = result_dict["trajectory"][::plot_every]
+
     m = result_dict["mass"]
     l = result_dict["extra_args"]["length"]
-
-    q = q.cpu().detach().numpy()[::plot_every]
-    p = p.cpu().detach().numpy()[::plot_every]
-    trajectory = trajectory.cpu().detach().numpy()[::plot_every]
-    m = m.cpu().detach().numpy()
-    l = l.cpu().detach().numpy()
+    g = result_dict["extra_args"]["g"]
 
     pe = pendulum.calc_potential_energy(m, g, l, q)
-    ke = pendulum.calc_kinetic_energy(m, l, p)
+    ke = pendulum.calc_kinetic_energy(m, l, p) * 2
     te = pendulum.calc_total_energy(ke, pe)
 
     # Create grid spec

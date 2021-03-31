@@ -22,7 +22,7 @@ def init_phasespace_plot(ax, q, p, margin=1.05):
     ax.set_xlabel("q")
     ax.set_ylabel("p")
 
-    set_limits(ax, q, p, margin)
+    set_limits(ax, q, p, margin=margin)
 
 
 def update_phasespace_plot(ax, q, p, i):

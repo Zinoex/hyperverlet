@@ -12,19 +12,14 @@ from hyperverlet.plotting.utils import plot_spring, set_limits, plot_spring_3d
 
 
 def three_body_spring_mass_plot(result_dict, plot_every=1, show_trail=True, show_springs=False):
-    q = result_dict["q"]
-    p = result_dict["p"]
-    trajectory = result_dict["trajectory"]
+    q = result_dict["q"][::plot_every]
+    p = result_dict["p"][::plot_every]
+    trajectory = result_dict["trajectory"][::plot_every]
     m = result_dict["mass"]
     l = result_dict["extra_args"]["length"]
     k = result_dict["extra_args"]["k"]
 
     euclidean_dim = q.shape[-1]
-
-    # Detatch and trim data
-    q = q[::plot_every]
-    p = p[::plot_every]
-    trajectory = trajectory[::plot_every]
 
     # Calculate energy of the system
     ke = three_body_spring_mass.calc_kinetic_energy(m, p)
@@ -90,9 +85,6 @@ def plot_springs(ax, q, i):
             if euclidean_dim == 2:
                 spring_theta = calc_theta(particle_pos, relative_particle_pos)
                 plot_spring(ax, spring_length, theta=spring_theta, xshift=particle_pos[0], yshift=particle_pos[1])
-            elif euclidean_dim == 3:
-                theta_x, theta_y = calc_theta_3d(particle_pos, relative_particle_pos)
-                plot_spring_3d(ax, spring_length, theta_x=theta_x, theta_y=theta_y, xshift=particle_pos[0], yshift=particle_pos[1], zshift=particle_pos[2])
 
 
 def plot_trail(ax, q, i, trail_len=8):

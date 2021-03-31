@@ -1,5 +1,4 @@
 import numpy as np
-import math
 from matplotlib import pyplot as plt
 from matplotlib.gridspec import GridSpec
 from matplotlib.patches import Circle
@@ -11,18 +10,12 @@ from hyperverlet.plotting.utils import plot_spring
 
 
 def spring_mass_plot(result_dict, plot_every=1):
-    q = result_dict["q"]
-    p = result_dict["p"]
-    trajectory = result_dict["trajectory"]
+    q = result_dict["q"][::plot_every]
+    p = result_dict["p"][::plot_every]
+    trajectory = result_dict["trajectory"][::plot_every]
     m = result_dict["mass"]
     l = result_dict["extra_args"]["length"]
     k = result_dict["extra_args"]["k"]
-
-    # Detatch and trim data
-    q = q[::plot_every]
-    p = p[::plot_every]
-    trajectory = trajectory[::plot_every]
-    k = k
 
     # Plotted bob circle radius
     r = 0.05
@@ -55,7 +48,7 @@ def spring_mass_plot(result_dict, plot_every=1):
         ax1.set_ylim(wall_bottom * 1.05, wall_top * 1.05)
         ax1.set_aspect('equal')
 
-        plot_spring(q[i], ax1)
+        plot_spring(ax1, q[i])
 
         c0 = Circle((0, 0), r / 2, fc='k', zorder=10)
         c1 = Circle((q[i, 0], 0), r, fc='r', ec='r', zorder=10)

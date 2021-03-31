@@ -62,15 +62,10 @@ class ExperimentDataset(Dataset):
 
 
 class Pendulum(nn.Module):
-    def __init__(self, g=9.807):
-        super().__init__()
-
-        self.g = g
-
-    def forward(self, q, p, m, t, length, **kwargs):
+    def forward(self, q, p, m, t, length, g, **kwargs):
         length = 0.9
         dq = p / (m * length ** 2)
-        dp = -m * self.g * length * torch.sin(q)
+        dp = -m * g * length * torch.sin(q)
         return dq, dp
 
 
@@ -78,19 +73,21 @@ class PendulumDataset(ExperimentDataset):
     def __init__(self, base_solver, duration, num_samples, num_configurations, coarsening_factor, sequence_length=None,
                  length_mean=1.0, length_std=0.5, mass_mean=0.9, mass_std=0.1, g=9.807):
 
-        self.experiment = Pendulum(g)
+        self.experiment = Pendulum()
         self.q0 = (torch.rand(num_configurations, 1) * 2 - 1) * (pi / 2)
         self.p0 = torch.randn(num_configurations, 1) * 0.1
         self.mass = torch.randn(num_configurations, 1) * mass_std + mass_mean
         self.extra_args = {
-            'length': torch.randn(num_configurations, 1) * length_std + length_mean  # torch.full((num_configurations, 1), 0.9)  #
+            'length': torch.randn(num_configurations, 1) * length_std + length_mean,  # torch.full((num_configurations, 1), 0.9)  #
+            'g': torch.full((num_configurations, 1), g)
         }
 
         super().__init__(base_solver, duration, num_samples, num_configurations, coarsening_factor, sequence_length)
 
     def config_extra_args(self, config_idx):
         return {
-            'length': self.extra_args['length'][config_idx]
+            'length': self.extra_args['length'][config_idx],
+            'g': self.extra_args['g'][config_idx]
         }
 
 

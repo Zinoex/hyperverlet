@@ -1,9 +1,9 @@
 {
-  "train": true,
-  "plot": true,
+  "save_path": "results/tbsm/EulerSolver.pickle",
   "train_args": {
     "epoch": 10,
-    "batch_size": 100
+    "batch_size": 100,
+    "num_workers": 8
   },
   "model_args": {
     "solver": "EulerSolver",
@@ -19,5 +19,8 @@
     "test_trajectory_length": 600001,
     "num_configurations": 1000,
     "coarsening_factor": 10
+  },
+  "plotting": {
+    "plot_every": 1
   }
 }

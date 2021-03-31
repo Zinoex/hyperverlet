@@ -7,15 +7,20 @@ from tqdm import trange, tqdm
 from hyperverlet.utils import send_to_device
 
 
-def train(solver, dataset, device, trajectory_fitting=True):
+def train(solver, dataset, device, config, trajectory_fitting=True):
     assert solver.trainable, 'Solver is not trainable'
+
+    train_args = config["train_args"]
+    epochs = train_args["epoch"]
+    batch_size = train_args["batch_size"]
+    num_workers = train_args["num_workers"]
 
     optimizer = optim.AdamW(solver.parameters(), lr=1e-4)
     criterion = nn.MSELoss()
 
-    loader = DataLoader(dataset, num_workers=8, pin_memory=device.type == 'cuda', batch_size=100, shuffle=True)
+    loader = DataLoader(dataset, num_workers=num_workers, pin_memory=device.type == 'cuda', batch_size=batch_size, shuffle=True)
 
-    for epoch in trange(10, desc='Epoch'):
+    for epoch in trange(epochs, desc='Epoch'):
         for iteration, batch in enumerate(tqdm(loader, desc='Training iteration')):
             optimizer.zero_grad(set_to_none=True)
 
