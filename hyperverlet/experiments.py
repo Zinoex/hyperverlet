@@ -63,7 +63,6 @@ class ExperimentDataset(Dataset):
 
 class Pendulum(nn.Module):
     def forward(self, q, p, m, t, length, g, **kwargs):
-        length = 0.9
         dq = p / (m * length ** 2)
         dp = -m * g * length * torch.sin(q)
         return dq, dp

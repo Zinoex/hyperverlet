@@ -21,8 +21,11 @@ def parse_arguments():
     evaluate_parse = commands.add_parser("evaluate", help="Test a model")
     evaluate_parse.set_defaults(func=evaluate)
 
-    plot_parse = commands.add_parser("plot", help="Test a model")
+    plot_parse = commands.add_parser("plot", help="Plot the results")
     plot_parse.set_defaults(func=plot)
+
+    full_parse = commands.add_parser("full", help="Run an evaluation and plotting")
+    full_parse.set_defaults(func=full_run)
 
     return parser.parse_args()
 
@@ -62,6 +65,11 @@ def plot(config_path):
         spring_mass_plot(result_dict, plot_every=plot_every)
     elif dataset == 'three_body_spring_mass':
         three_body_spring_mass_plot(result_dict, plot_every=plot_every, show_trail=True, show_springs=True)
+
+
+def full_run(config_path):
+    evaluate(config_path)
+    plot(config_path)
 
 
 if __name__ == '__main__':
