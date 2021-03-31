@@ -77,7 +77,7 @@ class PendulumDataset(ExperimentDataset):
         self.p0 = torch.randn(num_configurations, 1) * 0.1
         self.mass = torch.randn(num_configurations, 1) * mass_std + mass_mean
         self.extra_args = {
-            'length': torch.randn(num_configurations, 1) * length_std + length_mean,  # torch.full((num_configurations, 1), 0.9)  #
+            'length': torch.randn(num_configurations, 1) * length_std + length_mean,
             'g': torch.full((num_configurations, 1), g)
         }
 
