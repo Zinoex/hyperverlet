@@ -17,7 +17,7 @@ def pendulum_plot(result_dict, plot_every=1):
     g = result_dict["extra_args"]["g"]
 
     pe = pendulum.calc_potential_energy(m, g, l, q)
-    ke = pendulum.calc_kinetic_energy(m, l, p) * 2
+    ke = pendulum.calc_kinetic_energy(m, l, p)
     te = pendulum.calc_total_energy(ke, pe)
 
     # Create grid spec
