@@ -18,7 +18,7 @@
     "test_duration": 6,
     "test_trajectory_length": 60001,
     "num_configurations": 1,
-    "coarsening_factor": 1
+    "coarsening_factor": 10
   },
   "plotting": {
     "plot_every": 30
