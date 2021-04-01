@@ -1,3 +1,6 @@
+import datetime
+import sys
+
 from mpl_toolkits.mplot3d import art3d
 
 from hyperverlet.energy import three_body_spring_mass
@@ -8,9 +11,8 @@ from matplotlib.patches import Circle
 import seaborn as sns
 import numpy as np
 
-from hyperverlet.plotting.phasespace import update_phasespace_plot
 from hyperverlet.plotting.spring_mass import calc_theta, calc_dist_2d
-from hyperverlet.plotting.utils import plot_spring, set_limits, plot_spring_3d
+from hyperverlet.plotting.utils import plot_spring, set_limits
 
 
 def three_body_spring_mass_plot(result_dict, plot_every=1, show_trail=True, show_springs=False, show_gt=False):
@@ -136,7 +138,7 @@ def three_body_spring_mass_energy_plot(q, p, trajectory, m, k, l, plot_every=1):
     plot_energy(trajectory, te, ke, pe)
 
 
-def animate_tbsm(result_dict, plot_every=1, show_trail=True, show_springs=False, show_gt=False):
+def animate_tbsm(result_dict, plot_every=1, show_trail=True, show_springs=False, show_gt=False, save_plot=False, show_plot=False):
     # Predicted results
     q = result_dict["q"][::plot_every]
     p = result_dict["p"][::plot_every]
@@ -173,30 +175,34 @@ def animate_tbsm(result_dict, plot_every=1, show_trail=True, show_springs=False,
     pe = three_body_spring_mass.calc_potential_energy(k, q, l)
     te = three_body_spring_mass.calc_total_energy(ke, pe)
 
-    pe_plot, = ax2.plot([], [], color='blue')
-    ke_plot, = ax2.plot([], [], color='orange')
-    te_plot, = ax2.plot([], [], color='green')
-
-    init_energy_plot(ax2, trajectory, te, ke, pe)
+    # Initialize plots
+    pe_plot, ke_plot, te_plot = init_energy_plot(ax2, trajectory, te, ke, pe)
 
     def animate(i):
+        ax1.clear()
         if euclidean_dim == 2:
             ax1.set_aspect('equal')
         set_limits(ax1, xlim, ylim, zlim)
 
         if show_trail:
+            plot_trail(ax1, q, i, color='r', trail_len=15)
             if show_gt:
-                plot_trail(ax1, q, i, color='r', trail_len=15)
                 plot_trail(ax1, gt_q, i, color='g', trail_len=15)
-            else:
-                plot_trail(ax1, q, i)
 
         if show_springs:
             plot_springs(ax1, q, i)
+            if show_gt:
+                plot_springs(ax1, gt_q, i)
 
         energy_animate_update(pe_plot, ke_plot, te_plot, trajectory, i, pe, ke, te, ax2)
 
-    anim = animation.FuncAnimation(fig, animate, frames=q.shape[0], interval=10000 * interval)
+    anim = animation.FuncAnimatinon(fig, animate, frames=q.shape[0], repeat=False)
 
-    plt.show()
+    if show_plot:
+        plt.show()
+
+    if save_plot:
+        filename = datetime.datetime.now().strftime("%Y%m%d-%H%M%S") + ".mp4"
+        anim.save(filename)
+        print(f"File saved at {filename}")
 

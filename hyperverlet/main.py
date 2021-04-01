@@ -7,7 +7,7 @@ from hyperverlet.factories.dataset_factory import construct_dataset
 from hyperverlet.factories.solver_factory import construct_solver
 from hyperverlet.plotting.pendulum import pendulum_plot, animate_pendulum
 from hyperverlet.plotting.spring_mass import spring_mass_plot, animate_sm
-from hyperverlet.plotting.three_body_spring_mass import three_body_spring_mass_plot
+from hyperverlet.plotting.three_body_spring_mass import three_body_spring_mass_plot, animate_tbsm
 from hyperverlet.test import test
 from hyperverlet.train import train
 from hyperverlet.utils import seed_randomness, load_config, save_pickle, load_pickle
@@ -62,13 +62,14 @@ def plot(config_path):
     dataset = config["dataset_args"]['dataset']
     plot_every = config["plotting"]["plot_every"]
     result_dict = load_pickle(config["save_path"])
+    save_plot = config["plotting"]["save_plot"]
 
     if dataset == 'pendulum':
         animate_pendulum(result_dict, plot_every=plot_every, show_gt=True)
     elif dataset == 'spring_mass':
         animate_sm(result_dict, plot_every=plot_every, show_gt=True)
     elif dataset == 'three_body_spring_mass':
-        three_body_spring_mass_plot(result_dict, plot_every=plot_every, show_trail=True, show_springs=False, show_gt=True)
+        animate_tbsm(result_dict, plot_every=plot_every, show_trail=True, show_springs=True, show_gt=True, save_plot=save_plot)
 
 
 def full_run(config_path):

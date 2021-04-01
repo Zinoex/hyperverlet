@@ -1,3 +1,5 @@
+import sys
+
 import numpy as np
 from matplotlib import pyplot as plt, animation
 from matplotlib.gridspec import GridSpec
@@ -142,7 +144,7 @@ def animate_sm(result_dict, plot_every=1, show_gt=False):
         energy_animate_update(pe_plot, ke_plot, te_plot, trajectory, i, pe, ke, te, ax2)
         update_phasespace_plot(ax3, q, p, i)
 
-    anim = animation.FuncAnimation(fig, animate, frames=q.shape[0])
+    anim = animation.FuncAnimation(fig, animate, frames=q.shape[0], save_count=sys.maxsize)
 
     plt.show()
 
