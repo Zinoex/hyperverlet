@@ -6,18 +6,28 @@ from matplotlib import pyplot as plt
 from matplotlib.gridspec import GridSpec
 from matplotlib.patches import Circle
 import seaborn as sns
+import numpy as np
 
 from hyperverlet.plotting.spring_mass import calc_theta, calc_dist_2d
 from hyperverlet.plotting.utils import plot_spring, set_limits, plot_spring_3d
 
 
-def three_body_spring_mass_plot(result_dict, plot_every=1, show_trail=True, show_springs=False):
+def three_body_spring_mass_plot(result_dict, plot_every=1, show_trail=True, show_springs=False, show_gt=False):
+    # Predicted results
     q = result_dict["q"][::plot_every]
     p = result_dict["p"][::plot_every]
     trajectory = result_dict["trajectory"][::plot_every]
     m = result_dict["mass"]
     l = result_dict["extra_args"]["length"]
     k = result_dict["extra_args"]["k"]
+
+    # Ground Truth
+    gt_q = np.squeeze(result_dict["gt_q"][::plot_every], axis=1)
+    gt_p = result_dict["gt_p"][::plot_every]
+    gt_trajectory = result_dict["gt_trajectory"][::plot_every]
+    gt_m = result_dict["gt_mass"]
+    gt_l = result_dict["gt_extra_args"]["length"]
+    gt_k = result_dict["gt_extra_args"]["k"]
 
     euclidean_dim = q.shape[-1]
 
@@ -31,8 +41,8 @@ def three_body_spring_mass_plot(result_dict, plot_every=1, show_trail=True, show
     gs = GridSpec(1, 2)
 
     # Get x, y coordinate limits
-    xlim = q[:, :, 0]
-    ylim = q[:, :, 1]
+    xlim = q[:, :, 0] if q[:, :, 0].max() > gt_q[:, :, 0].max() else gt_q[:, :, 0]
+    ylim = q[:, :, 1] if q[:, :, 1].max() > gt_q[:, :, 1].max() else gt_q[:, :, 1]
     zlim = None
 
     if euclidean_dim == 2:
@@ -54,7 +64,11 @@ def three_body_spring_mass_plot(result_dict, plot_every=1, show_trail=True, show
         set_limits(ax1, xlim, ylim, zlim)
 
         if show_trail:
-            plot_trail(ax1, q, i)
+            if show_gt:
+                plot_trail(ax1, q, i, color='r', trail_len=15)
+                plot_trail(ax1, gt_q, i, color='g', trail_len=15)
+            else:
+                plot_trail(ax1, q, i)
 
         if show_springs:
             plot_springs(ax1, q, i)
@@ -87,7 +101,7 @@ def plot_springs(ax, q, i):
                 plot_spring(ax, spring_length, theta=spring_theta, xshift=particle_pos[0], yshift=particle_pos[1])
 
 
-def plot_trail(ax, q, i, trail_len=8):
+def plot_trail(ax, q, i, trail_len=8, color=None):
     # The trail will be divided into trail_len segments and plotted as a fading line.
     euclidean_dim = q.shape[-1]
     color_map = sns.color_palette("husl", q.shape[1])
@@ -101,7 +115,10 @@ def plot_trail(ax, q, i, trail_len=8):
         alpha = (j/trail_len) ** 2
         for particle in range(q.shape[1]):
             if euclidean_dim == 2:
-                ax.plot(q[imin:imax, particle, 0], q[imin:imax, particle, 1], c=color_map[particle], solid_capstyle='butt', lw=2, alpha=alpha)
+                if color is None:
+                    ax.plot(q[imin:imax, particle, 0], q[imin:imax, particle, 1], c=color_map[particle], solid_capstyle='butt', lw=2, alpha=alpha)
+                else:
+                    ax.plot(q[imin:imax, particle, 0], q[imin:imax, particle, 1], c=color, solid_capstyle='butt', lw=2, alpha=alpha)
             elif euclidean_dim == 3:
                 ax.plot3D(q[imin:imax, particle, 0], q[imin:imax, particle, 1], q[imin:imax, particle, 2], c=color_map[particle], solid_capstyle='butt', lw=2, alpha=alpha)
 

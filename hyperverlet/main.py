@@ -2,6 +2,7 @@ from argparse import ArgumentParser
 
 import torch
 
+from hyperverlet.experiments import dataset_to_dict
 from hyperverlet.factories.dataset_factory import construct_dataset
 from hyperverlet.factories.solver_factory import construct_solver
 from hyperverlet.plotting.pendulum import pendulum_plot
@@ -50,7 +51,10 @@ def evaluate(config_path):
 
     # Test Solver
     result_dict = test(solver, test_dataset, device)
-    save_pickle(config["save_path"], result_dict)
+    gt_dict = dataset_to_dict(test_dataset, "gt_")
+    merged_dict = {**gt_dict, **result_dict}
+
+    save_pickle(config["save_path"], merged_dict)
 
 
 def plot(config_path):
@@ -64,7 +68,7 @@ def plot(config_path):
     elif dataset == 'spring_mass':
         spring_mass_plot(result_dict, plot_every=plot_every)
     elif dataset == 'three_body_spring_mass':
-        three_body_spring_mass_plot(result_dict, plot_every=plot_every, show_trail=True, show_springs=True)
+        three_body_spring_mass_plot(result_dict, plot_every=plot_every, show_trail=True, show_springs=False, show_gt=True)
 
 
 def full_run(config_path):

@@ -17,8 +17,8 @@
     "train_sequence_length": 50,
     "test_duration": 6,
     "test_trajectory_length": 600001,
-    "num_configurations": 1000,
-    "coarsening_factor": 1000
+    "num_configurations": 10,
+    "coarsening_factor": 100
   },
   "plotting": {
     "plot_every": 1
