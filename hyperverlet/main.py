@@ -64,9 +64,9 @@ def plot(config_path):
     result_dict = load_pickle(config["save_path"])
 
     if dataset == 'pendulum':
-        pendulum_plot(result_dict, plot_every=plot_every)
+        pendulum_plot(result_dict, plot_every=plot_every, show_gt=True)
     elif dataset == 'spring_mass':
-        spring_mass_plot(result_dict, plot_every=plot_every)
+        spring_mass_plot(result_dict, plot_every=plot_every, show_gt=True)
     elif dataset == 'three_body_spring_mass':
         three_body_spring_mass_plot(result_dict, plot_every=plot_every, show_trail=True, show_springs=False, show_gt=True)
 

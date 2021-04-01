@@ -23,11 +23,6 @@ def three_body_spring_mass_plot(result_dict, plot_every=1, show_trail=True, show
 
     # Ground Truth
     gt_q = np.squeeze(result_dict["gt_q"][::plot_every], axis=1)
-    gt_p = result_dict["gt_p"][::plot_every]
-    gt_trajectory = result_dict["gt_trajectory"][::plot_every]
-    gt_m = result_dict["gt_mass"]
-    gt_l = result_dict["gt_extra_args"]["length"]
-    gt_k = result_dict["gt_extra_args"]["k"]
 
     euclidean_dim = q.shape[-1]
 

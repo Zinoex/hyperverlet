@@ -7,14 +7,16 @@ from hyperverlet.plotting.energy import init_energy_plot, update_energy_plot, pl
 from hyperverlet.plotting.phasespace import init_phasespace_plot, update_phasespace_plot
 
 
-def pendulum_plot(result_dict, plot_every=1):
+def pendulum_plot(result_dict, plot_every=1, show_gt=False):
     q = result_dict["q"][::plot_every]
     p = result_dict["p"][::plot_every]
     trajectory = result_dict["trajectory"][::plot_every]
-
     m = result_dict["mass"]
     l = result_dict["extra_args"]["length"]
     g = result_dict["extra_args"]["g"]
+
+    # Ground Truth
+    gt_q = np.squeeze(result_dict["gt_q"][::plot_every], axis=1)
 
     pe = pendulum.calc_potential_energy(m, g, l, q)
     ke = pendulum.calc_kinetic_energy(m, l, p)
@@ -41,13 +43,19 @@ def pendulum_plot(result_dict, plot_every=1):
         x = l * np.sin(q[i])
         y = - l * np.cos(q[i])
 
-        ax1.plot([0, x[0]], [0, y[0]], linewidth=3)
+        ax1.plot([0, x[0]], [0, y[0]], linewidth=3, color='red')
         ax1.scatter(x, y, color='red', marker='o', s=500, alpha=0.8)
         ax1.set_xlabel('X', fontweight='bold', fontsize=14)
         ax1.set_ylabel('Y', fontweight='bold', fontsize=14)
         ax1.set_xlim([-l - 0.5, l + 0.5])
         ax1.set_ylim([-l - 0.5, l + 0.5])
         ax1.set_aspect('equal')
+
+        if show_gt:
+            gt_x = l * np.sin(gt_q[i])
+            gt_y = - l * np.cos(gt_q[i])
+            ax1.plot([0, gt_x[0]], [0, gt_y[0]], linewidth=2, color='green')
+            ax1.scatter(gt_x, gt_y, color='green', marker='o', s=400, alpha=0.8)
 
         # PLOT - 2: Energy
         update_energy_plot(ax2, trajectory, i, te, ke, pe)

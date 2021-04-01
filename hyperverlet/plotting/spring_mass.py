@@ -9,13 +9,18 @@ from hyperverlet.plotting.phasespace import init_phasespace_plot, update_phasesp
 from hyperverlet.plotting.utils import plot_spring
 
 
-def spring_mass_plot(result_dict, plot_every=1):
+def spring_mass_plot(result_dict, plot_every=1, show_gt=False):
+    # Predicted results
     q = result_dict["q"][::plot_every]
     p = result_dict["p"][::plot_every]
     trajectory = result_dict["trajectory"][::plot_every]
     m = result_dict["mass"]
     l = result_dict["extra_args"]["length"]
     k = result_dict["extra_args"]["k"]
+
+    # Ground Truth
+    gt_q = np.squeeze(result_dict["gt_q"][::plot_every], axis=1)
+
 
     # Plotted bob circle radius
     r = 0.05
@@ -54,6 +59,11 @@ def spring_mass_plot(result_dict, plot_every=1):
         c1 = Circle((q[i, 0], 0), r, fc='r', ec='r', zorder=10)
         ax1.add_patch(c0)
         ax1.add_patch(c1)
+
+        if show_gt:
+            gt_c1 = Circle((gt_q[i, 0], 0), r*0.75, fc='g', ec='g', zorder=10)
+            ax1.add_patch(gt_c1)
+
         # Add wall
         ax1.vlines(0, wall_bottom, wall_top, linestyles="solid", color='k', linewidth=7.0)
 
