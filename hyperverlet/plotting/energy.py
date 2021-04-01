@@ -22,12 +22,14 @@ def energy_animate_update(pe_plot, ke_plot, te_plot, trajectory, i, pe, ke, te, 
 
 
 def init_energy_plot(ax, trajectory, te, ke, pe):
-    ax.plot(trajectory[0], te[0], label=r'$E_{sys}$')
-    ax.plot(trajectory[0], ke[0], label=r'KE')
-    ax.plot(trajectory[0], pe[0], label=r'PE')
+    te_plot, = ax.plot(trajectory[0], te[0], label=r'$E_{sys}$', color='blue')
+    ke_plot, = ax.plot(trajectory[0], ke[0], label=r'KE', color='orange')
+    pe_plot, = ax.plot(trajectory[0], pe[0], label=r'PE', color='green')
     ax.set_xlabel("Time")
     ax.set_ylabel("Energy")
     plt.legend(loc='lower left')
+
+    return pe_plot, ke_plot, te_plot
 
 
 def plot_energy(trajectory, te, ke, pe):

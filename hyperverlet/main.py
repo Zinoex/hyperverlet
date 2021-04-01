@@ -6,7 +6,7 @@ from hyperverlet.experiments import dataset_to_dict
 from hyperverlet.factories.dataset_factory import construct_dataset
 from hyperverlet.factories.solver_factory import construct_solver
 from hyperverlet.plotting.pendulum import pendulum_plot, animate_pendulum
-from hyperverlet.plotting.spring_mass import spring_mass_plot
+from hyperverlet.plotting.spring_mass import spring_mass_plot, animate_sm
 from hyperverlet.plotting.three_body_spring_mass import three_body_spring_mass_plot
 from hyperverlet.test import test
 from hyperverlet.train import train
@@ -66,7 +66,7 @@ def plot(config_path):
     if dataset == 'pendulum':
         animate_pendulum(result_dict, plot_every=plot_every, show_gt=True)
     elif dataset == 'spring_mass':
-        spring_mass_plot(result_dict, plot_every=plot_every, show_gt=True)
+        animate_sm(result_dict, plot_every=plot_every, show_gt=True)
     elif dataset == 'three_body_spring_mass':
         three_body_spring_mass_plot(result_dict, plot_every=plot_every, show_trail=True, show_springs=False, show_gt=True)
 

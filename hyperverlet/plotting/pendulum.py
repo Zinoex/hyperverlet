@@ -88,6 +88,9 @@ def animate_pendulum(result_dict, plot_every=1, show_gt=False):
     l = result_dict["extra_args"]["length"]
     g = result_dict["extra_args"]["g"]
 
+    # Ground Truth
+    gt_q = np.squeeze(result_dict["gt_q"][::plot_every], axis=1)
+
     pe = pendulum.calc_potential_energy(m, g, l, q)
     ke = pendulum.calc_kinetic_energy(m, l, p)
     te = pendulum.calc_total_energy(ke, pe)
@@ -100,28 +103,31 @@ def animate_pendulum(result_dict, plot_every=1, show_gt=False):
     ax2 = fig.add_subplot(gs[0, 2])
     ax3 = fig.add_subplot(gs[1, 2])
 
-    line, = ax1.plot([], [], linewidth=2, color='green')
-    bob = ax1.scatter(None, None, color='red', marker='o', s=500, alpha=0.8)
-    pe_plot, = ax2.plot([], [], color='blue')
-    ke_plot, = ax2.plot([], [], color='orange')
-    te_plot, = ax2.plot([], [], color='green')
-
+    # Initialize plots
     init_pendulum_plot(ax1, l)
+    pe_plot, ke_plot, te_plot = init_energy_plot(ax2, trajectory, te, ke, pe)
     init_phasespace_plot(ax3, q, p)
-    init_energy_plot(ax2, trajectory, te, ke, pe)
 
     def animate(i):
-        x = l[0] * np.sin(q[i, 0])
-        y = - l[0] * np.cos(q[i, 0])
-        line.set_data([0, x], [0, y])
-        bob.set_offsets([x, y])
+        ax1.clear()
+        update_pendulum(ax1, q, i, l, color="red")
+        if show_gt:
+            update_pendulum(ax1, gt_q, i, l, color="green", s=400, linewidth=2)
 
         energy_animate_update(pe_plot, ke_plot, te_plot, trajectory, i, pe, ke, te, ax2)
         update_phasespace_plot(ax3, q, p, i)
 
-    anim = animation.FuncAnimation(fig, animate, frames=q.shape[0], interval=10000 * interval)
+    anim = animation.FuncAnimation(fig, animate, frames=q.shape[0])
 
     plt.show()
+
+
+def update_pendulum(ax, q, i, l, color='red', s=500, linewidth=3):
+    gt_x = l * np.sin(q[i])
+    gt_y = - l * np.cos(q[i])
+    ax.plot([0, gt_x[0]], [0, gt_y[0]], linewidth=linewidth, color=color)
+    ax.scatter(gt_x, gt_y, color=color, marker='o', s=s, alpha=0.8)
+    init_pendulum_plot(ax, l)
 
 
 def init_pendulum_plot(ax, l):
