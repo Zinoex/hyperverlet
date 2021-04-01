@@ -1,9 +1,9 @@
 import numpy as np
-from matplotlib import pyplot as plt
+from matplotlib import pyplot as plt, animation
 
 from matplotlib.gridspec import GridSpec
 from hyperverlet.energy import pendulum
-from hyperverlet.plotting.energy import init_energy_plot, update_energy_plot, plot_energy
+from hyperverlet.plotting.energy import init_energy_plot, update_energy_plot, plot_energy, energy_animate_update
 from hyperverlet.plotting.phasespace import init_phasespace_plot, update_phasespace_plot
 
 
@@ -45,11 +45,7 @@ def pendulum_plot(result_dict, plot_every=1, show_gt=False):
 
         ax1.plot([0, x[0]], [0, y[0]], linewidth=3, color='red')
         ax1.scatter(x, y, color='red', marker='o', s=500, alpha=0.8)
-        ax1.set_xlabel('X', fontweight='bold', fontsize=14)
-        ax1.set_ylabel('Y', fontweight='bold', fontsize=14)
-        ax1.set_xlim([-l - 0.5, l + 0.5])
-        ax1.set_ylim([-l - 0.5, l + 0.5])
-        ax1.set_aspect('equal')
+        init_pendulum_plot(ax1, l)
 
         if show_gt:
             gt_x = l * np.sin(gt_q[i])
@@ -81,3 +77,57 @@ def spring_mass_energy_plot(q, p, trajectory, m, k, l, g, plot_every=1):
     te = pendulum.calc_total_energy(ke, pe)
 
     plot_energy(trajectory, te, ke, pe)
+
+
+def animate_pendulum(result_dict, plot_every=1, show_gt=False):
+    q = result_dict["q"][::plot_every]
+    p = result_dict["p"][::plot_every]
+    trajectory = result_dict["trajectory"][::plot_every]
+    interval = trajectory[1] - trajectory[0]
+    m = result_dict["mass"]
+    l = result_dict["extra_args"]["length"]
+    g = result_dict["extra_args"]["g"]
+
+    pe = pendulum.calc_potential_energy(m, g, l, q)
+    ke = pendulum.calc_kinetic_energy(m, l, p)
+    te = pendulum.calc_total_energy(ke, pe)
+
+    # Create grid spec
+    fig = plt.figure(figsize=(80, 60))
+    gs = GridSpec(2, 3)
+
+    ax1 = fig.add_subplot(gs[:, :2])
+    ax2 = fig.add_subplot(gs[0, 2])
+    ax3 = fig.add_subplot(gs[1, 2])
+
+    line, = ax1.plot([], [], linewidth=2, color='green')
+    bob = ax1.scatter(None, None, color='red', marker='o', s=500, alpha=0.8)
+    pe_plot, = ax2.plot([], [], color='blue')
+    ke_plot, = ax2.plot([], [], color='orange')
+    te_plot, = ax2.plot([], [], color='green')
+
+    init_pendulum_plot(ax1, l)
+    init_phasespace_plot(ax3, q, p)
+    init_energy_plot(ax2, trajectory, te, ke, pe)
+
+    def animate(i):
+        x = l[0] * np.sin(q[i, 0])
+        y = - l[0] * np.cos(q[i, 0])
+        line.set_data([0, x], [0, y])
+        bob.set_offsets([x, y])
+
+        energy_animate_update(pe_plot, ke_plot, te_plot, trajectory, i, pe, ke, te, ax2)
+        update_phasespace_plot(ax3, q, p, i)
+
+    anim = animation.FuncAnimation(fig, animate, frames=q.shape[0], interval=10000 * interval)
+
+    plt.show()
+
+
+def init_pendulum_plot(ax, l):
+    ax.set_title("Pendulum experiment")
+    ax.set_xlabel('X', fontweight='bold', fontsize=14)
+    ax.set_ylabel('Y', fontweight='bold', fontsize=14)
+    ax.set_xlim([-l - 0.5, l + 0.5])
+    ax.set_ylim([-l - 0.5, l + 0.5])
+    ax.set_aspect('equal')

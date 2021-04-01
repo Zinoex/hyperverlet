@@ -1,13 +1,14 @@
 from mpl_toolkits.mplot3d import art3d
 
 from hyperverlet.energy import three_body_spring_mass
-from hyperverlet.plotting.energy import plot_energy, init_energy_plot, update_energy_plot
-from matplotlib import pyplot as plt
+from hyperverlet.plotting.energy import plot_energy, init_energy_plot, update_energy_plot, energy_animate_update
+from matplotlib import pyplot as plt, animation
 from matplotlib.gridspec import GridSpec
 from matplotlib.patches import Circle
 import seaborn as sns
 import numpy as np
 
+from hyperverlet.plotting.phasespace import update_phasespace_plot
 from hyperverlet.plotting.spring_mass import calc_theta, calc_dist_2d
 from hyperverlet.plotting.utils import plot_spring, set_limits, plot_spring_3d
 
@@ -36,8 +37,8 @@ def three_body_spring_mass_plot(result_dict, plot_every=1, show_trail=True, show
     gs = GridSpec(1, 2)
 
     # Get x, y coordinate limits
-    xlim = q[:, :, 0] if q[:, :, 0].max() > gt_q[:, :, 0].max() else gt_q[:, :, 0]
-    ylim = q[:, :, 1] if q[:, :, 1].max() > gt_q[:, :, 1].max() else gt_q[:, :, 1]
+    xlim = gt_q[:, :, 0] if q[:, :, 0].max() < gt_q[:, :, 0].max() and show_gt else q[:, :, 0]
+    ylim = gt_q[:, :, 1] if q[:, :, 1].max() < gt_q[:, :, 1].max() and show_gt else q[:, :, 1]
     zlim = None
 
     if euclidean_dim == 2:
@@ -118,7 +119,6 @@ def plot_trail(ax, q, i, trail_len=8, color=None):
                 ax.plot3D(q[imin:imax, particle, 0], q[imin:imax, particle, 1], q[imin:imax, particle, 2], c=color_map[particle], solid_capstyle='butt', lw=2, alpha=alpha)
 
 
-
 def three_body_spring_mass_energy_plot(q, p, trajectory, m, k, l, plot_every=1):
     # Detatch and trim data
     q = q.cpu().detach().numpy()[::plot_every]
@@ -134,3 +134,69 @@ def three_body_spring_mass_energy_plot(q, p, trajectory, m, k, l, plot_every=1):
     te = three_body_spring_mass.calc_total_energy(ke, pe)
 
     plot_energy(trajectory, te, ke, pe)
+
+
+def animate_tbsm(result_dict, plot_every=1, show_trail=True, show_springs=False, show_gt=False):
+    # Predicted results
+    q = result_dict["q"][::plot_every]
+    p = result_dict["p"][::plot_every]
+    trajectory = result_dict["trajectory"][::plot_every]
+    interval = trajectory[1] - trajectory[0]
+    m = result_dict["mass"]
+    l = result_dict["extra_args"]["length"]
+    k = result_dict["extra_args"]["k"]
+
+    # Ground Truth
+    gt_q = np.squeeze(result_dict["gt_q"][::plot_every], axis=1)
+
+    euclidean_dim = q.shape[-1]
+
+    # Create grid spec
+    fig = plt.figure(figsize=(80, 60))
+    gs = GridSpec(1, 2)
+
+    # Get x, y coordinate limits
+    xlim = gt_q[:, :, 0] if q[:, :, 0].max() < gt_q[:, :, 0].max() and show_gt else q[:, :, 0]
+    ylim = gt_q[:, :, 1] if q[:, :, 1].max() < gt_q[:, :, 1].max() and show_gt else q[:, :, 1]
+    zlim = None
+
+    if euclidean_dim == 2:
+        ax1 = fig.add_subplot(gs[0, 0])
+    elif euclidean_dim == 3:
+        ax1 = fig.add_subplot(gs[0, 0], projection='3d')
+        zlim = q[:, :, 2]
+
+    ax2 = fig.add_subplot(gs[0, 1])
+
+    # Calculate energy of the system
+    ke = three_body_spring_mass.calc_kinetic_energy(m, p)
+    pe = three_body_spring_mass.calc_potential_energy(k, q, l)
+    te = three_body_spring_mass.calc_total_energy(ke, pe)
+
+    pe_plot, = ax2.plot([], [], color='blue')
+    ke_plot, = ax2.plot([], [], color='orange')
+    te_plot, = ax2.plot([], [], color='green')
+
+    init_energy_plot(ax2, trajectory, te, ke, pe)
+
+    def animate(i):
+        if euclidean_dim == 2:
+            ax1.set_aspect('equal')
+        set_limits(ax1, xlim, ylim, zlim)
+
+        if show_trail:
+            if show_gt:
+                plot_trail(ax1, q, i, color='r', trail_len=15)
+                plot_trail(ax1, gt_q, i, color='g', trail_len=15)
+            else:
+                plot_trail(ax1, q, i)
+
+        if show_springs:
+            plot_springs(ax1, q, i)
+
+        energy_animate_update(pe_plot, ke_plot, te_plot, trajectory, i, pe, ke, te, ax2)
+
+    anim = animation.FuncAnimation(fig, animate, frames=q.shape[0], interval=10000 * interval)
+
+    plt.show()
+

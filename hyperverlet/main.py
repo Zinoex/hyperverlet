@@ -5,7 +5,7 @@ import torch
 from hyperverlet.experiments import dataset_to_dict
 from hyperverlet.factories.dataset_factory import construct_dataset
 from hyperverlet.factories.solver_factory import construct_solver
-from hyperverlet.plotting.pendulum import pendulum_plot
+from hyperverlet.plotting.pendulum import pendulum_plot, animate_pendulum
 from hyperverlet.plotting.spring_mass import spring_mass_plot
 from hyperverlet.plotting.three_body_spring_mass import three_body_spring_mass_plot
 from hyperverlet.test import test
@@ -64,7 +64,7 @@ def plot(config_path):
     result_dict = load_pickle(config["save_path"])
 
     if dataset == 'pendulum':
-        pendulum_plot(result_dict, plot_every=plot_every, show_gt=True)
+        animate_pendulum(result_dict, plot_every=plot_every, show_gt=True)
     elif dataset == 'spring_mass':
         spring_mass_plot(result_dict, plot_every=plot_every, show_gt=True)
     elif dataset == 'three_body_spring_mass':
