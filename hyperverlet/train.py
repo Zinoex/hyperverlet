@@ -16,7 +16,7 @@ def train(solver, dataset, device, config, trajectory_fitting=True):
     batch_size = train_args["batch_size"]
     num_workers = train_args["num_workers"]
 
-    optimizer = optim.AdamW(solver.parameters(), lr=1e-4)
+    optimizer = optim.AdamW(solver.parameters(), lr=1e-3)
     criterion = nn.MSELoss()
 
     loader = DataLoader(dataset, num_workers=num_workers, pin_memory=device.type == 'cuda', batch_size=batch_size, shuffle=True)
@@ -35,7 +35,7 @@ def train(solver, dataset, device, config, trajectory_fitting=True):
             loss = criterion(q, q_base) + criterion(p, p_base)
 
             loss.backward()
-            nn.utils.clip_grad_norm_(solver.parameters(), 1)
+            # nn.utils.clip_grad_norm_(solver.parameters(), 1)
             optimizer.step()
 
             if iteration % 100 == 0:
