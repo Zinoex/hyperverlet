@@ -5,9 +5,9 @@ import torch
 from hyperverlet.experiments import dataset_to_dict
 from hyperverlet.factories.dataset_factory import construct_dataset
 from hyperverlet.factories.solver_factory import construct_solver
-from hyperverlet.plotting.pendulum import pendulum_plot, animate_pendulum
-from hyperverlet.plotting.spring_mass import spring_mass_plot, animate_sm
-from hyperverlet.plotting.three_body_spring_mass import three_body_spring_mass_plot, animate_tbsm
+from hyperverlet.plotting.pendulum import animate_pendulum
+from hyperverlet.plotting.spring_mass import animate_sm
+from hyperverlet.plotting.three_body_spring_mass import animate_tbsm
 from hyperverlet.test import test
 from hyperverlet.train import train
 from hyperverlet.utils import seed_randomness, load_config, save_pickle, load_pickle

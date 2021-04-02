@@ -21,13 +21,13 @@ def energy_animate_update(pe_plot, ke_plot, te_plot, trajectory, i, pe, ke, te, 
     ax.set_ylim(-0.1, te.max() * 1.05)
 
 
-def init_energy_plot(ax, trajectory, te, ke, pe, title="Energy Plot"):
-    te_plot, = ax.plot(trajectory[0], te[0], label=r'$E_{sys}$', color='blue')
-    ke_plot, = ax.plot(trajectory[0], ke[0], label=r'KE', color='orange')
-    pe_plot, = ax.plot(trajectory[0], pe[0], label=r'PE', color='green')
+def init_energy_plot(ax, trajectory, te, ke, pe, title="Energy plot"):
+    te_plot, = ax.plot(trajectory[0], te[0], label=r'Total energy', color='blue')
+    ke_plot, = ax.plot(trajectory[0], ke[0], label=r'Kinetic energy', color='orange')
+    pe_plot, = ax.plot(trajectory[0], pe[0], label=r'Potential energy', color='green')
     ax.set_xlabel("Time")
     ax.set_ylabel("Energy")
-    ax.set_title(title=title)
+    ax.set_title(title)
     plt.legend(loc='lower left')
 
     return pe_plot, ke_plot, te_plot
