@@ -12,11 +12,11 @@
   "dataset_args": {
     "dataset": "spring_mass",
     "gt_solver": "FourthOrderRuthSolver",
-    "train_duration": 300,
-    "train_trajectory_length": 300001,
+    "train_duration": 30,
+    "train_trajectory_length": 30001,
     "train_sequence_length": 50,
-    "test_duration": 300,
-    "test_trajectory_length": 300001,
+    "test_duration": 30,
+    "test_trajectory_length": 30001,
     "num_configurations": 1,
     "coarsening_factor": 25
   },

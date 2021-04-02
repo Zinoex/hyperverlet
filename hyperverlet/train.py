@@ -1,5 +1,6 @@
 import random
 
+import torch
 from torch import optim, nn
 from torch.utils.data import DataLoader
 from tqdm import trange, tqdm
@@ -30,11 +31,8 @@ def train(solver, dataset, device, config, trajectory_fitting=True):
             trajectory = batch['trajectory'].to(device, non_blocking=True).transpose_(0, 1)
             extra_args = send_to_device(batch['extra_args'], device, non_blocking=True)
 
-            if trajectory_fitting:
-                q, p = solver.trajectory(dataset.experiment, q_base[0], p_base[0], mass, trajectory, disable_print=True, **extra_args)
-                loss = criterion(q, q_base) + criterion(p, p_base)
-            else:
-                loss = solver.loss(dataset.experiment, q_base, p_base, mass, trajectory, **extra_args)
+            q, p = solver.trajectory(dataset.experiment, q_base[0], p_base[0], mass, trajectory, disable_print=True, **extra_args)
+            loss = criterion(q, q_base) + criterion(p, p_base)
 
             loss.backward()
             nn.utils.clip_grad_norm_(solver.parameters(), 1)

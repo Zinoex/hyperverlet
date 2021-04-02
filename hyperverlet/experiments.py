@@ -62,10 +62,14 @@ class ExperimentDataset(Dataset):
 
 
 class Pendulum(nn.Module):
-    def forward(self, q, p, m, t, length, g, **kwargs):
-        dq = p / (m * length ** 2)
-        dp = -m * g * length * torch.sin(q)
-        return dq, dp
+    def forward(self, q, p, m, t, **kwargs):
+        return self.dq(p, m, t, **kwargs), self.dq(q, m, t, **kwargs)
+
+    def dq(self, p, m, t, length, **kwargs):
+        return p / (m * length ** 2)
+
+    def dp(self, q, m, t, length, g, **kwargs):
+        return -m * g * length * torch.sin(q)
 
 
 class PendulumDataset(ExperimentDataset):
@@ -91,10 +95,14 @@ class PendulumDataset(ExperimentDataset):
 
 
 class SpringMass(nn.Module):
-    def forward(self, q, p, m, t, length, k, **kwargs):
-        dq = p / m
-        dp = -k * (q - length)
-        return dq, dp
+    def forward(self, q, p, m, t, **kwargs):
+        return self.dq(p, m, t, **kwargs), self.dp(q, m, t, **kwargs)
+
+    def dq(self, p, m, t, **kwargs):
+        return p / m
+
+    def dp(self, q, m, t, length, k, **kwargs):
+        return -k * (q - length)
 
 
 class SpringMassDataset(ExperimentDataset):
@@ -120,14 +128,17 @@ class SpringMassDataset(ExperimentDataset):
 
 
 class ThreeBodySpringMass(nn.Module):
-    def forward(self, q, p, m, t, k, length, **kwargs):
+    def forward(self, q, p, m, t, **kwargs):
+        return self.dq(p, m, t, **kwargs), self.dp(q, m, t, **kwargs)
+
+    def dq(self, p, m, t, **kwargs):
+        return p / m
+
+    def dp(self, q, m, t, length, k, **kwargs):
         disp = self.displacement(q)
         r = self.distance(disp)
-        # acceleration = force / mass
-        dq = p / m
-        dp = self.force(r, disp, k, length).sum(axis=-2)
 
-        return dq, dp
+        return self.force(r, disp, k, length).sum(axis=-2)
 
     def force(self, r, disp, k, length):
         num_particles = k.size(1)

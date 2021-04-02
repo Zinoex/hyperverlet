@@ -29,36 +29,6 @@ class BaseSolver(nn.Module):
         return q_traj, p_traj
 
 
-class HyperSolverMixin:
-    def residual_trajectory(self, func: Callable, q_base: torch.Tensor, p_base: torch.Tensor, m: torch.Tensor, trajectory: torch.Tensor, **kwargs):
-        q_traj = torch.zeros((trajectory.size(0) - 1, *q_base.shape[1:]), dtype=q_base.dtype, device=q_base.device)
-        p_traj = torch.zeros((trajectory.size(0) - 1, *p_base.shape[1:]), dtype=p_base.dtype, device=p_base.device)
-
-        dtrajectory = trajectory[1:] - trajectory[:-1]
-
-        for i, (t, dt) in enumerate(zip(trajectory[:-1], dtrajectory)):
-            q_res, p_res = self.residual(func, q_base[i].detach(), q_base[i + 1].detach(), p_base[i], p_base[i + 1], m, t, dt, **kwargs)
-            q_traj[i], p_traj[i] = q_res, p_res
-
-        return q_traj, p_traj
-
-    def residual(self, func: Callable, q: torch.Tensor, p: torch.Tensor, q_next: torch.Tensor, p_next: torch.Tensor, m: torch.Tensor, t, dt, **kwargs):
-        raise NotImplemented()
-
-    def hypersolver_trajectory(self, solver: Callable, func: Callable, q_base: torch.Tensor, p_base: torch.Tensor, m: torch.Tensor, trajectory: torch.Tensor, **kwargs):
-        q_traj = torch.zeros((trajectory.size(0) - 1, *q_base.shape[1:]), dtype=q_base.dtype, device=q_base.device)
-        p_traj = torch.zeros((trajectory.size(0) - 1, *p_base.shape[1:]), dtype=p_base.dtype, device=p_base.device)
-
-        dtrajectory = trajectory[1:] - trajectory[:-1]
-
-        for i, (t, dt) in enumerate(zip(trajectory[:-1], dtrajectory)):
-            dq, dp = func(q_base[i], p_base[i], m, t, **kwargs)
-            q, p = solver(q_base[i], p_base[i], dq, dp, m, t, dt, **kwargs)
-            q_traj[i], p_traj[i] = q, p
-
-        return q_traj, p_traj
-
-
 class EulerSolver(BaseSolver):
     def forward(self, func: Callable, q: torch.Tensor, p: torch.Tensor, m: torch.Tensor, t, dt, **kwargs):
         dq, dp = func(q, p, m, t, **kwargs)    # t1 --LAMMPSx2--> t2
@@ -66,7 +36,7 @@ class EulerSolver(BaseSolver):
         return q + dq * dt, p + dp * dt
 
 
-class HyperEulerSolver(BaseSolver, HyperSolverMixin):
+class HyperEulerSolver(BaseSolver):
     trainable = True
 
     def __init__(self, hypersolver):
@@ -83,71 +53,8 @@ class HyperEulerSolver(BaseSolver, HyperSolverMixin):
 
         return q_next, p_next
 
-    def residual(self, func: Callable, q: torch.Tensor, q_next: torch.Tensor, p: torch.Tensor, p_next: torch.Tensor, m: torch.Tensor, t, dt, **kwargs):
-        dq, dp = func(q, p, m, t, **kwargs)
 
-        return (q_next - q - dq * dt) / (dt ** 2), (p_next - p - dp * dt) / (dt ** 2)
-
-    def loss(self, func, q_base: torch.Tensor, p_base: torch.Tensor, m: torch.Tensor, trajectory, **kwargs):
-        q_base, p_base, m, trajectory = q_base.detach(), p_base.detach(), m.detach(), trajectory.detach()
-
-        q_res, p_res = self.residual_trajectory(func, q_base, p_base, m, trajectory, **kwargs)
-        q_model, p_model = self.hypersolver_trajectory(self.hypersolver, func, q_base, p_base, m, trajectory, **kwargs)
-
-        return torch.mean((q_res - q_model) ** 2) + torch.mean((p_res - p_model) ** 2)
-
-
-class StormerVerletSolver(BaseSolver):
-    def trajectory(self, func: Callable, q0: torch.Tensor, p0: torch.Tensor, m: torch.Tensor, trajectory: torch.Tensor, **kwargs):
-        q_traj = torch.zeros((trajectory.size(0), *q0.size()), dtype=q0.dtype, device=q0.device)
-
-        dtrajectory = trajectory[1:] - trajectory[:-1]
-
-        _, dp = func(q0, p0, m, 0, **kwargs)
-        dt = dtrajectory[0]
-        q1 = q0 + p0 / m * dt + (dp / (2 * m)) * (dt ** 2)
-
-        q_traj[0], q_traj[1] = q0, q1
-
-        for i, (t, dt) in enumerate(zip(trajectory[1:-1], dtrajectory[1:])):
-            q0, q1 = self(func, q0, q1, m, t, dt, **kwargs)
-            q_traj[i + 2] = q1
-
-        return q_traj[:-1], (q_traj[1:] - q_traj[:-1]) * m
-
-    def forward(self, func: Callable, q0: torch.Tensor, q1: torch.Tensor, m: torch.Tensor, t, dt, **kwargs):
-        _, dp = func(q1, (q1 - q0) * m, m, t, **kwargs)
-
-        return q1, 2 * q1 - q0 + (dp / m) * (dt ** 2)
-
-
-class HyperStormerVerletSolver(StormerVerletSolver):
-    trainable = True
-
-    def __init__(self, hypersolver):
-        super().__init__()
-
-        self.hypersolver = hypersolver
-
-    def forward(self, func: Callable, q0: torch.Tensor, q1: torch.Tensor, m: torch.Tensor, t, dt, **kwargs):
-        dq, dp = func(q1, (q1 - q0) * m, m, t, **kwargs)
-        hq, hp = self.hypersolver(q1, (q1 - q0) * m, dq, dp, m, t, dt, **kwargs)
-
-        return q1, 2 * q1 - q0 + (dp / m) * (dt ** 2) + hq * (dt ** 3)
-
-
-class VelocityVerletSolver(BaseSolver):
-    def forward(self, func: Callable, q: torch.Tensor, p: torch.Tensor, m: torch.Tensor, t, dt, **kwargs):
-        dq, dp = func(q, p, m, t, **kwargs)
-        q_next = q + dq * dt + (dp / (2 * m)) * (dt ** 2)
-
-        _, dp_next = func(q_next, p, m, t, **kwargs)
-        p_next = p + ((dp + dp_next) / 2) * dt
-
-        return q_next, p_next
-
-
-class HyperVelocityVerletSolver(BaseSolver, HyperSolverMixin):
+class HyperVelocityVerletSolver(BaseSolver):
     trainable = True
 
     def __init__(self, hypersolver):
@@ -156,51 +63,20 @@ class HyperVelocityVerletSolver(BaseSolver, HyperSolverMixin):
         self.hypersolver = hypersolver
 
     def forward(self, func: Callable, q: torch.Tensor, p: torch.Tensor, m: torch.Tensor, t, dt, **kwargs):
-        dq, dp = func(q, p, m, t, **kwargs)
-        hq, hp = self.hypersolver(q, p, dq, dp, m, t, dt, include_p=False, **kwargs)
+        dt = dt.view(-1, *[1 for _ in range(len(q.size()) - 1)])
+        one_half = 1 / 2
 
-        dt = dt.view(-1, *[1 for _ in range(len(dq.size()) - 1)])
-        q_next = q + dq * dt + (dp / (2 * m)) * (dt ** 2) + hq * (dt ** 2)
+        dp = func.dp(q, m, t, **kwargs)
+        p = p + one_half * dp * dt
 
-        dq_next, dp_next = func(q_next, p, m, t, **kwargs)
-        hq, hp = self.hypersolver(q_next, p, dq_next, dp_next, m, t, dt, include_q=False, **kwargs)
-        p_next = p + ((dp + dp_next) / 2) * dt + hp * (dt ** 2)
+        dq = func.dq(p, m, t, **kwargs)
+        q = q + dq * dt
 
-        return q_next, p_next
+        dp = func.dp(q, m, t, **kwargs)
+        p = p + one_half * dp * dt
 
-    def residual(self, func: Callable, q: torch.Tensor, q_next: torch.Tensor, p: torch.Tensor, p_next: torch.Tensor, m: torch.Tensor, t, dt, **kwargs):
-        dq, dp = func(q, p, m, t, **kwargs)
-        q_prime = q + dq * dt + (dp / (2 * m)) * (dt ** 2)
-
-        dq_next, dp_next = func(q_prime, p, m, t, **kwargs)
-        p_prime = p + ((dp + dp_next) / 2) * dt
-
-        return (q_next - q_prime) / (dt ** 2), (p_next - p_prime) / (dt ** 2)
-
-    def hypersolver_trajectory(self, solver: Callable, func: Callable, q_base: torch.Tensor, p_base: torch.Tensor, m: torch.Tensor, trajectory: torch.Tensor, **kwargs):
-        q_traj = torch.zeros((trajectory.size(0) - 1, *q_base.shape[1:]), dtype=q_base.dtype, device=q_base.device)
-        p_traj = torch.zeros((trajectory.size(0) - 1, *p_base.shape[1:]), dtype=p_base.dtype, device=p_base.device)
-
-        dtrajectory = trajectory[1:] - trajectory[:-1]
-
-        for i, (t, dt) in enumerate(zip(trajectory[:-1], dtrajectory)):
-            dq, dp = func(q_base[i], p_base[i], m, t, **kwargs)
-            q_next = q_base[i] + dq * dt / m + (dp / (2 * m)) * (dt ** 2)
-
-            dq_next, dp_next = func(q_next, p_base[i], m, t, **kwargs)
-            hq, hp = solver(q_next, p_base[i], dq_next, dp_next, m, t, dt, **kwargs)
-
-            q_traj[i], p_traj[i] = hq, hp
-
-        return q_traj, p_traj
-
-    def loss(self, func, q_base: torch.Tensor, p_base: torch.Tensor, m: torch.Tensor, trajectory, **kwargs):
-        q_base, p_base, m, trajectory = q_base.detach(), p_base.detach(), m.detach(), trajectory.detach()
-
-        q_res, p_res = self.residual_trajectory(func, q_base, p_base, m, trajectory, **kwargs)
-        q_model, p_model = self.hypersolver_trajectory(self.hypersolver, func, q_base, p_base, m, trajectory, **kwargs)
-
-        return torch.mean((q_res - q_model) ** 2) + torch.mean((p_res - p_model) ** 2)
+        hq, hp = self.hypersolver(q, p, dq, dp, m, t, dt, **kwargs)
+        return q + hq * dt ** 2, p + hp * dt ** 2
 
 
 class SymplecticSolver(BaseSolver):
@@ -213,17 +89,21 @@ class SymplecticSolver(BaseSolver):
         self.d = d
 
     def forward(self, func: Callable, q: torch.Tensor, p: torch.Tensor, m: torch.Tensor, t, dt, **kwargs):
-        for c, d in zip(self.c, self.d):
-            dq, dp = func(q, p, m, t, **kwargs)
-            q = q + c * dq * dt
+        dt = dt.view(-1, *[1 for _ in range(len(q.size()) - 1)])
 
-            dq, dp = func(q, p, m, t, **kwargs)
-            p = p + d * dp * dt
+        for c, d in zip(self.c, self.d):
+            if c != 0:
+                dq = func.dq(p, m, t, **kwargs)
+                q = q + c * dq * dt
+
+            if d != 0:
+                dp = func.dp(q, m, t, **kwargs)
+                p = p + d * dp * dt
 
         return q, p
 
 
-class LeapfrogSolver(SymplecticSolver):
+class VelocityVerletSolver(SymplecticSolver):
     def __init__(self):
         one_half = 1 / 2
 

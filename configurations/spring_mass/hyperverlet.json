@@ -2,7 +2,7 @@
   "save_path": "results/sm/HyperVelocityVerletSolver.pickle",
   "train_args": {
     "epoch": 10,
-    "batch_size": 100,
+    "batch_size": 1000,
     "num_workers": 8
   },
   "model_args": {
@@ -12,12 +12,12 @@
   "dataset_args": {
     "dataset": "spring_mass",
     "gt_solver": "FourthOrderRuthSolver",
-    "train_duration": 300,
-    "train_trajectory_length": 300001,
+    "train_duration": 30,
+    "train_trajectory_length": 30001,
     "train_sequence_length": 50,
-    "test_duration": 300,
-    "test_trajectory_length": 300001,
-    "num_configurations": 1000,
+    "test_duration": 30,
+    "test_trajectory_length": 30001,
+    "num_configurations": 10000,
     "coarsening_factor": 250
   },
   "plotting": {

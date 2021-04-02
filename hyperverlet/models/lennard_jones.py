@@ -29,17 +29,11 @@ class LennardJonesMLP(nn.Module):
 
         # TODO: Try a GNN model for interactions and permutation equivariance
 
-    def forward(self, q, p, dq, dp, m, t, dt, include_q=True, include_p=True, **kwargs):
-        if include_q:
-            hq = torch.cat([q, dq, p, dp], dim=-1)
-            hq = self.model_q(hq)
-        else:
-            hq = None
+    def forward(self, q, p, dq, dp, m, t, dt, **kwargs):
+        hq = torch.cat([q, dq, p, dp], dim=-1)
+        hq = self.model_q(hq)
 
-        if include_p:
-            hp = torch.cat([q, dq, p, dp], dim=-1)
-            hp = self.model_p(hp)
-        else:
-            hp = None
+        hp = torch.cat([q, dq, p, dp], dim=-1)
+        hp = self.model_p(hp)
 
         return hq, hp

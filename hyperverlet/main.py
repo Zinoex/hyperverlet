@@ -39,7 +39,7 @@ def evaluate(config_path):
     model_config = config['model_args']
     test_solver_name = model_config['solver']
     model_path = model_config.get("nn_module")
-    solver = construct_solver(test_solver_name, model_path)
+    solver = construct_solver(test_solver_name, model_path).to(device=device, non_blocking=True)
 
     # Train Solver
     if solver.trainable:

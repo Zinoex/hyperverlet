@@ -11,7 +11,7 @@ class Block(nn.Module):
 
         self.model = nn.Sequential(
             nn.Linear(features, features),
-            nn.PReLU(),
+            nn.Sigmoid(),
         )
 
     def forward(self, x):
@@ -22,7 +22,7 @@ class SingleAxisMLP(nn.Sequential):
     def __init__(self, input_dim, h_dim):
         super().__init__(
             nn.Linear(input_dim, h_dim),
-            nn.PReLU(),
+            nn.Sigmoid(),
             Block(h_dim),
             Block(h_dim),
             Block(h_dim),
@@ -30,15 +30,10 @@ class SingleAxisMLP(nn.Sequential):
         )
 
 
-class Swish(nn.Module):
-    def forward(self, x):
-        return x * x.sigmoid()
-
-
 class DenseBlock(nn.Sequential):
     def __init__(self, input_dim, output_dim, activation='relu', activate=True):
         act = {
-            'swish': Swish,
+            'silu': nn.SiLU,
             'relu': nn.ReLU
         }
 

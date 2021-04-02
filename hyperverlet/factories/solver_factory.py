@@ -8,11 +8,8 @@ def construct_solver(solver_name, model_path=None):
         hyper_solver = construct_model(model_path)
 
     solvers = {
-        "HyperSolverMixin": HyperSolverMixin,
         "HyperEulerSolver": HyperEulerSolver,
         "EulerSolver": EulerSolver,
-        "StormerVerletSolver": StormerVerletSolver,
-        "HyperStormerVerletSolver": HyperStormerVerletSolver,
         "VelocityVerletSolver": VelocityVerletSolver,
         "HyperVelocityVerletSolver": HyperVelocityVerletSolver,
         "ThirdOrderRuthSolver": ThirdOrderRuthSolver,
