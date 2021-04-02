@@ -5,6 +5,7 @@ from mpl_toolkits.mplot3d import art3d
 
 from hyperverlet.energy import three_body_spring_mass
 from hyperverlet.plotting.energy import plot_energy, init_energy_plot, update_energy_plot, energy_animate_update
+import matplotlib
 from matplotlib import pyplot as plt, animation
 from matplotlib.gridspec import GridSpec
 from matplotlib.patches import Circle
@@ -154,7 +155,7 @@ def animate_tbsm(result_dict, plot_every=1, show_trail=True, show_springs=False,
     euclidean_dim = q.shape[-1]
 
     # Create grid spec
-    fig = plt.figure(figsize=(80, 60))
+    fig = plt.figure(figsize=(20, 15))
     gs = GridSpec(1, 2)
 
     # Get x, y coordinate limits
@@ -196,7 +197,9 @@ def animate_tbsm(result_dict, plot_every=1, show_trail=True, show_springs=False,
 
         energy_animate_update(pe_plot, ke_plot, te_plot, trajectory, i, pe, ke, te, ax2)
 
-    anim = animation.FuncAnimatinon(fig, animate, frames=q.shape[0], repeat=False)
+        return []
+
+    anim = animation.FuncAnimation(fig, animate, frames=q.shape[0], repeat=False)
 
     if show_plot:
         plt.show()
