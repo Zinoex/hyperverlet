@@ -21,6 +21,7 @@
     "coarsening_factor": 10
   },
   "plotting": {
-    "plot_every": 10
+    "plot_every": 10,
+    "save_plot": true
   }
 }

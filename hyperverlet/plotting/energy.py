@@ -18,15 +18,16 @@ def energy_animate_update(pe_plot, ke_plot, te_plot, trajectory, i, pe, ke, te, 
         traj_mid = (trajectory[0] + trajectory[i]) / 2
 
         ax.set_xlim(traj_mid - traj_range_half, traj_mid + traj_range_half)
-    ax.set_ylim(-1, te.max() + 1)
+    ax.set_ylim(-0.1, te.max() * 1.05)
 
 
-def init_energy_plot(ax, trajectory, te, ke, pe):
+def init_energy_plot(ax, trajectory, te, ke, pe, title="Energy Plot"):
     te_plot, = ax.plot(trajectory[0], te[0], label=r'$E_{sys}$', color='blue')
     ke_plot, = ax.plot(trajectory[0], ke[0], label=r'KE', color='orange')
     pe_plot, = ax.plot(trajectory[0], pe[0], label=r'PE', color='green')
     ax.set_xlabel("Time")
     ax.set_ylabel("Energy")
+    ax.set_title(title=title)
     plt.legend(loc='lower left')
 
     return pe_plot, ke_plot, te_plot

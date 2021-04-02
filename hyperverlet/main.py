@@ -60,16 +60,13 @@ def evaluate(config_path):
 def plot(config_path):
     config = load_config(config_path)
     dataset = config["dataset_args"]['dataset']
-    plot_every = config["plotting"]["plot_every"]
-    result_dict = load_pickle(config["save_path"])
-    save_plot = config["plotting"]["save_plot"]
 
     if dataset == 'pendulum':
-        animate_pendulum(result_dict, plot_every=plot_every, show_gt=True)
+        animate_pendulum(config, show_gt=True)
     elif dataset == 'spring_mass':
-        animate_sm(result_dict, plot_every=plot_every, show_gt=True)
+        animate_sm(config, show_gt=True)
     elif dataset == 'three_body_spring_mass':
-        animate_tbsm(result_dict, plot_every=plot_every, show_trail=True, show_springs=True, show_gt=True, show_plot=True, save_plot=save_plot)
+        animate_tbsm(config, show_trail=True, show_springs=True, show_gt=True, show_plot=True)
 
 
 def full_run(config_path):

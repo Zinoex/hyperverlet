@@ -22,6 +22,6 @@
   },
   "plotting": {
     "plot_every": 1,
-    "save_plot": true
+    "save_plot": false
   }
 }

@@ -41,3 +41,4 @@ def torch_to_numpy(extra_args):
     return {
         k: v.numpy() for k, v in extra_args.items()
     }
+
