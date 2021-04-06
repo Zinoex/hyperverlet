@@ -5,10 +5,10 @@ from matplotlib import pyplot as plt, animation
 
 from matplotlib.gridspec import GridSpec
 from hyperverlet.energy import pendulum
-from hyperverlet.plotting.energy import init_energy_plot, update_energy_plot, plot_energy, energy_animate_update
+from hyperverlet.plotting.energy import init_energy_plot, plot_energy, energy_animate_update
 from hyperverlet.plotting.phasespace import init_phasespace_plot, update_phasespace_plot
 from hyperverlet.plotting.utils import save_animation
-from hyperverlet.utils import load_pickle
+from hyperverlet.utils import load_pickle, format_save_path
 
 
 def spring_mass_energy_plot(q, p, trajectory, m, k, l, g, plot_every=1):
@@ -30,7 +30,8 @@ def spring_mass_energy_plot(q, p, trajectory, m, k, l, g, plot_every=1):
 
 def animate_pendulum(config, show_gt=False, show_plot=True):
     plot_every = config["plotting"]["plot_every"]
-    result_dict = load_pickle(config["save_path"])
+    save_path = format_save_path(config)
+    result_dict = load_pickle(save_path)
     save_plot = config["plotting"]["save_plot"]
     dataset = config["dataset_args"]['dataset']
 
