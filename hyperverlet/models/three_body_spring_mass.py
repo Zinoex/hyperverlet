@@ -1,7 +1,7 @@
 import torch
 from torch import nn
 
-from hyperverlet.models.misc import SingleAxisMLP
+from hyperverlet.models.misc import MergeNDenseBlock
 
 from hyperverlet.models.graph_model import GraphNetwork
 
@@ -13,8 +13,8 @@ class ThreeBodySpringMassModel(nn.Module):
         self.q_input_dim = model_args['q_input_dim']
         self.p_input_dim = model_args['p_input_dim']
 
-        self.model_q = SingleAxisMLP(self.q_input_dim, self.h_dim)
-        self.model_p = SingleAxisMLP(self.p_input_dim, self.h_dim)
+        self.model_q = MergeNDenseBlock(self.q_input_dim, self.h_dim, 1, n_dense=5, activate_last=False, activation='prelu')
+        self.model_p = MergeNDenseBlock(self.p_input_dim, self.h_dim, 1, n_dense=5, activate_last=False, activation='prelu')
 
     def forward(self, q, p, dq, dp, m, t, dt, length, k, include_q=True, include_p=True, **kwargs):
         if len(q.size()) == 3:

@@ -1,7 +1,7 @@
 import torch
 from torch import nn
 
-from hyperverlet.models.misc import Block
+from hyperverlet.models.misc import MergeNDenseBlock
 
 
 class LennardJonesMLP(nn.Module):
@@ -9,31 +9,16 @@ class LennardJonesMLP(nn.Module):
         super().__init__()
         self.h_dim = 64
 
-        self.model_q = nn.Sequential(
-            nn.Linear(12, self.h_dim),
-            nn.PReLU(),
-            Block(self.h_dim),
-            Block(self.h_dim),
-            Block(self.h_dim),
-            nn.Linear(self.h_dim, 3)
-        )
+        kwargs = dict(n_dense=5, activate_last=False, activation='prelu')
 
-        self.model_p = nn.Sequential(
-            nn.Linear(12, self.h_dim),
-            nn.PReLU(),
-            Block(self.h_dim),
-            Block(self.h_dim),
-            Block(self.h_dim),
-            nn.Linear(self.h_dim, 3)
-        )
+        self.model_q = MergeNDenseBlock(torch.ones(4, dtype=torch.int).tolist(), self.h_dim, 3, **kwargs)
+        self.model_p = MergeNDenseBlock(torch.ones(4, dtype=torch.int).tolist(), self.h_dim, 3, **kwargs)
 
         # TODO: Try a GNN model for interactions and permutation equivariance
 
     def forward(self, q, p, dq, dp, m, t, dt, **kwargs):
-        hq = torch.cat([q, dq, p, dp], dim=-1)
-        hq = self.model_q(hq)
+        hq = self.model_q(q, dq, p, dp)
 
-        hp = torch.cat([q, dq, p, dp], dim=-1)
-        hp = self.model_p(hp)
+        hp = self.model_p(q, dq, p, dp)
 
         return hq, hp

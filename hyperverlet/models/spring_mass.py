@@ -1,7 +1,7 @@
 import torch
 from torch import nn
 
-from hyperverlet.models.misc import SingleAxisMLP
+from hyperverlet.models.misc import MergeNDenseBlock, NDenseBlock
 
 
 class SpringMassModel(nn.Module):
@@ -11,8 +11,10 @@ class SpringMassModel(nn.Module):
         self.q_input_dim = model_args['q_input_dim']
         self.p_input_dim = model_args['p_input_dim']
 
-        self.model_q = SingleAxisMLP(self.q_input_dim, self.h_dim)
-        self.model_p = SingleAxisMLP(self.p_input_dim, self.h_dim)
+        kwargs = dict(n_dense=5, activate_last=False, activation='sigmoid')
+
+        self.model_q = NDenseBlock(self.q_input_dim, self.h_dim, 1, **kwargs)
+        self.model_p = NDenseBlock(self.p_input_dim, self.h_dim, 1, **kwargs)
 
     def forward(self, q, p, dq, dp, m, t, dt, **kwargs):
         return self.hq(q, dq, m, t, dt, **kwargs), self.hp(p, dp, m, t, dt, **kwargs)

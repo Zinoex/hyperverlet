@@ -31,7 +31,7 @@ class BaseSolver(nn.Module):
 
 class EulerSolver(BaseSolver):
     def forward(self, func: Callable, q: torch.Tensor, p: torch.Tensor, m: torch.Tensor, t, dt, **kwargs):
-        dq, dp = func(q, p, m, t, **kwargs)    # t1 --LAMMPSx2--> t2
+        dq, dp = func(q, p, m, t, **kwargs)
 
         return q + dq * dt, p + dp * dt
 
@@ -52,6 +52,46 @@ class HyperEulerSolver(BaseSolver):
         p_next = p + dp * dt + hp * (dt ** 2)
 
         return q_next, p_next
+
+
+class HeunSolver(BaseSolver):
+    def forward(self, func: Callable, q: torch.Tensor, p: torch.Tensor, m: torch.Tensor, t, dt, **kwargs):
+        dq, dp = func(q, p, m, t, **kwargs)
+        q_hat, p_hat = q + dq * dt, p + dp * dt
+        dq_hat, dp_hat = func(q_hat, p_hat, m, t + dt, **kwargs)
+
+        return q + dt / 2 * (dq + dq_hat), p + dt / 2 * (dp + dp_hat)
+
+
+class HyperHeunSolver(BaseSolver):
+    trainable = True
+
+    def __init__(self, hypersolver):
+        super().__init__()
+
+        self.hypersolver = hypersolver
+
+    def forward(self, func: Callable, q: torch.Tensor, p: torch.Tensor, m: torch.Tensor, t, dt, **kwargs):
+        dq, dp = func(q, p, m, t, **kwargs)
+        hq, hp = self.hypersolver(q, p, dq, dp, m, t, dt, **kwargs)
+        q_hat, p_hat = q + dq * dt + (dt ** 2) * hq, p + dp * dt + (dt ** 2) * hp
+        dq_hat, dp_hat = func(q_hat, p_hat, m, t + dt, **kwargs)
+        hq, hp = self.hypersolver(q_hat, p_hat, dq_hat, dp_hat, m, t + dt, dt, **kwargs)
+
+        return q + dt / 2 * (dq + dq_hat) + (dt ** 3) * hq, p + dt / 2 * (dp + dp_hat) + (dt ** 3) * hp
+
+
+class RungeKutta4Solver(BaseSolver):
+    def forward(self, func: Callable, q: torch.Tensor, p: torch.Tensor, m: torch.Tensor, t, dt, **kwargs):
+        dq1, dp1 = func(q, p, m, t, **kwargs)
+        q1, p1, t1 = q + dq1 * dt / 2, p + dp1 * dt / 2, t + dt / 2
+        dq2, dp2 = func(q1, p1, m, t1, **kwargs)
+        q2, p2, t2 = q + dq2 * dt / 2, p + dp2 * dt / 2, t + dt / 2
+        dq3, dp3 = func(q2, p2, m, t2, **kwargs)
+        q3, p3, t3 = q + dq3 * dt, p + dp3 * dt, t + dt
+        dq4, dp4 = func(q3, p3, m, t3, **kwargs)
+
+        return q + (dq1 + 2 * dq2 + 2 * dq3 + dq4) / 6 * dt, p + (dp1 + 2 * dp2 + 2 * dp3 + dp4) / 6 * dt
 
 
 class HyperVelocityVerletSolver(BaseSolver):

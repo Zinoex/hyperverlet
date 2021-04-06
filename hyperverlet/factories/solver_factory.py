@@ -10,6 +10,9 @@ def construct_solver(solver_name, model_path=None):
     solvers = {
         "HyperEulerSolver": HyperEulerSolver,
         "EulerSolver": EulerSolver,
+        "HyperHeunSolver": HyperHeunSolver,
+        "HeunSolver": HeunSolver,
+        "RungeKutta4Solver": RungeKutta4Solver,
         "VelocityVerletSolver": VelocityVerletSolver,
         "HyperVelocityVerletSolver": HyperVelocityVerletSolver,
         "ThirdOrderRuthSolver": ThirdOrderRuthSolver,
