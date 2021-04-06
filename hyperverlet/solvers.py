@@ -31,6 +31,8 @@ class BaseSolver(nn.Module):
 
 class EulerSolver(BaseSolver):
     def forward(self, func: Callable, q: torch.Tensor, p: torch.Tensor, m: torch.Tensor, t, dt, **kwargs):
+        dt = dt.view(-1, *[1 for _ in range(len(q.size()) - 1)])
+
         dq, dp = func(q, p, m, t, **kwargs)
 
         return q + dq * dt, p + dp * dt
@@ -45,6 +47,8 @@ class HyperEulerSolver(BaseSolver):
         self.hypersolver = hypersolver
 
     def forward(self, func: Callable, q: torch.Tensor, p: torch.Tensor, m: torch.Tensor, t, dt, **kwargs):
+        dt = dt.view(-1, *[1 for _ in range(len(q.size()) - 1)])
+
         dq, dp = func(q, p, m, t, **kwargs)
         hq, hp = self.hypersolver(q, p, dq, dp, m, t, dt, **kwargs)
 
@@ -56,6 +60,8 @@ class HyperEulerSolver(BaseSolver):
 
 class HeunSolver(BaseSolver):
     def forward(self, func: Callable, q: torch.Tensor, p: torch.Tensor, m: torch.Tensor, t, dt, **kwargs):
+        dt = dt.view(-1, *[1 for _ in range(len(q.size()) - 1)])
+
         dq, dp = func(q, p, m, t, **kwargs)
         q_hat, p_hat = q + dq * dt, p + dp * dt
         dq_hat, dp_hat = func(q_hat, p_hat, m, t + dt, **kwargs)
@@ -72,6 +78,8 @@ class HyperHeunSolver(BaseSolver):
         self.hypersolver = hypersolver
 
     def forward(self, func: Callable, q: torch.Tensor, p: torch.Tensor, m: torch.Tensor, t, dt, **kwargs):
+        dt = dt.view(-1, *[1 for _ in range(len(q.size()) - 1)])
+
         dq, dp = func(q, p, m, t, **kwargs)
         hq, hp = self.hypersolver(q, p, dq, dp, m, t, dt, **kwargs)
         q_hat, p_hat = q + dq * dt + (dt ** 2) * hq, p + dp * dt + (dt ** 2) * hp
@@ -83,6 +91,8 @@ class HyperHeunSolver(BaseSolver):
 
 class RungeKutta4Solver(BaseSolver):
     def forward(self, func: Callable, q: torch.Tensor, p: torch.Tensor, m: torch.Tensor, t, dt, **kwargs):
+        dt = dt.view(-1, *[1 for _ in range(len(q.size()) - 1)])
+
         dq1, dp1 = func(q, p, m, t, **kwargs)
         q1, p1, t1 = q + dq1 * dt / 2, p + dp1 * dt / 2, t + dt / 2
         dq2, dp2 = func(q1, p1, m, t1, **kwargs)
