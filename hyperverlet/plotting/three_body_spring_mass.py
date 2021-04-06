@@ -9,8 +9,9 @@ from matplotlib.patches import Circle
 import seaborn as sns
 import numpy as np
 
+from hyperverlet.plotting.grid_spec import gs_3_2_3, gs_2_1_2
 from hyperverlet.plotting.utils import plot_spring, set_limits, save_animation
-from hyperverlet.utils import load_pickle
+from hyperverlet.utils import load_pickle, format_save_path
 
 
 def plot_springs(ax, q, i):
@@ -71,7 +72,8 @@ def three_body_spring_mass_energy_plot(q, p, trajectory, m, k, l, plot_every=1):
 
 def animate_tbsm(config, show_trail=True, show_springs=False, show_gt=False, show_plot=True):
     plot_every = config["plotting"]["plot_every"]
-    result_dict = load_pickle(config["save_path"])
+    save_path = format_save_path(config)
+    result_dict = load_pickle(save_path)
     save_plot = config["plotting"]["save_plot"]
     dataset = config["dataset_args"]['dataset']
 
@@ -93,21 +95,17 @@ def animate_tbsm(config, show_trail=True, show_springs=False, show_gt=False, sho
     legend_elements = [Line2D([0], [0], color='r', label='Prediction')]
 
     if show_gt:
-        gs = GridSpec(2, 3)
-        ax1 = fig.add_subplot(gs[:, :2])
-        ax2 = fig.add_subplot(gs[0, 2])
-        ax3 = fig.add_subplot(gs[1, 2])
+        ax1, ax2 = gs_2_1_2(fig)
+#       #ax1, ax2, ax3 = gs_3_2_3(fig)
 
         # Energy variables
         gt_ke = three_body_spring_mass.calc_kinetic_energy(m, gt_p)
         gt_pe = three_body_spring_mass.calc_potential_energy(k, gt_q, l)
         gt_te = three_body_spring_mass.calc_total_energy(gt_ke, gt_pe)
-        gt_pe_plot, gt_ke_plot, gt_te_plot = init_energy_plot(ax3, gt_trajectory, gt_te, gt_ke, gt_pe, title="Ground truth energy plot")
+        gt_pe_plot, gt_ke_plot, gt_te_plot = init_energy_plot(ax2, gt_trajectory, gt_te, gt_ke, gt_pe, title="Ground truth energy plot", te_color='blue', ke_color='red', pe_color='black')
         legend_elements.append(Line2D([0], [0], color='g', label='Ground truth'))
     else:
-        gs = GridSpec(1, 2)
-        ax1 = fig.add_subplot(gs[0, 0])
-        ax2 = fig.add_subplot(gs[0, 1])
+        ax1, ax2 = gs_2_1_2(fig)
 
     # Get x, y coordinate limits
     xlim = gt_q[:, :, 0] if q[:, :, 0].max() < gt_q[:, :, 0].max() and show_gt else q[:, :, 0]
@@ -142,7 +140,7 @@ def animate_tbsm(config, show_trail=True, show_springs=False, show_gt=False, sho
 
         energy_animate_update(pe_plot, ke_plot, te_plot, trajectory, i, pe, ke, te, ax2)
         if show_gt:
-            energy_animate_update(gt_pe_plot, gt_ke_plot, gt_te_plot, gt_trajectory, i, gt_pe, gt_ke, gt_te, ax3)
+            energy_animate_update(gt_pe_plot, gt_ke_plot, gt_te_plot, gt_trajectory, i, gt_pe, gt_ke, gt_te, ax2)
 
         return []
 
