@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+
+python -m hyperverlet.main --config-path configurations/integrator_experiments/three_body_spring_mass/euler.json evaluate
+python -m hyperverlet.main --config-path configurations/integrator_experiments/three_body_spring_mass/hypereuler.json evaluate
+python -m hyperverlet.main --config-path configurations/integrator_experiments/three_body_spring_mass/hyperverlet.json evaluate
+python -m hyperverlet.main --config-path configurations/integrator_experiments/three_body_spring_mass/velocityverlet.json evaluate
