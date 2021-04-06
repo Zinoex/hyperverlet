@@ -3,7 +3,7 @@
   "train_args": {
     "epoch": 10,
     "batch_size": 100,
-    "num_workers": 8
+    "num_workers": 0
   },
   "model_args": {
     "solver": "EulerSolver",
