@@ -47,7 +47,7 @@ class EdgeModel(nn.Module):
         self.activate_last = model_args['activate_last']
         self.layer_norm = model_args['layer_norm']
 
-        self.mlp = MergeNDenseBlock((self.h_dim, self.h_dim, self.h_dim), self.h_dim, self.n_dense, activate_last=self.activate_last, layer_norm=self.layer_norm)
+        self.mlp = MergeNDenseBlock((self.h_dim, self.h_dim, self.h_dim), self.h_dim, self.h_dim, self.n_dense, activate_last=self.activate_last)
 
     def forward(self, src, dest, e):
         return self.mlp(e, dest, src)
@@ -62,7 +62,7 @@ class NodeModel(nn.Module):
         self.activate_last = model_args['activate_last']
         self.layer_norm = model_args['layer_norm']
 
-        self.mlp = MergeNDenseBlock((self.h_dim, self.h_dim), self.h_dim, self.n_dense, activate_last=self.activate_last, layer_norm=self.layer_norm)
+        self.mlp = MergeNDenseBlock((self.h_dim, self.h_dim), self.h_dim, self.h_dim, self.n_dense, activate_last=self.activate_last)
 
     def forward(self, v, edge_index, e):
         _, receiver = edge_index
@@ -82,8 +82,8 @@ class GraphEncoder(nn.Module):
         self.node_input_dim = model_args['node_input_dim']
         self.edge_input_dim = model_args['edge_input_dim']
 
-        self.node_encoder = NDenseBlock(self.node_input_dim, self.h_dim, self.n_dense, activate_last=self.activate_last, layer_norm=self.layer_norm)
-        self.edge_encoder = NDenseBlock(self.edge_input_dim, self.h_dim, self.n_dense, activate_last=self.activate_last, layer_norm=self.layer_norm)
+        self.node_encoder = NDenseBlock(self.node_input_dim, self.h_dim, self.h_dim, self.n_dense, activate_last=self.activate_last)
+        self.edge_encoder = NDenseBlock(self.edge_input_dim, self.h_dim, self.h_dim, self.n_dense, activate_last=self.activate_last)
 
     def forward(self, node_attr, edge_attr):
         return self.node_encoder(node_attr), self.edge_encoder(edge_attr)
@@ -103,7 +103,7 @@ class GraphDecoder(nn.Module):
         self.n_dense = model_args['n_dense']
         self.node_output_dim = model_args['node_output_dim']
 
-        self.node_decoder = NDenseBlock(self.h_dim, self.h_dim, self.n_dense, Linear(self.h_dim, self.node_output_dim), activate_last=True)
+        self.node_decoder = NDenseBlock(self.h_dim, self.h_dim, self.node_output_dim, self.n_dense, activate_last=True)
 
     def forward(self, v):
         return self.node_decoder(v)
