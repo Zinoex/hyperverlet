@@ -1,0 +1,17 @@
+{
+  "save_path": "results/{dataset}/{solver}_{train_duration}_{train_trajectory_length}_{coarsening_factor}_{test_duration}_{test_trajectory_length}.pickle",
+  "train_args": {
+    "epoch": 10,
+    "batch_size": 100,
+    "num_workers": 4
+  },
+  "model_args": {
+    "solver": "HyperVelocityVerletSolver",
+    "nn_path": "configurations/integrator_experiments/three_body_spring_mass/nn.json"
+  },
+  "dataset_args_path": "configurations/integrator_experiments/three_body_spring_mass/dataset.json",
+  "plotting": {
+    "plot_every": 1,
+    "save_plot": true
+  }
+}

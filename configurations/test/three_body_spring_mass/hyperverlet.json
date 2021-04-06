@@ -3,22 +3,22 @@
   "train_args": {
     "epoch": 10,
     "batch_size": 100,
-    "num_workers": 8
+    "num_workers": 4
   },
   "model_args": {
-    "solver": "EulerSolver",
-    "nn_path": "configurations/pendulum/nn_model_pendulum.json"
+    "solver": "HyperVelocityVerletSolver",
+    "nn_path": "configurations/test/three_body_spring_mass/nn.json"
   },
   "dataset_args": {
-    "dataset": "pendulum",
+    "dataset": "three_body_spring_mass",
     "gt_solver": "FourthOrderRuthSolver",
-    "train_duration": 6,
-    "train_trajectory_length": 600001,
+    "train_duration": 10,
+    "train_trajectory_length": 100001,
     "train_sequence_length": 50,
-    "test_duration": 6,
-    "test_trajectory_length": 600001,
-    "num_configurations": 1,
-    "coarsening_factor": 10
+    "test_duration": 10,
+    "test_trajectory_length": 100001,
+    "num_configurations": 100,
+    "coarsening_factor": 100
   },
   "plotting": {
     "plot_every": 1,

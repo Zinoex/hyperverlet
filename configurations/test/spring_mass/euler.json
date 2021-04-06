@@ -2,23 +2,23 @@
   "save_path": "results/{dataset}/{solver}_{train_duration}_{train_trajectory_length}_{coarsening_factor}_{test_duration}_{test_trajectory_length}.pickle",
   "train_args": {
     "epoch": 10,
-    "batch_size": 1000,
+    "batch_size": 100,
     "num_workers": 8
   },
   "model_args": {
-    "solver": "HyperVelocityVerletSolver",
-    "nn_path": "configurations/spring_mass/nn_model_spring_mass.json"
+    "solver": "EulerSolver",
+    "nn_path": "configurations/test/spring_mass/nn.json"
   },
   "dataset_args": {
     "dataset": "spring_mass",
     "gt_solver": "FourthOrderRuthSolver",
-    "train_duration": 30,
-    "train_trajectory_length": 30001,
+    "train_duration": 600,
+    "train_trajectory_length": 600001,
     "train_sequence_length": 50,
-    "test_duration": 30,
-    "test_trajectory_length": 30001,
-    "num_configurations": 10000,
-    "coarsening_factor": 150
+    "test_duration": 600,
+    "test_trajectory_length": 600001,
+    "num_configurations": 1,
+    "coarsening_factor": 10
   },
   "plotting": {
     "plot_every": 1,

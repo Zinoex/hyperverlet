@@ -1,0 +1,6 @@
+{
+  "module": "PendulumModel",
+  "h_dim": 64,
+  "q_input_dim": 4,
+  "p_input_dim": 4
+}

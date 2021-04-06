@@ -7,7 +7,7 @@
   },
   "model_args": {
     "solver": "HyperEulerSolver",
-    "nn_path": "configurations/spring_mass/nn_model_spring_mass.json"
+    "nn_path": "configurations/test/spring_mass/nn.json"
   },
   "dataset_args": {
     "dataset": "spring_mass",
