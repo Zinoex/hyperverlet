@@ -72,7 +72,7 @@ def three_body_spring_mass_energy_plot(q, p, trajectory, m, k, l, plot_every=1):
 
 def animate_tbsm(config, show_trail=True, show_springs=False, show_gt=False, show_plot=True):
     plot_every = config["plotting"]["plot_every"]
-    save_path = format_path(config)
+    save_path = format_path(config, config["save_path"])
     result_dict = load_pickle(save_path)
     save_plot = config["plotting"]["save_plot"]
 
