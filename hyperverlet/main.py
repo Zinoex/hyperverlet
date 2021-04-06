@@ -37,14 +37,14 @@ def evaluate(config_path):
     config = load_config(config_path)
     device = torch.device('cpu')
 
-    # Dataset Construction
-    train_dataset, test_dataset = construct_dataset(config)
-
     # Solver Construction
     model_config = config['model_args']
     test_solver_name = model_config['solver']
-    model_path = model_config.get("nn_module")
-    solver = construct_solver(test_solver_name, model_path).to(device=device, non_blocking=True)
+
+    solver = construct_solver(test_solver_name, model_config["nn_args"]).to(device=device, non_blocking=True)
+
+    # Dataset Construction
+    train_dataset, test_dataset = construct_dataset(config, solver.trainable)
 
     # Train Solver
     if solver.trainable:

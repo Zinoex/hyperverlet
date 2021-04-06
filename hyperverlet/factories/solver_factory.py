@@ -2,10 +2,10 @@ from hyperverlet.factories.model_factory import construct_model
 from hyperverlet.solvers import *
 
 
-def construct_solver(solver_name, model_path=None):
+def construct_solver(solver_name, nn_args=None):
 
-    if model_path is not None:
-        hyper_solver = construct_model(model_path)
+    if nn_args is not None:
+        hyper_solver = construct_model(nn_args)
 
     solvers = {
         "HyperEulerSolver": HyperEulerSolver,

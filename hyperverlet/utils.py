@@ -8,7 +8,17 @@ import os
 
 def load_config(path):
     with open(path, 'r') as f:
-        return json.load(f)
+        base_config = json.load(f)
+
+    if 'dataset_args_path' in base_config:
+        with open(base_config['dataset_args_path'], 'r') as f:
+            base_config['dataset_args'] = json.load(f)
+
+    if 'nn_path' in base_config['model_args']:
+        with open(base_config['model_args']["nn_path"], 'r') as f:
+            base_config["model_args"]['nn_args'] = json.load(f)
+
+    return base_config
 
 
 def load_pickle(path):

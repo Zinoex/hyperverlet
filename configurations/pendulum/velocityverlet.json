@@ -7,7 +7,7 @@
   },
   "model_args": {
     "solver": "VelocityVerletSolver",
-    "nn_module": "configurations/pendulum/nn_model_pendulum.json"
+    "nn_path": "configurations/pendulum/nn_model_pendulum.json"
   },
   "dataset_args": {
     "dataset": "pendulum",

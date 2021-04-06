@@ -5,9 +5,8 @@ from hyperverlet.models.three_body_spring_mass import ThreeBodySpringMassModel, 
 from hyperverlet.utils import load_config
 
 
-def construct_model(model_path):
-    model_config = load_config(model_path)
-    module = model_config['module']
+def construct_model(module_config):
+    module = module_config["module"]
 
     module_mapping = dict(
         PendulumModel=PendulumModel,
@@ -18,6 +17,6 @@ def construct_model(model_path):
     )
 
     module = module_mapping[module]
-    model = module(model_config)
+    model = module(module_config)
 
     return model

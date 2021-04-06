@@ -2,7 +2,7 @@ from hyperverlet.factories.solver_factory import construct_solver
 from hyperverlet.experiments import PendulumDataset, SpringMassDataset, ThreeBodySpringMassDataset
 
 
-def construct_dataset(config):
+def construct_dataset(config, trainable=True):
     dataset_config = config["dataset_args"]
     dataset = dataset_config['dataset']
 
@@ -21,16 +21,13 @@ def construct_dataset(config):
 
     gt_solver = construct_solver(gt_solver_name)
 
-    if dataset == 'pendulum':
-        train_ds = PendulumDataset(gt_solver, train_duration, train_trajectory_length, num_config, coarsening_factor, sequence_length=train_sequence_length)
-        test_ds = PendulumDataset(gt_solver, test_duration, test_trajectory_length, 1, coarsening_factor, sequence_length=None)
-    elif dataset == 'spring_mass':
-        train_ds = SpringMassDataset(gt_solver, train_duration, train_trajectory_length, num_config, coarsening_factor, sequence_length=train_sequence_length)
-        test_ds = SpringMassDataset(gt_solver, test_duration, test_trajectory_length, 1, coarsening_factor, sequence_length=None)
-    elif dataset == 'three_body_spring_mass':
-        train_ds = ThreeBodySpringMassDataset(gt_solver, train_duration, train_trajectory_length, num_config, coarsening_factor, sequence_length=train_sequence_length)
-        test_ds = ThreeBodySpringMassDataset(gt_solver, test_duration, test_trajectory_length, 1, coarsening_factor, sequence_length=None)
-    else:
-        raise NotImplementedError
+    ds_mapping = dict(pendulum=PendulumDataset, spring_mass=SpringMassDataset, three_body_spring_mass=ThreeBodySpringMassDataset)
+    ds_cls = ds_mapping[dataset]
+
+    test_ds = ds_cls(gt_solver, test_duration, test_trajectory_length, 1, coarsening_factor, sequence_length=None)
+
+    train_ds = None
+    if trainable:
+        train_ds = ds_cls(gt_solver, train_duration, train_trajectory_length, num_config, coarsening_factor, sequence_length=train_sequence_length)
 
     return train_ds, test_ds
