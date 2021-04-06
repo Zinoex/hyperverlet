@@ -53,7 +53,7 @@ def evaluate(config_path):
     # Test Solver
     result_dict = test(solver, test_dataset, device)
     gt_dict = dataset_to_dict(test_dataset, "gt_")
-    merged_dict = {**gt_dict, **result_dict}
+    merged_dict = {**gt_dict, **result_dict, "config": config}
 
     save_path = format_save_path(config)
     save_pickle(save_path, merged_dict)
