@@ -1,3 +1,6 @@
+import datetime
+import os
+
 from matplotlib import pyplot as plt
 import numpy as np
 
@@ -96,3 +99,14 @@ def set_limits(ax, x, y, z=None, margin=1.05):
         z_half_range_ext = (z.max() - z.min()) * margin / 2
         z_mid = (z.min() + z.max()) / 2
         ax.set_zlim(z_mid - z_half_range_ext, z_mid + z_half_range_ext)
+
+
+def save_animation(dataset, animation, filename=None):
+    if filename is None:
+        filename = datetime.datetime.now().strftime("%Y%m%d-%H%M%S") + ".mp4"
+
+    dir_path = f"visualization/{dataset}"
+    os.makedirs(dir_path, exist_ok=True)
+    file_path = os.path.join(dir_path, filename)
+    animation.save(file_path)
+    print(f"File saved at {file_path}")

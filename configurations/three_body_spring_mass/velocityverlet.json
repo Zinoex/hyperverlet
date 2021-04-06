@@ -1,5 +1,5 @@
 {
-  "save_path": "results/tbsm/VelocityVerletSolver.pickle",
+  "save_path": "results/{dataset}/{solver}_{train_duration}_{train_trajectory_length}_{coarsening_factor}_{test_duration}_{test_trajectory_length}.pickle",
   "train_args": {
     "epoch": 10,
     "batch_size": 100,
@@ -18,7 +18,7 @@
     "test_duration": 10,
     "test_trajectory_length": 100001,
     "num_configurations": 1,
-    "coarsening_factor": 1000
+    "coarsening_factor": 500
   },
   "plotting": {
     "plot_every": 1,
