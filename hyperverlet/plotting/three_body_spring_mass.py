@@ -75,7 +75,6 @@ def animate_tbsm(config, show_trail=True, show_springs=False, show_gt=False, sho
     save_path = format_path(config)
     result_dict = load_pickle(save_path)
     save_plot = config["plotting"]["save_plot"]
-    dataset = config["dataset_args"]['dataset']
 
     # Predicted results
     q = result_dict["q"][::plot_every]

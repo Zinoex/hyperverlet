@@ -33,7 +33,6 @@ def animate_pendulum(config, show_gt=False, show_plot=True):
     save_path = format_path(config)
     result_dict = load_pickle(save_path)
     save_plot = config["plotting"]["save_plot"]
-    dataset = config["dataset_args"]['dataset']
 
     q = result_dict["q"][::plot_every]
     p = result_dict["p"][::plot_every]
@@ -77,7 +76,7 @@ def animate_pendulum(config, show_gt=False, show_plot=True):
         plt.show()
 
     if save_plot:
-        save_animation(dataset, anim)
+        save_animation(anim, config)
 
 
 def update_pendulum(ax, q, i, l, color='red', s=500, linewidth=3):
