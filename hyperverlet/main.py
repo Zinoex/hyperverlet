@@ -55,7 +55,7 @@ def evaluate(config_path):
     gt_dict = dataset_to_dict(test_dataset, "gt_")
     merged_dict = {**gt_dict, **result_dict, "config": config}
 
-    save_path = format_path(config, config['save_path'])
+    save_path = format_path(config, config['result_path'])
     save_pickle(save_path, merged_dict)
 
 

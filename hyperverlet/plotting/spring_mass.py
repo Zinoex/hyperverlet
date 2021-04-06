@@ -31,8 +31,8 @@ def spring_mass_energy_plot(q, p, trajectory, m, k, l, plot_every=1):
 
 def animate_sm(config, show_gt=False, show_plot=True):
     plot_every = config["plotting"]["plot_every"]
-    save_path = format_path(config, config["save_path"])
-    result_dict = load_pickle(save_path)
+    result_path = format_path(config, config["result_path"])
+    result_dict = load_pickle(result_path)
     save_plot = config["plotting"]["save_plot"]
 
     # Predicted results
