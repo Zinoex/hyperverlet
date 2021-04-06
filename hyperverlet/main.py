@@ -11,7 +11,7 @@ from hyperverlet.plotting.spring_mass import animate_sm
 from hyperverlet.plotting.three_body_spring_mass import animate_tbsm
 from hyperverlet.test import test
 from hyperverlet.train import train
-from hyperverlet.utils import seed_randomness, load_config, save_pickle, load_pickle, format_save_path
+from hyperverlet.utils import seed_randomness, load_config, save_pickle, load_pickle, format_path
 
 
 def parse_arguments():
@@ -55,7 +55,7 @@ def evaluate(config_path):
     gt_dict = dataset_to_dict(test_dataset, "gt_")
     merged_dict = {**gt_dict, **result_dict, "config": config}
 
-    save_path = format_save_path(config)
+    save_path = format_path(config, config['result_path'])
     save_pickle(save_path, merged_dict)
 
 

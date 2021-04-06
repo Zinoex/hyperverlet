@@ -1,4 +1,6 @@
 import random
+from datetime import datetime
+
 import torch
 import numpy as np
 import json
@@ -53,12 +55,15 @@ def torch_to_numpy(extra_args):
     }
 
 
-def format_save_path(config):
-    save_path = config['save_path']
+def format_path(config, path):
     dataset_args = config["dataset_args"]
     model_args = config["model_args"]
 
-    return save_path.format(dataset=dataset_args["dataset"], solver=model_args['solver'],
-                            train_duration=dataset_args["train_duration"], train_trajectory_length=dataset_args["train_trajectory_length"],
-                            coarsening_factor=dataset_args["coarsening_factor"], test_duration=dataset_args["test_duration"],
-                            test_trajectory_length=dataset_args["test_trajectory_length"])
+    return path.format(dataset=dataset_args["dataset"],
+                       solver=model_args['solver'],
+                       train_duration=dataset_args["train_duration"],
+                       train_trajectory_length=dataset_args["train_trajectory_length"],
+                       coarsening_factor=dataset_args["coarsening_factor"],
+                       test_duration=dataset_args["test_duration"],
+                       test_trajectory_length=dataset_args["test_trajectory_length"],
+                       datetime=datetime.now())

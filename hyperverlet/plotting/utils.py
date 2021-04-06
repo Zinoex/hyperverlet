@@ -4,6 +4,8 @@ import os
 from matplotlib import pyplot as plt
 import numpy as np
 
+from hyperverlet.utils import format_path
+
 
 def plot_3d_pos(q, plot_every=1, show=True):
     fig = plt.figure()
@@ -101,12 +103,8 @@ def set_limits(ax, x, y, z=None, margin=1.05):
         ax.set_zlim(z_mid - z_half_range_ext, z_mid + z_half_range_ext)
 
 
-def save_animation(dataset, animation, filename=None):
-    if filename is None:
-        filename = datetime.datetime.now().strftime("%Y%m%d-%H%M%S") + ".mp4"
-
-    dir_path = f"visualization/{dataset}"
-    os.makedirs(dir_path, exist_ok=True)
-    file_path = os.path.join(dir_path, filename)
-    animation.save(file_path)
-    print(f"File saved at {file_path}")
+def save_animation(animation, config):
+    plot_path = format_path(config, config["plot_path"])
+    os.makedirs(os.path.dirname(plot_path), exist_ok=True)
+    animation.save(plot_path)
+    print(f"File saved at {plot_path}")

@@ -11,7 +11,7 @@ import numpy as np
 
 from hyperverlet.plotting.grid_spec import gs_3_2_3, gs_2_1_2
 from hyperverlet.plotting.utils import plot_spring, set_limits, save_animation
-from hyperverlet.utils import load_pickle, format_save_path
+from hyperverlet.utils import load_pickle, format_path
 
 
 def plot_springs(ax, q, i):
@@ -72,10 +72,9 @@ def three_body_spring_mass_energy_plot(q, p, trajectory, m, k, l, plot_every=1):
 
 def animate_tbsm(config, show_trail=True, show_springs=False, show_gt=False, show_plot=True):
     plot_every = config["plotting"]["plot_every"]
-    save_path = format_save_path(config)
-    result_dict = load_pickle(save_path)
+    result_path = format_path(config, config["result_path"])
+    result_dict = load_pickle(result_path)
     save_plot = config["plotting"]["save_plot"]
-    dataset = config["dataset_args"]['dataset']
 
     # Predicted results
     q = result_dict["q"][::plot_every]
@@ -150,4 +149,4 @@ def animate_tbsm(config, show_trail=True, show_springs=False, show_gt=False, sho
         plt.show()
 
     if save_plot:
-        save_animation(dataset, anim)
+        save_animation(anim, config)

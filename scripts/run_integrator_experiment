@@ -4,4 +4,4 @@
 python -m hyperverlet.main --config-path configurations/integrator_experiments/$1/euler.json $2 &
 python -m hyperverlet.main --config-path configurations/integrator_experiments/$1/hypereuler.json $2 &
 python -m hyperverlet.main --config-path configurations/integrator_experiments/$1/hyperverlet.json $2 &
-python -m hyperverlet.main --config-path configurations/integrator_experiments/$1/velocityverlet.json $2 &
+python -m hyperverlet.main --config-path configurations/integrator_experiments/$1/velocityverlet.json $2
