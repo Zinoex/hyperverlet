@@ -8,7 +8,7 @@ from tqdm import trange, tqdm
 from hyperverlet.utils import send_to_device
 
 
-def train(solver, dataset, device, config, trajectory_fitting=True):
+def train(solver, dataset, device, config):
     assert solver.trainable, 'Solver is not trainable'
 
     train_args = config["train_args"]

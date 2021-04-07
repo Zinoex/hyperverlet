@@ -3,7 +3,6 @@ from datetime import datetime
 
 import torch
 
-from hyperverlet.experiments import dataset_to_dict
 from hyperverlet.factories.dataset_factory import construct_dataset
 from hyperverlet.factories.solver_factory import construct_solver
 from hyperverlet.plotting.pendulum import animate_pendulum
@@ -51,12 +50,11 @@ def evaluate(config_path):
         train(solver, train_dataset, device, config)
 
     # Test Solver
-    result_dict = test(solver, test_dataset, device)
-    gt_dict = dataset_to_dict(test_dataset, "gt_")
-    merged_dict = {**gt_dict, **result_dict, "config": config}
+    result_dict = test(solver, test_dataset, device, config)
+    result_dict['config'] = config
 
     save_path = format_path(config, config['result_path'])
-    save_pickle(save_path, merged_dict)
+    save_pickle(save_path, result_dict)
 
 
 def plot(config_path):

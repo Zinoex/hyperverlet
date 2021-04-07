@@ -265,13 +265,3 @@ class LennardJonesDataset(ExperimentDataset):
         self.extra_args = {}
 
         super().__init__(base_solver, duration, num_samples, num_configurations, coarsening_factor, sequence_length)
-
-
-def dataset_to_dict(dataset, prefix=None):
-    return {
-        f"{prefix}q": dataset.q.cpu().detach().numpy(),
-        f"{prefix}p": dataset.p.cpu().detach().numpy(),
-        f"{prefix}mass": dataset.mass.cpu().detach().numpy(),
-        f"{prefix}trajectory": dataset.trajectory.cpu().detach().numpy(),
-        f"{prefix}extra_args": torch_to_numpy(send_to_device(dataset.extra_args, torch.device("cpu"), non_blocking=True))
-    }

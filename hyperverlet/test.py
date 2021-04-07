@@ -1,15 +1,21 @@
 import torch
 from torch import nn
+from torch.utils.data import DataLoader
 
 from hyperverlet.timer import timer
 from hyperverlet.utils import send_to_device, torch_to_numpy
 
 
-def test(solver, dataset, device):
+def test(solver, dataset, device, config):
     criterion = nn.MSELoss()
 
+    train_args = config["train_args"]
+    num_workers = train_args["num_workers"]
+
+    loader = DataLoader(dataset, num_workers=num_workers, pin_memory=device.type == 'cuda', batch_size=len(dataset))
+
     with torch.no_grad():
-        batch = dataset[0]
+        batch = next(loader)
 
         q_base = batch['q'].to(device, non_blocking=True)
         p_base = batch['p'].to(device, non_blocking=True)
