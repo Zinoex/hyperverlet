@@ -7,7 +7,7 @@ num_cores = 8
 
 systems = ['pendulum', 'spring_mass', 'three_body_spring_mass']
 config_paths = {
-    'integer_comparision': [
+    'integer_comparison': [
         'configurations/integrator_experiments/{system}/euler.json'
         'configurations/integrator_experiments/{system}/heun.json'
         'configurations/integrator_experiments/{system}/hypereuler.json'
