@@ -7,7 +7,6 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 
 from hyperverlet.main import evaluate, plot, full_run
 
-num_cores = 8
 
 systems = ['pendulum', 'spring_mass', 'three_body_spring_mass']
 config_paths = {
@@ -28,6 +27,7 @@ def parse_arguments():
     parser = ArgumentParser()
     parser.add_argument('--experiment', type=str, choices=config_paths.keys(), help="Name of the experiment to run")
     parser.add_argument('--system', type=str, choices=systems, help="Name of the system to test")
+    parser.add_argument('--num-processes', type=int, default=7, help="Number of parallel processes")
 
     commands = parser.add_subparsers(help='commands', dest='command')
 
@@ -51,5 +51,5 @@ if __name__ == '__main__':
 
     experiment_config_paths = map(replace_system, config_paths[args.experiment])
 
-    with Pool(num_cores - 1) as p:
+    with Pool(args.num_processes) as p:
         p.map(args.func, experiment_config_paths)
