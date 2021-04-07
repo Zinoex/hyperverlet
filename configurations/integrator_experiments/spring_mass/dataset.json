@@ -1,11 +1,11 @@
 {
    "dataset": "spring_mass",
    "gt_solver": "FourthOrderRuthSolver",
-   "train_duration": 10,
-   "train_trajectory_length": 100001,
-   "train_sequence_length": 50,
-   "test_duration": 10,
-   "test_trajectory_length": 100001,
-   "num_configurations": 1,
-   "coarsening_factor": 500
+   "train_duration": 100,
+   "train_trajectory_length": 1000001,
+   "train_sequence_length": 10,
+   "test_duration": 100,
+   "test_trajectory_length": 1000001,
+   "num_configurations": 100,
+   "coarsening_factor": 100
 }
