@@ -11,7 +11,7 @@ def energy_animate_update(pe_plot, ke_plot, te_plot, trajectory, i, pe, ke, te, 
         traj_mid = (trajectory[0] + trajectory[i]) / 2
 
         ax.set_xlim(traj_mid - traj_range_half, traj_mid + traj_range_half)
-    ax.set_ylim(-0.15, te.max() * 1.05)
+    ax.set_ylim(-0.55, te.max() * 1.05)
 
 
 def init_energy_plot(ax, trajectory, te, ke, pe, title="Energy plot", te_color='blue', ke_color='orange', pe_color='green'):

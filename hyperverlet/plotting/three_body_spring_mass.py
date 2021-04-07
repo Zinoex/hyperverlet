@@ -9,20 +9,22 @@ from matplotlib.patches import Circle
 import seaborn as sns
 import numpy as np
 
-from hyperverlet.plotting.grid_spec import gs_3_2_3, gs_2_1_2
+from hyperverlet.plotting.grid_spec import *
 from hyperverlet.plotting.utils import plot_spring, set_limits, save_animation
 from hyperverlet.utils import load_pickle, format_path
 
 
-def plot_springs(ax, q, i):
+def plot_springs(ax, q, i, colormap=None):
     # Plotted bob circle radius
     r = 0.02
     num_particles = q.shape[1]
 
     for particle in range(num_particles):
         particle_pos = q[i, particle, :]
-
-        c0 = Circle(particle_pos[:2], r, fc='k', zorder=10)
+        if colormap:
+            c0 = Circle(particle_pos[:2], r, fc=colormap[particle], zorder=10)
+        else:
+            c0 = Circle(particle_pos[:2], r, fc='k', zorder=10)
         ax.add_patch(c0)
 
         for relative_particle in range(particle + 1, num_particles):
@@ -32,25 +34,21 @@ def plot_springs(ax, q, i):
             plot_spring(ax, spring_length, theta=spring_theta, xshift=particle_pos[0], yshift=particle_pos[1])
 
 
-def plot_trail(ax, q, i, trail_len=8, color=None):
+def plot_trail(ax, q, i, trail_len=8, color_map=None):
     # The trail will be divided into trail_len segments and plotted as a fading line.
-    euclidean_dim = q.shape[-1]
-    color_map = sns.color_palette("husl", q.shape[1])
     for j in range(trail_len):
         imin = i - (trail_len - j)
         if imin < 0:
             continue
         imax = imin + 2
         # The fading looks better if we square the fractional length along the trail.
-        alpha = (j/trail_len) ** 2
+        alpha = (j / trail_len) ** 2
         for particle in range(q.shape[1]):
-            if euclidean_dim == 2:
-                if color is None:
-                    ax.plot(q[imin:imax, particle, 0], q[imin:imax, particle, 1], c=color_map[particle], solid_capstyle='butt', lw=2, alpha=alpha)
-                else:
-                    ax.plot(q[imin:imax, particle, 0], q[imin:imax, particle, 1], c=color, solid_capstyle='butt', lw=2, alpha=alpha)
-            elif euclidean_dim == 3:
-                ax.plot3D(q[imin:imax, particle, 0], q[imin:imax, particle, 1], q[imin:imax, particle, 2], c=color_map[particle], solid_capstyle='butt', lw=2, alpha=alpha)
+            if color_map is not None:
+                ax.plot(q[imin:imax, particle, 0], q[imin:imax, particle, 1], c=color_map[particle],
+                        solid_capstyle='butt', lw=2, alpha=alpha)
+            else:
+                ax.plot(q[imin:imax, particle, 0], q[imin:imax, particle, 1], solid_capstyle='butt', lw=2, alpha=alpha)
 
 
 def three_body_spring_mass_energy_plot(q, p, trajectory, m, k, l, plot_every=1):
@@ -92,16 +90,21 @@ def animate_tbsm(config, show_trail=True, show_springs=False, show_gt=False, sho
     # Create grid spec
     fig = plt.figure(figsize=(20, 15))
     legend_elements = [Line2D([0], [0], color='r', label='Prediction')]
+    cm = ["blue", "orange", "green", "yellow", "red", "black"]
 
     if show_gt:
-        ax1, ax2 = gs_2_1_2(fig)
-#       #ax1, ax2, ax3 = gs_3_2_3(fig)
+        #ax1, ax2 = gs_2_1_2(fig)
+        #ax1, ax2, ax3 = gs_3_2_3(fig)
+        ax1, ax2, ax3, ax4, ax5 = gs_5_3_2(fig)
 
         # Energy variables
         gt_ke = three_body_spring_mass.calc_kinetic_energy(m, gt_p)
         gt_pe = three_body_spring_mass.calc_potential_energy(k, gt_q, l)
         gt_te = three_body_spring_mass.calc_total_energy(gt_ke, gt_pe)
-        gt_pe_plot, gt_ke_plot, gt_te_plot = init_energy_plot(ax2, gt_trajectory, gt_te, gt_ke, gt_pe, title="Ground truth energy plot", te_color='blue', ke_color='red', pe_color='black')
+        gt_pe_plot, gt_ke_plot, gt_te_plot = init_energy_plot(ax2, gt_trajectory, gt_te, gt_ke, gt_pe,
+                                                              title="Ground truth energy plot", te_color='yellow',
+                                                              ke_color='red', pe_color='black')
+
         legend_elements.append(Line2D([0], [0], color='g', label='Ground truth'))
     else:
         ax1, ax2 = gs_2_1_2(fig)
@@ -116,8 +119,12 @@ def animate_tbsm(config, show_trail=True, show_springs=False, show_gt=False, sho
     pe = three_body_spring_mass.calc_potential_energy(k, q, l)
     te = three_body_spring_mass.calc_total_energy(ke, pe)
 
+    gt_pred_diff = gt_q - q
     # Initialize plots
     pe_plot, ke_plot, te_plot = init_energy_plot(ax2, trajectory, te, ke, pe)
+    p1_x, p1_y = init_diff_plot(ax3, trajectory, gt_pred_diff[:, 0])
+    p2_x, p2_y = init_diff_plot(ax4, trajectory, gt_pred_diff[:, 1])
+    p3_x, p3_y = init_diff_plot(ax5, trajectory, gt_pred_diff[:, 2])
 
     def animate(i):
         ax1.clear()
@@ -126,20 +133,24 @@ def animate_tbsm(config, show_trail=True, show_springs=False, show_gt=False, sho
         set_limits(ax1, xlim, ylim, zlim)
 
         if show_trail:
-            plot_trail(ax1, q, i, color='r', trail_len=15)
+            plot_trail(ax1, q, i, color_map=cm[:3], trail_len=15)
             if show_gt:
-                plot_trail(ax1, gt_q, i, color='g', trail_len=15)
+                plot_trail(ax1, gt_q, i, color_map=cm[-3:], trail_len=15)
 
         if show_springs:
-            plot_springs(ax1, q, i)
+            plot_springs(ax1, q, i, cm[:3])
             if show_gt:
-                plot_springs(ax1, gt_q, i)
+                plot_springs(ax1, gt_q, i, cm[-3:])
 
         ax1.legend(handles=legend_elements, loc='best')
 
         energy_animate_update(pe_plot, ke_plot, te_plot, trajectory, i, pe, ke, te, ax2)
         if show_gt:
             energy_animate_update(gt_pe_plot, gt_ke_plot, gt_te_plot, gt_trajectory, i, gt_pe, gt_ke, gt_te, ax2)
+
+        diff_animate_update(ax3, p1_x, p1_y, trajectory, i, gt_pred_diff[:, 0])
+        diff_animate_update(ax4, p2_x, p2_y, trajectory, i, gt_pred_diff[:, 1])
+        diff_animate_update(ax5, p3_x, p3_y, trajectory, i, gt_pred_diff[:, 2])
 
         return []
 
@@ -150,3 +161,27 @@ def animate_tbsm(config, show_trail=True, show_springs=False, show_gt=False, sho
 
     if save_plot:
         save_animation(anim, config)
+
+
+def init_diff_plot(ax, trajectory, diff, title=None, x_color='blue', y_color='orange'):
+    x_plot, = ax.plot(trajectory[0], diff[0, 0], color=x_color, label=r'X')
+    y_plot, = ax.plot(trajectory[0], diff[0, 1], color=y_color, label=r'Y')
+    ax.set_xlabel("Time")
+    ax.set_ylabel("Difference")
+    ax.set_title(title)
+    plt.legend(loc='lower left')
+
+    return x_plot, y_plot
+
+
+def diff_animate_update(ax, x_plot, y_plot, trajectory, i, diff):
+    x_plot.set_data(trajectory[:i + 1], diff[:i + 1, 0])
+    y_plot.set_data(trajectory[:i + 1], diff[:i + 1, 1])
+    ax.legend(loc='lower left')
+
+    if i > 0:
+        traj_range_half = 1.05 * (trajectory[i] - trajectory[0]) / 2
+        traj_mid = (trajectory[0] + trajectory[i]) / 2
+
+        ax.set_xlim(traj_mid - traj_range_half, traj_mid + traj_range_half)
+    ax.set_ylim(diff.min() * 1.05, diff.max() * 1.05)
