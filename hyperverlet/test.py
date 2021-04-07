@@ -17,12 +17,13 @@ def test(solver, dataset, device):
         trajectory = batch['trajectory'].to(device, non_blocking=True)
         extra_args = send_to_device(batch['extra_args'], device, non_blocking=True)
 
-        q, p = timer(lambda: solver.trajectory(dataset.experiment, q_base[0], p_base[0], mass, trajectory, **extra_args), 'solving')
+        (q, p), inference_time = timer(lambda: solver.trajectory(dataset.experiment, q_base[0], p_base[0], mass, trajectory, **extra_args), 'solving', return_time=True)
 
         q_loss, p_loss = criterion(q, q_base), criterion(p, p_base)
         print(f'final loss: {q_loss.item(), p_loss.item()}')
 
     return {
+        "inference_time": inference_time,
         "q": q.cpu().detach().numpy(),
         "q_base": q_base.cpu().detach().numpy(),
         "p": p.cpu().detach().numpy(),
