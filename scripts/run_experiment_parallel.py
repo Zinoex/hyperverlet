@@ -17,7 +17,7 @@ config_paths = {
         'configurations/integrator_experiments/{system}/velocityverlet.json',
         'configurations/integrator_experiments/{system}/hyperverlet.json',
         'configurations/integrator_experiments/{system}/hyperheun.json',
-        'configurations/integrator_experiments/{system}/rk4.json',
+        'configurations/integrator_experiments/{system}/rk4.json'
         'configurations/integrator_experiments/{system}/ruth4.json'
     ]
 }

@@ -68,7 +68,7 @@ def plot(config_path):
     elif dataset == 'spring_mass':
         animate_sm(config, show_gt=True)
     elif dataset == 'three_body_spring_mass':
-        animate_tbsm(config, show_trail=True, show_springs=True, show_gt=True, show_plot=True)
+        animate_tbsm(config, show_trail=True, show_springs=True, show_gt=True, show_plot=False)
 
 
 def full_run(config_path):
