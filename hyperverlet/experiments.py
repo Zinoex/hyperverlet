@@ -24,7 +24,7 @@ class ExperimentDataset(Dataset):
 
         self.q, self.p, self.trajectory = self.coarsening(self.q, self.p, self.trajectory)
 
-        if self.sequence_length is None:
+        if self.sequence_length is not None:
             assert self.coarsening.new_trajectory_length >= self.sequence_length, 'Trajectory length too short for coarsening'
 
     def __len__(self):
