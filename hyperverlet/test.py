@@ -15,7 +15,7 @@ def test(solver, dataset, device, config):
     loader = DataLoader(dataset, num_workers=num_workers, pin_memory=device.type == 'cuda', batch_size=len(dataset))
 
     with torch.no_grad():
-        batch = next(loader)
+        batch = next(iter(loader))
 
         q_base = batch['q'].to(device, non_blocking=True)
         p_base = batch['p'].to(device, non_blocking=True)
