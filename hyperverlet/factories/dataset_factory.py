@@ -14,9 +14,11 @@ def construct_dataset(config, trainable=True):
     train_trajectory_length = dataset_config['train_trajectory_length']
     test_trajectory_length = dataset_config['test_trajectory_length']
 
+    train_num_config = dataset_config['train_num_configurations']
+    test_num_config = dataset_config['test_num_configurations']
+
     train_sequence_length = dataset_config["train_sequence_length"]
 
-    num_config = dataset_config['num_configurations']
     coarsening_factor = dataset_config['coarsening_factor']
 
     gt_solver = construct_solver(gt_solver_name)
@@ -24,10 +26,10 @@ def construct_dataset(config, trainable=True):
     ds_mapping = dict(pendulum=PendulumDataset, spring_mass=SpringMassDataset, three_body_spring_mass=ThreeBodySpringMassDataset)
     ds_cls = ds_mapping[dataset]
 
-    test_ds = ds_cls(gt_solver, test_duration, test_trajectory_length, 1, coarsening_factor, sequence_length=None)
+    test_ds = ds_cls(gt_solver, test_duration, test_trajectory_length, test_num_config, coarsening_factor, sequence_length=None)
 
     train_ds = None
     if trainable:
-        train_ds = ds_cls(gt_solver, train_duration, train_trajectory_length, num_config, coarsening_factor, sequence_length=train_sequence_length)
+        train_ds = ds_cls(gt_solver, train_duration, train_trajectory_length, train_num_config, coarsening_factor, sequence_length=train_sequence_length)
 
     return train_ds, test_ds
