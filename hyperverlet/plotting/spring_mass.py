@@ -44,7 +44,7 @@ def animate_sm(config, show_gt=False, show_plot=True):
     k = result_dict["extra_args"]["k"]
 
     # Ground Truth
-    gt_q = np.squeeze(result_dict["q_base"][::plot_every], axis=1)
+    gt_q = np.squeeze(result_dict["gt_q"][::plot_every], axis=1)
 
     # Create grid spec
     fig = plt.figure(figsize=(20, 15))

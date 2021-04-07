@@ -31,9 +31,9 @@ def test(solver, dataset, device, config):
     return {
         "inference_time": inference_time,
         "q": q.cpu().detach().numpy(),
-        "q_base": q_base.cpu().detach().numpy(),
+        "gt_q": q_base.cpu().detach().numpy(),
         "p": p.cpu().detach().numpy(),
-        "p_base": p_base.cpu().detach().numpy(),
+        "gt_p": p_base.cpu().detach().numpy(),
         "mass": mass.cpu().detach().numpy(),
         "trajectory": trajectory.cpu().detach().numpy(),
         "extra_args": torch_to_numpy(send_to_device(extra_args, torch.device("cpu"), non_blocking=True))

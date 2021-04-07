@@ -83,8 +83,8 @@ def animate_tbsm(config, show_trail=True, show_springs=False, show_gt=False, sho
     k = result_dict["extra_args"]["k"][cfg]
 
     # Ground Truth
-    gt_q = result_dict["q_base"][::plot_every, cfg]
-    gt_p = result_dict["p_base"][::plot_every, cfg]
+    gt_q = result_dict["gt_q"][::plot_every, cfg]
+    gt_p = result_dict["gt_p"][::plot_every, cfg]
 
     # Create grid spec
     fig = plt.figure(figsize=(20, 15))
