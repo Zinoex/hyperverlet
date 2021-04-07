@@ -13,12 +13,12 @@ config_paths = {
     'integrator_comparison': [
         'configurations/integrator_experiments/{system}/euler.json',
         'configurations/integrator_experiments/{system}/heun.json',
-        #'configurations/integrator_experiments/{system}/hypereuler.json',
+        'configurations/integrator_experiments/{system}/hypereuler.json',
         'configurations/integrator_experiments/{system}/velocityverlet.json',
-        #'configurations/integrator_experiments/{system}/hyperverlet.json',
-        #'configurations/integrator_experiments/{system}/hyperheun.json',
+        'configurations/integrator_experiments/{system}/hyperverlet.json',
+        'configurations/integrator_experiments/{system}/hyperheun.json',
         'configurations/integrator_experiments/{system}/rk4.json'
-        #'configurations/integrator_experiments/{system}/ruth4.json'
+        'configurations/integrator_experiments/{system}/ruth4.json'
     ]
 }
 
