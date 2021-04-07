@@ -7,7 +7,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 
 from hyperverlet.main import evaluate, plot, full_run
 
-num_cores = 8
+num_processes = 7
 
 systems = ['pendulum', 'spring_mass', 'three_body_spring_mass']
 config_paths = {
@@ -51,5 +51,5 @@ if __name__ == '__main__':
 
     experiment_config_paths = map(replace_system, config_paths[args.experiment])
 
-    with Pool(num_cores - 1) as p:
+    with Pool(num_processes) as p:
         p.map(args.func, experiment_config_paths)
