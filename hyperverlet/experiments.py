@@ -24,11 +24,15 @@ class ExperimentDataset(Dataset):
 
         self.q, self.p, self.trajectory = self.coarsening(self.q, self.p, self.trajectory)
 
+        if self.sequence_length is None:
+            assert self.coarsening.new_trajectory_length >= self.sequence_length, 'Trajectory length too short for coarsening'
+
     def __len__(self):
         if self.sequence_length is None:
             return self.num_configurations
         else:
-            configuration_length = self.coarsening.new_trajectory_length - self.sequence_length
+            assert self.coarsening.new_trajectory_length >= self.sequence_length, 'Trajectory length too short for coarsening'
+            configuration_length = self.coarsening.new_trajectory_length - self.sequence_length + 1
             return configuration_length * self.num_configurations
 
     def __getitem__(self, idx):
@@ -42,7 +46,7 @@ class ExperimentDataset(Dataset):
         if self.sequence_length is None:
             config_idx = idx
         else:
-            configuration_length = self.coarsening.new_trajectory_length - self.sequence_length
+            configuration_length = self.coarsening.new_trajectory_length - self.sequence_length + 1
 
             config_idx, time_idx = idx // configuration_length, idx % configuration_length
 
