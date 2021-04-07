@@ -2,7 +2,7 @@ import numpy as np
 from matplotlib import pyplot as plt
 from matplotlib.gridspec import GridSpec
 
-from hyperverlet.plotting.energy import init_energy_plot, update_energy_plot
+from hyperverlet.plotting.energy import init_energy_plot, energy_animate_update
 
 
 def lj_plot(trajectory: np.array, pe: np.array, ke: np.array, te: np.array, dist: np.array, eps, sigma):
@@ -13,7 +13,7 @@ def lj_plot(trajectory: np.array, pe: np.array, ke: np.array, te: np.array, dist
     ax2 = fig.add_subplot(gs[0, 1])
 
     # PLOT - 2: Energy
-    init_energy_plot(ax2, trajectory, te, ke, pe)
+    pe_plot, ke_plot, te_plot = init_energy_plot(ax2, trajectory, te, ke, pe)
 
     for i in range(1, len(trajectory)):
         # PLOT - 1: Model
@@ -32,6 +32,6 @@ def lj_plot(trajectory: np.array, pe: np.array, ke: np.array, te: np.array, dist
         ax1.legend()
 
         # PLOT - 2: Energy
-        update_energy_plot(ax2, trajectory, i, te, ke, pe)
+        energy_animate_update(pe_plot, ke_plot, te_plot, trajectory, i, te, ke, pe, ax2)
 
         plt.pause(1E-11)

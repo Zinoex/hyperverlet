@@ -83,9 +83,8 @@ def animate_tbsm(config, show_trail=True, show_springs=False, show_gt=False, sho
     k = result_dict["extra_args"]["k"]
 
     # Ground Truth
-    gt_q = np.squeeze(result_dict["gt_q"][::plot_every], axis=1)
-    gt_p = np.squeeze(result_dict["gt_p"][::plot_every], axis=1)
-    gt_trajectory = result_dict["gt_trajectory"][::plot_every]
+    gt_q = np.squeeze(result_dict["q_base"][::plot_every], axis=1)
+    gt_p = np.squeeze(result_dict["p_base"][::plot_every], axis=1)
 
     # Create grid spec
     fig = plt.figure(figsize=(20, 15))
@@ -101,7 +100,7 @@ def animate_tbsm(config, show_trail=True, show_springs=False, show_gt=False, sho
         gt_ke = three_body_spring_mass.calc_kinetic_energy(m, gt_p)
         gt_pe = three_body_spring_mass.calc_potential_energy(k, gt_q, l)
         gt_te = three_body_spring_mass.calc_total_energy(gt_ke, gt_pe)
-        gt_pe_plot, gt_ke_plot, gt_te_plot = init_energy_plot(ax2, gt_trajectory, gt_te, gt_ke, gt_pe,
+        gt_pe_plot, gt_ke_plot, gt_te_plot = init_energy_plot(ax2, trajectory, gt_te, gt_ke, gt_pe,
                                                               title="Ground truth energy plot", te_color='yellow',
                                                               ke_color='red', pe_color='black')
 
@@ -146,7 +145,7 @@ def animate_tbsm(config, show_trail=True, show_springs=False, show_gt=False, sho
 
         energy_animate_update(pe_plot, ke_plot, te_plot, trajectory, i, pe, ke, te, ax2)
         if show_gt:
-            energy_animate_update(gt_pe_plot, gt_ke_plot, gt_te_plot, gt_trajectory, i, gt_pe, gt_ke, gt_te, ax2)
+            energy_animate_update(gt_pe_plot, gt_ke_plot, gt_te_plot, trajectory, i, gt_pe, gt_ke, gt_te, ax2)
 
         diff_animate_update(ax3, p1_x, p1_y, trajectory, i, gt_pred_diff[:, 0])
         diff_animate_update(ax4, p2_x, p2_y, trajectory, i, gt_pred_diff[:, 1])

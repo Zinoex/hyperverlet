@@ -42,7 +42,7 @@ def animate_pendulum(config, show_gt=False, show_plot=True):
     g = result_dict["extra_args"]["g"]
 
     # Ground Truth
-    gt_q = np.squeeze(result_dict["gt_q"][::plot_every], axis=1)
+    gt_q = np.squeeze(result_dict["q_base"][::plot_every], axis=1)
 
     pe = pendulum.calc_potential_energy(m, g, l, q)
     ke = pendulum.calc_kinetic_energy(m, l, p)

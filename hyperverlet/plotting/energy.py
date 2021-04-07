@@ -1,5 +1,6 @@
 import matplotlib.pyplot as plt
 
+
 def energy_animate_update(pe_plot, ke_plot, te_plot, trajectory, i, pe, ke, te, ax):
     pe_plot.set_data(trajectory[:i + 1], pe[:i + 1])
     ke_plot.set_data(trajectory[:i + 1], ke[:i + 1])
