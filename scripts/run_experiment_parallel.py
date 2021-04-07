@@ -1,5 +1,9 @@
 from argparse import ArgumentParser
 from multiprocessing import Pool
+import sys
+import os
+
+sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 
 from hyperverlet.main import evaluate, plot, full_run
 
