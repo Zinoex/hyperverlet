@@ -3,5 +3,9 @@
 # 1st argument is the experiment (e.g. three_body_spring_mass) 2nd argument is the task (evaluate, plot or full)
 python -m hyperverlet.main --config-path configurations/integrator_experiments/$1/euler.json $2 &
 python -m hyperverlet.main --config-path configurations/integrator_experiments/$1/hypereuler.json $2 &
+python -m hyperverlet.main --config-path configurations/integrator_experiments/$1/velocityverlet.json $2 &
 python -m hyperverlet.main --config-path configurations/integrator_experiments/$1/hyperverlet.json $2 &
-python -m hyperverlet.main --config-path configurations/integrator_experiments/$1/velocityverlet.json $2
+python -m hyperverlet.main --config-path configurations/integrator_experiments/$1/heun.json $2
+python -m hyperverlet.main --config-path configurations/integrator_experiments/$1/hyperheun.json $2
+python -m hyperverlet.main --config-path configurations/integrator_experiments/$1/rk4.json $2
+#python -m hyperverlet.main --config-path configurations/integrator_experiments/$1/ruth4.json $2
