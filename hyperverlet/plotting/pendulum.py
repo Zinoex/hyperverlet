@@ -28,21 +28,21 @@ def spring_mass_energy_plot(q, p, trajectory, m, k, l, g, plot_every=1):
     plot_energy(trajectory, te, ke, pe)
 
 
-def animate_pendulum(config, show_gt=False, show_plot=True):
+def animate_pendulum(config, show_gt=False, show_plot=True, cfg=0):
     plot_every = config["plotting"]["plot_every"]
     result_path = format_path(config, config["result_path"])
     result_dict = load_pickle(result_path)
     save_plot = config["plotting"]["save_plot"]
 
-    q = result_dict["q"][::plot_every]
-    p = result_dict["p"][::plot_every]
-    trajectory = result_dict["trajectory"][::plot_every]
-    m = result_dict["mass"]
-    l = result_dict["extra_args"]["length"]
-    g = result_dict["extra_args"]["g"]
+    q = result_dict["q"][::plot_every, cfg]
+    p = result_dict["p"][::plot_every, cfg]
+    trajectory = result_dict["trajectory"][::plot_every, cfg]
+    m = result_dict["mass"][cfg]
+    l = result_dict["extra_args"]["length"][cfg]
+    g = result_dict["extra_args"]["g"][cfg]
 
     # Ground Truth
-    gt_q = np.squeeze(result_dict["gt_q"][::plot_every], axis=1)
+    gt_q = result_dict["gt_q"][::plot_every, cfg]
 
     pe = pendulum.calc_potential_energy(m, g, l, q)
     ke = pendulum.calc_kinetic_energy(m, l, p)
