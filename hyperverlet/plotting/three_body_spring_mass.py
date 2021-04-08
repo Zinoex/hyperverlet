@@ -1,13 +1,10 @@
 from matplotlib.lines import Line2D
 
 from hyperverlet.energy import three_body_spring_mass
-from hyperverlet.math_utils import calc_dist_2d, calc_theta
+from hyperverlet.utils.math_utils import calc_dist_2d, calc_theta
 from hyperverlet.plotting.energy import plot_energy, init_energy_plot, energy_animate_update
 from matplotlib import pyplot as plt, animation
-from matplotlib.gridspec import GridSpec
 from matplotlib.patches import Circle
-import seaborn as sns
-import numpy as np
 
 from hyperverlet.plotting.grid_spec import *
 from hyperverlet.plotting.utils import plot_spring, set_limits, save_animation
