@@ -8,15 +8,15 @@ def construct_solver(solver_name, nn_args=None):
         hyper_solver = construct_model(nn_args)
 
     solvers = {
-        "HyperEulerSolver": HyperEulerSolver,
-        "EulerSolver": EulerSolver,
-        "HyperHeunSolver": HyperHeunSolver,
-        "HeunSolver": HeunSolver,
-        "RungeKutta4Solver": RungeKutta4Solver,
-        "VelocityVerletSolver": VelocityVerletSolver,
-        "HyperVelocityVerletSolver": HyperVelocityVerletSolver,
-        "ThirdOrderRuthSolver": ThirdOrderRuthSolver,
-        "FourthOrderRuthSolver": FourthOrderRuthSolver
+        "HyperEuler": HyperEuler,
+        "Euler": Euler,
+        "HyperHeun": HyperHeun,
+        "Heun": Heun,
+        "RungeKutta4": RungeKutta4,
+        "VelocityVerlet": VelocityVerlet,
+        "HyperVelocityVerlet": HyperVelocityVerlet,
+        "ThirdOrderRuth": ThirdOrderRuth,
+        "FourthOrderRuth": FourthOrderRuth
     }
 
     solver = solvers[solver_name]

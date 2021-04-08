@@ -1,5 +1,5 @@
 from hyperverlet.factories.solver_factory import construct_solver
-from hyperverlet.experiments import PendulumDataset, SpringMassDataset, ThreeBodySpringMassDataset
+from hyperverlet.datasets import PendulumDataset, SpringMassDataset, ThreeBodySpringMassDataset
 
 
 def construct_dataset(config, trainable=True):

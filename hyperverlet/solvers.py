@@ -4,14 +4,16 @@ import torch
 from torch import nn
 from tqdm import tqdm
 
+from hyperverlet.experiments import Experiment
+
 
 class BaseSolver(nn.Module):
     trainable = False
 
-    def forward(self, func: Callable, q: torch.Tensor, p: torch.Tensor, m: torch.Tensor, t, dt, **kwargs):
+    def forward(self, func: Experiment, q: torch.Tensor, p: torch.Tensor, m: torch.Tensor, t, dt, **kwargs):
         raise NotImplemented()
 
-    def trajectory(self, func: Callable, q0: torch.Tensor, p0: torch.Tensor, m: torch.Tensor, trajectory: torch.Tensor, disable_print=False, **kwargs):
+    def trajectory(self, func: Experiment, q0: torch.Tensor, p0: torch.Tensor, m: torch.Tensor, trajectory: torch.Tensor, disable_print=False, **kwargs):
         q_traj = torch.zeros((trajectory.size(0), *q0.size()), dtype=q0.dtype, device=q0.device)
         p_traj = torch.zeros((trajectory.size(0), *p0.size()), dtype=p0.dtype, device=p0.device)
 
@@ -29,8 +31,8 @@ class BaseSolver(nn.Module):
         return q_traj, p_traj
 
 
-class EulerSolver(BaseSolver):
-    def forward(self, func: Callable, q: torch.Tensor, p: torch.Tensor, m: torch.Tensor, t, dt, **kwargs):
+class Euler(BaseSolver):
+    def forward(self, func: Experiment, q: torch.Tensor, p: torch.Tensor, m: torch.Tensor, t, dt, **kwargs):
         dt = dt.view(-1, *[1 for _ in range(len(q.size()) - 1)])
 
         dq, dp = func(q, p, m, t, **kwargs)
@@ -38,7 +40,7 @@ class EulerSolver(BaseSolver):
         return q + dq * dt, p + dp * dt
 
 
-class HyperEulerSolver(BaseSolver):
+class HyperEuler(BaseSolver):
     trainable = True
 
     def __init__(self, hypersolver):
@@ -46,7 +48,7 @@ class HyperEulerSolver(BaseSolver):
 
         self.hypersolver = hypersolver
 
-    def forward(self, func: Callable, q: torch.Tensor, p: torch.Tensor, m: torch.Tensor, t, dt, **kwargs):
+    def forward(self, func: Experiment, q: torch.Tensor, p: torch.Tensor, m: torch.Tensor, t, dt, **kwargs):
         dt = dt.view(-1, *[1 for _ in range(len(q.size()) - 1)])
 
         dq, dp = func(q, p, m, t, **kwargs)
@@ -58,8 +60,8 @@ class HyperEulerSolver(BaseSolver):
         return q_next, p_next
 
 
-class HeunSolver(BaseSolver):
-    def forward(self, func: Callable, q: torch.Tensor, p: torch.Tensor, m: torch.Tensor, t, dt, **kwargs):
+class Heun(BaseSolver):
+    def forward(self, func: Experiment, q: torch.Tensor, p: torch.Tensor, m: torch.Tensor, t, dt, **kwargs):
         dt = dt.view(-1, *[1 for _ in range(len(q.size()) - 1)])
 
         dq, dp = func(q, p, m, t, **kwargs)
@@ -69,7 +71,7 @@ class HeunSolver(BaseSolver):
         return q + dt / 2 * (dq + dq_hat), p + dt / 2 * (dp + dp_hat)
 
 
-class HyperHeunSolver(BaseSolver):
+class HyperHeun(BaseSolver):
     trainable = True
 
     def __init__(self, hypersolver):
@@ -77,7 +79,7 @@ class HyperHeunSolver(BaseSolver):
 
         self.hypersolver = hypersolver
 
-    def forward(self, func: Callable, q: torch.Tensor, p: torch.Tensor, m: torch.Tensor, t, dt, **kwargs):
+    def forward(self, func: Experiment, q: torch.Tensor, p: torch.Tensor, m: torch.Tensor, t, dt, **kwargs):
         dt = dt.view(-1, *[1 for _ in range(len(q.size()) - 1)])
 
         dq, dp = func(q, p, m, t, **kwargs)
@@ -89,8 +91,8 @@ class HyperHeunSolver(BaseSolver):
         return q + dt / 2 * (dq + dq_hat) + (dt ** 3) * hq, p + dt / 2 * (dp + dp_hat) + (dt ** 3) * hp
 
 
-class RungeKutta4Solver(BaseSolver):
-    def forward(self, func: Callable, q: torch.Tensor, p: torch.Tensor, m: torch.Tensor, t, dt, **kwargs):
+class RungeKutta4(BaseSolver):
+    def forward(self, func: Experiment, q: torch.Tensor, p: torch.Tensor, m: torch.Tensor, t, dt, **kwargs):
         dt = dt.view(-1, *[1 for _ in range(len(q.size()) - 1)])
 
         dq1, dp1 = func(q, p, m, t, **kwargs)
@@ -104,7 +106,7 @@ class RungeKutta4Solver(BaseSolver):
         return q + (dq1 + 2 * dq2 + 2 * dq3 + dq4) / 6 * dt, p + (dp1 + 2 * dp2 + 2 * dp3 + dp4) / 6 * dt
 
 
-class HyperVelocityVerletSolver(BaseSolver):
+class HyperVelocityVerlet(BaseSolver):
     trainable = True
 
     def __init__(self, hypersolver):
@@ -112,7 +114,7 @@ class HyperVelocityVerletSolver(BaseSolver):
 
         self.hypersolver = hypersolver
 
-    def forward(self, func: Callable, q: torch.Tensor, p: torch.Tensor, m: torch.Tensor, t, dt, **kwargs):
+    def forward(self, func: Experiment, q: torch.Tensor, p: torch.Tensor, m: torch.Tensor, t, dt, **kwargs):
         dt = dt.view(-1, *[1 for _ in range(len(q.size()) - 1)])
         one_half = 1 / 2
 
@@ -138,7 +140,7 @@ class SymplecticSolver(BaseSolver):
         self.c = c
         self.d = d
 
-    def forward(self, func: Callable, q: torch.Tensor, p: torch.Tensor, m: torch.Tensor, t, dt, **kwargs):
+    def forward(self, func: Experiment, q: torch.Tensor, p: torch.Tensor, m: torch.Tensor, t, dt, **kwargs):
         dt = dt.view(-1, *[1 for _ in range(len(q.size()) - 1)])
 
         for c, d in zip(self.c, self.d):
@@ -153,7 +155,7 @@ class SymplecticSolver(BaseSolver):
         return q, p
 
 
-class VelocityVerletSolver(SymplecticSolver):
+class VelocityVerlet(SymplecticSolver):
     def __init__(self):
         one_half = 1 / 2
 
@@ -163,7 +165,7 @@ class VelocityVerletSolver(SymplecticSolver):
         )
 
 
-class ThirdOrderRuthSolver(SymplecticSolver):
+class ThirdOrderRuth(SymplecticSolver):
     def __init__(self):
         c1 = 1
         c2 = -2 / 3
@@ -178,7 +180,7 @@ class ThirdOrderRuthSolver(SymplecticSolver):
         )
 
 
-class FourthOrderRuthSolver(SymplecticSolver):
+class FourthOrderRuth(SymplecticSolver):
     def __init__(self):
         two_power_one_third = 2 ** (1 / 3)
         two_minus_two_power_one_third = 2 - two_power_one_third

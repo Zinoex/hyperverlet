@@ -1,6 +1,6 @@
 {
    "dataset": "spring_mass",
-   "gt_solver": "FourthOrderRuthSolver",
+   "gt_solver": "FourthOrderRuth",
    "train_duration": 100,
    "train_trajectory_length": 1000001,
    "train_sequence_length": 10,

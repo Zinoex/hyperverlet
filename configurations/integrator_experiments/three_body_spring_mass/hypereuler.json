@@ -3,7 +3,7 @@
   "plot_path": "visualization/{dataset}/{solver}_{train_duration}_{train_trajectory_length}_{coarsening_factor}_{test_duration}_{test_trajectory_length}_{datetime}.mp4",
   "train_args_path": "configurations/integrator_experiments/three_body_spring_mass/training.json",
   "model_args": {
-    "solver": "HyperEulerSolver",
+    "solver": "HyperEuler",
     "nn_path": "configurations/integrator_experiments/three_body_spring_mass/nn.json"
   },
   "dataset_args_path": "configurations/integrator_experiments/three_body_spring_mass/dataset.json",
