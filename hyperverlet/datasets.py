@@ -118,7 +118,7 @@ class ThreeBodySpringMassDataset(ExperimentDataset):
 
         self.experiment = ThreeBodySpringMass()
         length = sample_parameterized_truncated_normal((num_configurations, num_springs), 0.8, 0.1, 0.1, 1.5)
-        self.q0 = torch.rand(num_configurations, num_particles, num_euclid) * length.max(dim=1, keepdim=True)[0].unsqueeze(2) * 2
+        self.q0 = (torch.randn(num_configurations, num_particles, num_euclid) * 2 - 1) * length.max(dim=1, keepdim=True)[0].unsqueeze(2)
 
         # Don't judge, just accept
         first_index = [i for i in range(0, num_particles) for j in range(i + 1, num_particles)]

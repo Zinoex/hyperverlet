@@ -62,7 +62,7 @@ class ThreeBodySpringMass(BasePairPotential):
 
 class LennardJones(BasePairPotential):
     def force(self, r, disp, eps, sigma, **kwargs):
-        prefix = 48 * eps
+        prefix = 24 * eps
         sigma12 = sigma ** 12
         sigma6 = sigma ** 6
 
@@ -71,16 +71,11 @@ class LennardJones(BasePairPotential):
         r13 = r ** 13
         r7 = r ** 7
 
-        inner = sigma12 / r13 - 0.5 * sigma6 / r7
+        inner = 2 * sigma12 / r13 - sigma6 / r7
 
-        direction = disp / r.unsqueeze(-1)
+        num_particles = r.size(1)
+        r_prime = (r + torch.eye(num_particles, num_particles, device=r.device)).unsqueeze(-1)
+        direction = disp / r_prime
 
         return -prefix * inner.fill_diagonal_(0).unsqueeze(-1) * direction
-
-        # energy = self.potential(r).sum()
-        # scalar_force = torch.autograd.grad(energy, r, retain_graph=True)[0].fill_diagonal_(0)
-        # return -scalar_force.unsqueeze(2) * (disp / r.fill_diagonal_(1).unsqueeze(2))
-
-    def potential(self, r, eps, sigma, **kwargs):
-        return (4 * eps * ((sigma / r) ** 12 - (sigma / r) ** 6)).fill_diagonal_(0)
 
