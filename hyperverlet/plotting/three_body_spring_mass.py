@@ -85,39 +85,43 @@ def animate_tbsm(config, show_trail=True, show_springs=False, show_gt=False, sho
 
     # Create grid spec
     fig = plt.figure(figsize=(20, 15))
-    legend_elements = [Line2D([0], [0], color='r', label='Prediction')]
-    cm = ["blue", "orange", "green", "yellow", "red", "black"]
-
-    if show_gt:
-        #ax1, ax2 = gs_2_1_2(fig)
-        #ax1, ax2, ax3 = gs_3_2_3(fig)
-        ax1, ax2, ax3, ax4, ax5 = gs_5_3_2(fig)
-
-        # Energy variables
-        gt_ke = three_body_spring_mass.calc_kinetic_energy(m, gt_p)
-        gt_pe = three_body_spring_mass.calc_potential_energy(k, gt_q, l)
-        gt_te = three_body_spring_mass.calc_total_energy(gt_ke, gt_pe)
-        gt_pe_plot, gt_ke_plot, gt_te_plot = init_energy_plot(ax2, trajectory, gt_te, gt_ke, gt_pe,
-                                                              title="Ground truth energy plot", te_color='yellow',
-                                                              ke_color='red', pe_color='black')
-
-        legend_elements.append(Line2D([0], [0], color='g', label='Ground truth'))
-    else:
-        ax1, ax2 = gs_2_1_2(fig)
-
-    # Get x, y coordinate limits
-    xlim = gt_q[:, :, 0] if q[:, :, 0].max() < gt_q[:, :, 0].max() and show_gt else q[:, :, 0]
-    ylim = gt_q[:, :, 1] if q[:, :, 1].max() < gt_q[:, :, 1].max() and show_gt else q[:, :, 1]
-    zlim = None
 
     # Calculate energy of the system
     ke = three_body_spring_mass.calc_kinetic_energy(m, p)
     pe = three_body_spring_mass.calc_potential_energy(k, q, l)
     te = three_body_spring_mass.calc_total_energy(ke, pe)
 
+    if show_gt:
+        #ax1, ax2 = gs_2_1_2(fig)
+        #ax1, ax2, ax3 = gs_3_2_3(fig)
+        ax1, ax2, ax3, ax4, ax5 = gs_5_3_2(fig)
+
+        # Predictions must be initialized before gt, to ensure the correct order of labels
+        pe_plot, ke_plot, te_plot = init_energy_plot(ax2, trajectory, te, ke, pe)
+
+        # Energy variables
+        gt_ke = three_body_spring_mass.calc_kinetic_energy(m, gt_p)
+        gt_pe = three_body_spring_mass.calc_potential_energy(k, gt_q, l)
+        gt_te = three_body_spring_mass.calc_total_energy(gt_ke, gt_pe)
+
+        gt_pe_plot, gt_ke_plot, gt_te_plot = init_energy_plot(ax2, trajectory, gt_te, gt_ke, gt_pe,
+                                                              title="Ground truth energy plot", te_color='yellow',
+                                                              ke_color='red', pe_color='black', prefix="GT_")
+        cm = ["blue", "orange", "green", "yellow", "red", "black"]
+    else:
+        ax1, ax2 = gs_2_1_2(fig)
+        pe_plot, ke_plot, te_plot = init_energy_plot(ax2, trajectory, te, ke, pe)
+        cm = ["blue", "orange", "green"]
+
+    legend_elements = init_legend_elements(q, cm)
+
+    # Get x, y coordinate limits
+    xlim = gt_q[:, :, 0] if q[:, :, 0].max() < gt_q[:, :, 0].max() and show_gt else q[:, :, 0]
+    ylim = gt_q[:, :, 1] if q[:, :, 1].max() < gt_q[:, :, 1].max() and show_gt else q[:, :, 1]
+    zlim = None
+
     gt_pred_diff = gt_q - q
     # Initialize plots
-    pe_plot, ke_plot, te_plot = init_energy_plot(ax2, trajectory, te, ke, pe)
     p1_x, p1_y = init_diff_plot(ax3, trajectory, gt_pred_diff[:, 0])
     p2_x, p2_y = init_diff_plot(ax4, trajectory, gt_pred_diff[:, 1])
     p3_x, p3_y = init_diff_plot(ax5, trajectory, gt_pred_diff[:, 2])
@@ -126,7 +130,7 @@ def animate_tbsm(config, show_trail=True, show_springs=False, show_gt=False, sho
         ax1.clear()
         ax1.set_aspect('equal')
         ax1.set_title("Three body spring mass experiment")
-        set_limits(ax1, xlim, ylim, zlim)
+        set_limits(ax1, xlim, ylim, zlim, margin=1.2)
 
         if show_trail:
             plot_trail(ax1, q, i, color_map=cm[:3], trail_len=15)
@@ -138,11 +142,11 @@ def animate_tbsm(config, show_trail=True, show_springs=False, show_gt=False, sho
             if show_gt:
                 plot_springs(ax1, gt_q, i, cm[-3:])
 
-        ax1.legend(handles=legend_elements, loc='best')
+        ax1.legend(handles=legend_elements, loc='upper right', bbox_to_anchor=(0.5, 1.00), ncol=2, fancybox=True, shadow=True)
 
-        energy_animate_update(pe_plot, ke_plot, te_plot, trajectory, i, pe, ke, te, ax2)
         if show_gt:
             energy_animate_update(gt_pe_plot, gt_ke_plot, gt_te_plot, trajectory, i, gt_pe, gt_ke, gt_te, ax2)
+        energy_animate_update(pe_plot, ke_plot, te_plot, trajectory, i, pe, ke, te, ax2)
 
         diff_animate_update(ax3, p1_x, p1_y, trajectory, i, gt_pred_diff[:, 0])
         diff_animate_update(ax4, p2_x, p2_y, trajectory, i, gt_pred_diff[:, 1])
@@ -157,6 +161,18 @@ def animate_tbsm(config, show_trail=True, show_springs=False, show_gt=False, sho
 
     if save_plot:
         save_animation(anim, config)
+
+
+def init_legend_elements(q, cm):
+    legend_elements = []
+
+    for idx, color in enumerate(cm):
+        if idx >= q.shape[1]:
+            label = 'Prediction'
+        else:
+            label = "Ground truth"
+        legend_elements.append(Line2D([0], [0], color=color, label=label))
+    return legend_elements
 
 
 def init_diff_plot(ax, trajectory, diff, title=None, x_color='blue', y_color='orange'):
