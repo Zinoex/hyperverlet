@@ -3,7 +3,7 @@ from torch import nn
 from torch.utils.data import DataLoader
 
 from hyperverlet.timer import timer
-from hyperverlet.utils import send_to_device, torch_to_numpy
+from hyperverlet.utils.misc import send_to_device, torch_to_numpy
 
 
 def test(solver, dataset, device, config):

@@ -8,7 +8,7 @@ from hyperverlet.energy import pendulum
 from hyperverlet.plotting.energy import init_energy_plot, plot_energy, energy_animate_update
 from hyperverlet.plotting.phasespace import init_phasespace_plot, update_phasespace_plot
 from hyperverlet.plotting.utils import save_animation
-from hyperverlet.utils import load_pickle, format_path
+from hyperverlet.utils.misc import load_pickle, format_path
 
 
 def spring_mass_energy_plot(q, p, trajectory, m, k, l, g, plot_every=1):

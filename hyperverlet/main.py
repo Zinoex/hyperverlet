@@ -10,7 +10,7 @@ from hyperverlet.plotting.spring_mass import animate_sm
 from hyperverlet.plotting.three_body_spring_mass import animate_tbsm
 from hyperverlet.test import test
 from hyperverlet.train import train
-from hyperverlet.utils import seed_randomness, load_config, save_pickle, load_pickle, format_path
+from hyperverlet.utils.misc import seed_randomness, load_config, save_pickle, format_path
 
 
 def parse_arguments():

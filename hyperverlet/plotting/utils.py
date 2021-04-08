@@ -4,7 +4,7 @@ import os
 from matplotlib import pyplot as plt
 import numpy as np
 
-from hyperverlet.utils import format_path
+from hyperverlet.utils.misc import format_path
 
 
 def plot_3d_pos(q, plot_every=1, show=True):

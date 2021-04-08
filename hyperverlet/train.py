@@ -5,7 +5,7 @@ from torch import optim, nn
 from torch.utils.data import DataLoader
 from tqdm import trange, tqdm
 
-from hyperverlet.utils import send_to_device
+from hyperverlet.utils.misc import send_to_device
 
 
 def train(solver, dataset, device, config):
