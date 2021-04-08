@@ -6,7 +6,7 @@ from torch import nn
 
 class Experiment(nn.Module, abc.ABC):
     def forward(self, q, p, m, t, **kwargs):
-        return self.dq(p, m, t, **kwargs), self.dq(q, m, t, **kwargs)
+        return self.dq(p, m, t, **kwargs), self.dp(q, m, t, **kwargs)
 
     def dq(self, p, m, t, length, **kwargs):
         return p / m
