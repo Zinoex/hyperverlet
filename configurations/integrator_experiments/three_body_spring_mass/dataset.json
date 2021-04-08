@@ -1,13 +1,12 @@
 {
    "dataset": "three_body_spring_mass",
    "gt_solver": "FourthOrderRuthSolver",
-   "train_duration": 100,
-   "train_trajectory_length": 1000001,
-   "train_sequence_length": 100,
+   "train_duration": 50,
+   "train_trajectory_length": 500001,
+   "train_sequence_length": 10,
    "train_num_configurations": 100,
-   "test_duration": 10,
-   "test_trajectory_length": 1000001,
-   "test_num_configurations": 2,
-
+   "test_duration": 50,
+   "test_trajectory_length": 500001,
+   "test_num_configurations": 100,
    "coarsening_factor": 100
 }
