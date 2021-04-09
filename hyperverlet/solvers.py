@@ -10,34 +10,34 @@ from hyperverlet.experiments import Experiment
 class BaseSolver(nn.Module):
     trainable = False
 
-    def forward(self, func: Experiment, q: torch.Tensor, p: torch.Tensor, m: torch.Tensor, t, dt, **kwargs):
+    def forward(self, experiment: Experiment, q: torch.Tensor, p: torch.Tensor, m: torch.Tensor, t, dt, **kwargs):
         raise NotImplemented()
 
-    def trajectory(self, func: Experiment, q0: torch.Tensor, p0: torch.Tensor, m: torch.Tensor, trajectory: torch.Tensor, disable_print=False, **kwargs):
+    def trajectory(self, experiment: Experiment, q0: torch.Tensor, p0: torch.Tensor, m: torch.Tensor, trajectory: torch.Tensor, disable_print=False, **kwargs):
         q_traj = torch.zeros((trajectory.size(0), *q0.size()), dtype=q0.dtype, device=q0.device)
         p_traj = torch.zeros((trajectory.size(0), *p0.size()), dtype=p0.dtype, device=p0.device)
 
         q_traj[0], p_traj[0] = q0, p0
-        q, p = q0, p0
+        q, p = experiment.shift(q0, **kwargs), p0
 
         trajectory = trajectory.unsqueeze(-1)
         dtrajectory = trajectory[1:] - trajectory[:-1]
 
         for i, (t, dt) in enumerate(zip(tqdm(trajectory[:-1], disable=disable_print), dtrajectory)):
             # q, p = q.detach(), p.detach()
-            q, p = self(func, q, p, m, t, dt, **kwargs)
+            q, p = self(experiment, q, p, m, t, dt, **kwargs)
             q_traj[i + 1], p_traj[i + 1] = q, p
 
         return q_traj, p_traj
 
 
 class Euler(BaseSolver):
-    def forward(self, func: Experiment, q: torch.Tensor, p: torch.Tensor, m: torch.Tensor, t, dt, **kwargs):
+    def forward(self, experiment: Experiment, q: torch.Tensor, p: torch.Tensor, m: torch.Tensor, t, dt, **kwargs):
         dt = dt.view(-1, *[1 for _ in range(len(q.size()) - 1)])
 
-        dq, dp = func(q, p, m, t, **kwargs)
+        dq, dp = experiment(q, p, m, t, **kwargs)
 
-        return q + dq * dt, p + dp * dt
+        return experiment.shift(q + dq * dt, **kwargs), p + dp * dt
 
 
 class HyperEuler(BaseSolver):
@@ -48,27 +48,27 @@ class HyperEuler(BaseSolver):
 
         self.hypersolver = hypersolver
 
-    def forward(self, func: Experiment, q: torch.Tensor, p: torch.Tensor, m: torch.Tensor, t, dt, **kwargs):
+    def forward(self, experiment: Experiment, q: torch.Tensor, p: torch.Tensor, m: torch.Tensor, t, dt, **kwargs):
         dt = dt.view(-1, *[1 for _ in range(len(q.size()) - 1)])
 
-        dq, dp = func(q, p, m, t, **kwargs)
+        dq, dp = experiment(q, p, m, t, **kwargs)
         hq, hp = self.hypersolver(q, p, dq, dp, m, t, dt, **kwargs)
 
-        q_next = q + dq * dt + hq * (dt ** 2)
+        q_next = experiment.shift(q + dq * dt + hq * (dt ** 2), **kwargs)
         p_next = p + dp * dt + hp * (dt ** 2)
 
         return q_next, p_next
 
 
 class Heun(BaseSolver):
-    def forward(self, func: Experiment, q: torch.Tensor, p: torch.Tensor, m: torch.Tensor, t, dt, **kwargs):
+    def forward(self, experiment: Experiment, q: torch.Tensor, p: torch.Tensor, m: torch.Tensor, t, dt, **kwargs):
         dt = dt.view(-1, *[1 for _ in range(len(q.size()) - 1)])
 
-        dq, dp = func(q, p, m, t, **kwargs)
-        q_hat, p_hat = q + dq * dt, p + dp * dt
-        dq_hat, dp_hat = func(q_hat, p_hat, m, t + dt, **kwargs)
+        dq, dp = experiment(q, p, m, t, **kwargs)
+        q_hat, p_hat = experiment.shift(q + dq * dt, **kwargs), p + dp * dt
+        dq_hat, dp_hat = experiment(q_hat, p_hat, m, t + dt, **kwargs)
 
-        return q + dt / 2 * (dq + dq_hat), p + dt / 2 * (dp + dp_hat)
+        return experiment.shift(q + dt / 2 * (dq + dq_hat), **kwargs), p + dt / 2 * (dp + dp_hat)
 
 
 class HyperHeun(BaseSolver):
@@ -79,31 +79,31 @@ class HyperHeun(BaseSolver):
 
         self.hypersolver = hypersolver
 
-    def forward(self, func: Experiment, q: torch.Tensor, p: torch.Tensor, m: torch.Tensor, t, dt, **kwargs):
+    def forward(self, experiment: Experiment, q: torch.Tensor, p: torch.Tensor, m: torch.Tensor, t, dt, **kwargs):
         dt = dt.view(-1, *[1 for _ in range(len(q.size()) - 1)])
 
-        dq, dp = func(q, p, m, t, **kwargs)
+        dq, dp = experiment(q, p, m, t, **kwargs)
         hq, hp = self.hypersolver(q, p, dq, dp, m, t, dt, **kwargs)
-        q_hat, p_hat = q + dq * dt + (dt ** 2) * hq, p + dp * dt + (dt ** 2) * hp
-        dq_hat, dp_hat = func(q_hat, p_hat, m, t + dt, **kwargs)
+        q_hat, p_hat = experiment.shift(q + dq * dt + (dt ** 2) * hq, **kwargs), p + dp * dt + (dt ** 2) * hp
+        dq_hat, dp_hat = experiment(q_hat, p_hat, m, t + dt, **kwargs)
         hq, hp = self.hypersolver(q_hat, p_hat, dq_hat, dp_hat, m, t + dt, dt, **kwargs)
 
-        return q + dt / 2 * (dq + dq_hat) + (dt ** 3) * hq, p + dt / 2 * (dp + dp_hat) + (dt ** 3) * hp
+        return experiment.shift(q + dt / 2 * (dq + dq_hat) + (dt ** 3) * hq, **kwargs), p + dt / 2 * (dp + dp_hat) + (dt ** 3) * hp
 
 
 class RungeKutta4(BaseSolver):
-    def forward(self, func: Experiment, q: torch.Tensor, p: torch.Tensor, m: torch.Tensor, t, dt, **kwargs):
+    def forward(self, experiment: Experiment, q: torch.Tensor, p: torch.Tensor, m: torch.Tensor, t, dt, **kwargs):
         dt = dt.view(-1, *[1 for _ in range(len(q.size()) - 1)])
 
-        dq1, dp1 = func(q, p, m, t, **kwargs)
-        q1, p1, t1 = q + dq1 * dt / 2, p + dp1 * dt / 2, t + dt / 2
-        dq2, dp2 = func(q1, p1, m, t1, **kwargs)
-        q2, p2, t2 = q + dq2 * dt / 2, p + dp2 * dt / 2, t + dt / 2
-        dq3, dp3 = func(q2, p2, m, t2, **kwargs)
-        q3, p3, t3 = q + dq3 * dt, p + dp3 * dt, t + dt
-        dq4, dp4 = func(q3, p3, m, t3, **kwargs)
+        dq1, dp1 = experiment(q, p, m, t, **kwargs)
+        q1, p1, t1 = experiment.shift(q + dq1 * dt / 2, **kwargs), p + dp1 * dt / 2, t + dt / 2
+        dq2, dp2 = experiment(q1, p1, m, t1, **kwargs)
+        q2, p2, t2 = experiment.shift(q + dq2 * dt / 2, **kwargs), p + dp2 * dt / 2, t + dt / 2
+        dq3, dp3 = experiment(q2, p2, m, t2, **kwargs)
+        q3, p3, t3 = experiment.shift(q + dq3 * dt, **kwargs), p + dp3 * dt, t + dt
+        dq4, dp4 = experiment(q3, p3, m, t3, **kwargs)
 
-        return q + (dq1 + 2 * dq2 + 2 * dq3 + dq4) / 6 * dt, p + (dp1 + 2 * dp2 + 2 * dp3 + dp4) / 6 * dt
+        return experiment.shift(q + (dq1 + 2 * dq2 + 2 * dq3 + dq4) / 6 * dt, **kwargs), p + (dp1 + 2 * dp2 + 2 * dp3 + dp4) / 6 * dt
 
 
 class HyperVelocityVerlet(BaseSolver):
@@ -114,21 +114,21 @@ class HyperVelocityVerlet(BaseSolver):
 
         self.hypersolver = hypersolver
 
-    def forward(self, func: Experiment, q: torch.Tensor, p: torch.Tensor, m: torch.Tensor, t, dt, **kwargs):
+    def forward(self, experiment: Experiment, q: torch.Tensor, p: torch.Tensor, m: torch.Tensor, t, dt, **kwargs):
         dt = dt.view(-1, *[1 for _ in range(len(q.size()) - 1)])
         one_half = 1 / 2
 
-        dp = func.dp(q, m, t, **kwargs)
+        dp = experiment.dp(q, m, t, **kwargs)
         p = p + one_half * dp * dt
 
-        dq = func.dq(p, m, t, **kwargs)
-        q = q + dq * dt
+        dq = experiment.dq(p, m, t, **kwargs)
+        q = experiment.shift(q + dq * dt, **kwargs)
 
-        dp = func.dp(q, m, t, **kwargs)
+        dp = experiment.dp(q, m, t, **kwargs)
         p = p + one_half * dp * dt
 
         hq, hp = self.hypersolver(q, p, dq, dp, m, t, dt, **kwargs)
-        return q + hq * dt ** 2, p + hp * dt ** 2
+        return experiment.shift(q + hq * dt ** 2, **kwargs), p + hp * dt ** 2
 
 
 class SymplecticSolver(BaseSolver):
@@ -140,16 +140,16 @@ class SymplecticSolver(BaseSolver):
         self.c = c
         self.d = d
 
-    def forward(self, func: Experiment, q: torch.Tensor, p: torch.Tensor, m: torch.Tensor, t, dt, **kwargs):
+    def forward(self, experiment: Experiment, q: torch.Tensor, p: torch.Tensor, m: torch.Tensor, t, dt, **kwargs):
         dt = dt.view(-1, *[1 for _ in range(len(q.size()) - 1)])
 
         for c, d in zip(self.c, self.d):
             if c != 0:
-                dq = func.dq(p, m, t, **kwargs)
-                q = q + c * dq * dt
+                dq = experiment.dq(p, m, t, **kwargs)
+                q = experiment.shift(q + c * dq * dt, **kwargs)
 
             if d != 0:
-                dp = func.dp(q, m, t, **kwargs)
+                dp = experiment.dp(q, m, t, **kwargs)
                 p = p + d * dp * dt
 
         return q, p
