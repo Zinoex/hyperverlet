@@ -13,7 +13,7 @@ from hyperverlet.utils.misc import load_pickle, format_path
 
 def plot_springs(ax, q, i, colormap=None):
     # Plotted bob circle radius
-    r = 0.02
+    r = 0.1
     num_particles = q.shape[1]
 
     for particle in range(num_particles):
@@ -65,7 +65,7 @@ def three_body_spring_mass_energy_plot(q, p, trajectory, m, k, l, plot_every=1):
     plot_energy(trajectory, te, ke, pe)
 
 
-def animate_tbsm(config, show_trail=True, show_springs=False, show_gt=False, show_plot=True, cfg=0):
+def animate_tbsm(config, show_trail=True, show_springs=False, show_plot=True, cfg=0):
     plot_every = config["plotting"]["plot_every"]
     result_path = format_path(config, config["result_path"])
     result_dict = load_pickle(result_path)
@@ -85,68 +85,58 @@ def animate_tbsm(config, show_trail=True, show_springs=False, show_gt=False, sho
 
     # Create grid spec
     fig = plt.figure(figsize=(20, 15))
+    ax1, ax2, ax3, ax4, ax5 = gs_5_3_2(fig)
 
     # Calculate energy of the system
     ke = three_body_spring_mass.calc_kinetic_energy(m, p)
     pe = three_body_spring_mass.calc_potential_energy(k, q, l)
     te = three_body_spring_mass.calc_total_energy(ke, pe)
 
-    if show_gt:
-        #ax1, ax2 = gs_2_1_2(fig)
-        #ax1, ax2, ax3 = gs_3_2_3(fig)
-        ax1, ax2, ax3, ax4, ax5 = gs_5_3_2(fig)
+    gt_ke = three_body_spring_mass.calc_kinetic_energy(m, gt_p)
+    gt_pe = three_body_spring_mass.calc_potential_energy(k, gt_q, l)
+    gt_te = three_body_spring_mass.calc_total_energy(gt_ke, gt_pe)
+    te_max = max(te.max(), gt_te.max())
 
-        # Predictions must be initialized before gt, to ensure the correct order of labels
-        pe_plot, ke_plot, te_plot = init_energy_plot(ax2, trajectory, te, ke, pe)
+    # Color maps
+    cm_gt = ["yellow", "red", "cyan"]
+    cm_pred = ["blue", "orange", "green"]
 
-        # Energy variables
-        gt_ke = three_body_spring_mass.calc_kinetic_energy(m, gt_p)
-        gt_pe = three_body_spring_mass.calc_potential_energy(k, gt_q, l)
-        gt_te = three_body_spring_mass.calc_total_energy(gt_ke, gt_pe)
-
-        gt_pe_plot, gt_ke_plot, gt_te_plot = init_energy_plot(ax2, trajectory, gt_te, gt_ke, gt_pe,
-                                                              title="Ground truth energy plot", te_color='yellow',
-                                                              ke_color='red', pe_color='black', prefix="GT_")
-        cm = ["blue", "orange", "green", "yellow", "red", "black"]
-    else:
-        ax1, ax2 = gs_2_1_2(fig)
-        pe_plot, ke_plot, te_plot = init_energy_plot(ax2, trajectory, te, ke, pe)
-        cm = ["blue", "orange", "green"]
-
-    legend_elements = init_legend_elements(q, cm)
 
     # Get x, y coordinate limits
-    xlim = gt_q[:, :, 0] if q[:, :, 0].max() < gt_q[:, :, 0].max() and show_gt else q[:, :, 0]
-    ylim = gt_q[:, :, 1] if q[:, :, 1].max() < gt_q[:, :, 1].max() and show_gt else q[:, :, 1]
-    zlim = None
+    xlim = gt_q[:, :, 0] if q[:, :, 0].max() < gt_q[:, :, 0].max() else q[:, :, 0]
+    ylim = gt_q[:, :, 1] if q[:, :, 1].max() < gt_q[:, :, 1].max() else q[:, :, 1]
 
     gt_pred_diff = gt_q - q
+
     # Initialize plots
     p1_x, p1_y = init_diff_plot(ax3, trajectory, gt_pred_diff[:, 0])
     p2_x, p2_y = init_diff_plot(ax4, trajectory, gt_pred_diff[:, 1])
     p3_x, p3_y = init_diff_plot(ax5, trajectory, gt_pred_diff[:, 2])
 
+    gt_pe_plot, gt_ke_plot, gt_te_plot = init_energy_plot(ax2, trajectory, gt_te, gt_ke, gt_pe, title="Ground truth energy plot", cm=cm_gt, prefix="GT_")
+    pe_plot, ke_plot, te_plot = init_energy_plot(ax2, trajectory, te, ke, pe, cm=cm_pred)
+    ax2.set_ylim(-0.3 * te_max, te_max * 1.05)
+
+    legend_elements = create_gt_pred_legends(q, cm_gt + cm_pred)
+
     def animate(i):
         ax1.clear()
         ax1.set_aspect('equal')
         ax1.set_title("Three body spring mass experiment")
-        set_limits(ax1, xlim, ylim, zlim, margin=1.2)
+        set_limits(ax1, xlim, ylim, margin=1.2)
 
         if show_trail:
-            plot_trail(ax1, q, i, color_map=cm[:3], trail_len=15)
-            if show_gt:
-                plot_trail(ax1, gt_q, i, color_map=cm[-3:], trail_len=15)
+            plot_trail(ax1, q, i, color_map=cm_pred, trail_len=15)
+            plot_trail(ax1, gt_q, i, color_map=cm_gt, trail_len=15)
 
         if show_springs:
-            plot_springs(ax1, q, i, cm[:3])
-            if show_gt:
-                plot_springs(ax1, gt_q, i, cm[-3:])
+            plot_springs(ax1, q, i, cm_pred)
+            plot_springs(ax1, gt_q, i, cm_gt)
 
-        ax1.legend(handles=legend_elements, loc='upper right', bbox_to_anchor=(0.5, 1.00), ncol=2, fancybox=True, shadow=True)
+        ax1.legend(handles=legend_elements, loc='upper left', bbox_to_anchor=(0, 1), ncol=2, fancybox=True, shadow=True)
 
-        if show_gt:
-            energy_animate_update(gt_pe_plot, gt_ke_plot, gt_te_plot, trajectory, i, gt_pe, gt_ke, gt_te, ax2)
         energy_animate_update(pe_plot, ke_plot, te_plot, trajectory, i, pe, ke, te, ax2)
+        energy_animate_update(gt_pe_plot, gt_ke_plot, gt_te_plot, trajectory, i, gt_pe, gt_ke, gt_te, ax2)
 
         diff_animate_update(ax3, p1_x, p1_y, trajectory, i, gt_pred_diff[:, 0])
         diff_animate_update(ax4, p2_x, p2_y, trajectory, i, gt_pred_diff[:, 1])
@@ -163,7 +153,7 @@ def animate_tbsm(config, show_trail=True, show_springs=False, show_gt=False, sho
         save_animation(anim, config)
 
 
-def init_legend_elements(q, cm):
+def create_gt_pred_legends(q, cm):
     legend_elements = []
 
     for idx, color in enumerate(cm):
@@ -181,7 +171,7 @@ def init_diff_plot(ax, trajectory, diff, title=None, x_color='blue', y_color='or
     ax.set_xlabel("Time")
     ax.set_ylabel("Difference")
     ax.set_title(title)
-    plt.legend(loc='lower left')
+    ax.legend(loc='lower left')
 
     return x_plot, y_plot
 
