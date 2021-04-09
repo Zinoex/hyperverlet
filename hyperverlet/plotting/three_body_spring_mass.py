@@ -66,6 +66,7 @@ def three_body_spring_mass_energy_plot(q, p, trajectory, m, k, l, plot_every=1):
 
 
 def animate_tbsm(config, show_trail=True, show_springs=False, show_plot=True, cfg=0):
+    # Config handler
     plot_every = config["plotting"]["plot_every"]
     result_path = format_path(config, config["result_path"])
     result_dict = load_pickle(result_path)
@@ -79,7 +80,7 @@ def animate_tbsm(config, show_trail=True, show_springs=False, show_plot=True, cf
     l = result_dict["extra_args"]["length"][cfg]
     k = result_dict["extra_args"]["k"][cfg]
 
-    # Ground Truth
+    # Ground truth results
     gt_q = result_dict["gt_q"][::plot_every, cfg]
     gt_p = result_dict["gt_p"][::plot_every, cfg]
 
@@ -100,7 +101,6 @@ def animate_tbsm(config, show_trail=True, show_springs=False, show_plot=True, cf
     # Color maps
     cm_gt = ["yellow", "red", "cyan"]
     cm_pred = ["blue", "orange", "green"]
-
 
     # Get x, y coordinate limits
     xlim = gt_q[:, :, 0] if q[:, :, 0].max() < gt_q[:, :, 0].max() else q[:, :, 0]
