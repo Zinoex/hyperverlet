@@ -134,3 +134,5 @@ dmypy.json
 # Project specific
 results/
 visualization/
+data/
+cache/

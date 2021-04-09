@@ -34,7 +34,7 @@ def parse_arguments():
 def evaluate(config_path):
     seed_randomness()
     config = load_config(config_path)
-    device = torch.device('cpu')
+    device = torch.device('cuda')
 
     # Solver Construction
     model_config = config['model_args']

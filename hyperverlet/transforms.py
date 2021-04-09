@@ -19,3 +19,6 @@ class Coarsening:
     @property
     def new_trajectory_length(self):
         return (self.trajectory_length - 1) // self.coarsening_factor + 1
+
+    def compute_new_trajectory_length(self, trajectory_length):
+        return (trajectory_length - 1) // self.coarsening_factor + 1

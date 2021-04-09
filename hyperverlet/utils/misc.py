@@ -63,15 +63,20 @@ def torch_to_numpy(extra_args):
     }
 
 
-def format_path(config, path):
+def format_path(config, path, **kwargs):
     dataset_args = config["dataset_args"]
     model_args = config["model_args"]
 
-    return path.format(dataset=dataset_args["dataset"],
-                       solver=model_args['solver'],
-                       train_duration=dataset_args["train_duration"],
-                       train_trajectory_length=dataset_args["train_trajectory_length"],
-                       coarsening_factor=dataset_args["coarsening_factor"],
-                       test_duration=dataset_args["test_duration"],
-                       test_trajectory_length=dataset_args["test_trajectory_length"],
-                       datetime=datetime.now())
+    return path.format(
+        dataset=dataset_args["dataset"],
+        solver=model_args['solver'],
+        train_duration=dataset_args["train_duration"],
+        train_trajectory_length=dataset_args["train_trajectory_length"],
+        train_num_configurations=dataset_args["train_num_configurations"],
+        coarsening_factor=dataset_args["coarsening_factor"],
+        test_duration=dataset_args["test_duration"],
+        test_trajectory_length=dataset_args["test_trajectory_length"],
+        test_num_configurations=dataset_args["test_num_configurations"],
+        datetime=datetime.now(),
+        **kwargs
+   )

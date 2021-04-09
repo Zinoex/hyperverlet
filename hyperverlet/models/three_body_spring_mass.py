@@ -44,14 +44,14 @@ class ThreeBodySpringMassGraphModel(nn.Module):
         self.model_q = GraphNetwork(model_args)
         self.model_p = GraphNetwork(model_args)
 
-    def fully_connected(self, batch_size, num_particles):
-        particle_ids = torch.arange(num_particles)
+    def fully_connected(self, batch_size, num_particles, device):
+        particle_ids = torch.arange(num_particles, device=device)
 
         senders = particle_ids.repeat(num_particles)
         receivers = particle_ids.repeat_interleave(num_particles)
 
         if batch_size is not None:
-            batch_idx = torch.arange(batch_size).repeat_interleave(num_particles ** 2) * num_particles
+            batch_idx = torch.arange(batch_size, device=device).repeat_interleave(num_particles ** 2) * num_particles
             senders = senders.repeat(batch_size) + batch_idx
             receivers = receivers.repeat(batch_size) + batch_idx
 
@@ -66,7 +66,7 @@ class ThreeBodySpringMassGraphModel(nn.Module):
         """
         batch_size = length.size(0) if len(length.size()) == 3 else None
 
-        return self.fully_connected(batch_size, num_particles), torch.stack([length, k], dim=-1).view(-1, 2)
+        return self.fully_connected(batch_size, num_particles, length.device), torch.stack([length, k], dim=-1).view(-1, 2)
 
     def forward(self, q, p, dq, dp, m, t, dt, length, k, include_q=True, include_p=True, **kwargs):
         num_particles = q.size(-2)

@@ -4,7 +4,7 @@
   "train_args_path": "configurations/test/three_body_spring_mass/training.json",
   "model_args": {
     "solver": "Euler",
-    "nn_path": "configurations/test/test/nn.json"
+    "nn_path": "configurations/test/three_body_spring_mass/nn.json"
   },
   "dataset_args_path": "configurations/test/three_body_spring_mass/dataset.json",
   "plotting_args_path": "configurations/test/three_body_spring_mass/plotting.json"

@@ -34,18 +34,18 @@ class SpringMass(Experiment):
 
 class BasePairPotential(Experiment):
     def dp(self, q, m, t, **kwargs):
-        disp = self.displacement(q)
-        r = self.distance(disp)
+        disp = self.displacement(q, **kwargs)
+        r = self.distance(disp, **kwargs)
 
         return self.force(r, disp, **kwargs).sum(axis=-2)
 
-    def displacement(self, q):
+    def displacement(self, q, **kwargs):
         a = torch.unsqueeze(q, -2)
         b = torch.unsqueeze(q, -3)
 
         return a - b
 
-    def distance(self, disp):
+    def distance(self, disp, **kwargs):
         return disp.norm(dim=-1)
 
 

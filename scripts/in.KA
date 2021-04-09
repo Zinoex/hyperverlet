@@ -1,0 +1,88 @@
+variable var_timestep equal 0.005
+variable target_temp equal 0.5
+variable target_pres equal 1.55
+variable relax_time equal 7.446
+variable relax_run equal (${relax_time}*10)/${var_timestep}
+variable num_atom1 equal 3277
+variable num_atom2 equal 819
+variable seed2 equal ${seed}+1
+
+variable msd_on equal 0
+variable dsp_on equal 0
+
+
+units lj
+dimension 3
+processors * * *
+boundary p p p
+
+# read data
+atom_style atomic
+
+region my_region block 0 15.041 0 15.041 0 15.041
+create_box 2 my_region
+create_atoms 1 random ${num_atom1} ${seed}  my_region
+create_atoms 2 random ${num_atom2} ${seed2} my_region
+mass 1 1
+mass 2 1
+
+# inter-atomic potential
+pair_style lj/cut 2.5
+pair_coeff 1 1 1 1
+pair_coeff 1 2 1.5 0.80
+pair_coeff 2 2 0.5 0.88
+
+neighbor 0.3 bin
+neigh_modify every 1 delay 0 check yes
+
+velocity all create 0.5495 ${seed} dist gaussian
+
+timestep ${var_timestep}
+
+# outputs
+thermo 1000
+thermo_style custom step temp pe press lx density 
+
+minimize 1.0e-4 1.0e-6 1000 1000
+
+print nose1
+fix nose1 all npt temp 0.5495 0.5495 $(100.0*dt) iso 0.4888 0.4888 $(1000*dt)
+run 10000
+unfix nose1
+
+print nose2
+fix nose2 all npt temp 0.5495 ${target_temp} $(100.0*dt) iso 0.4888 ${target_pres} $(1000*dt)
+run 10000
+unfix nose2
+
+print nose3
+fix nose3 all npt temp ${target_temp} ${target_temp} $(100.0*dt) iso ${target_pres} ${target_pres} $(1000*dt)
+run ${relax_run}
+unfix nose3
+
+print nose4
+fix nose4 all nvt temp ${target_temp} ${target_temp} $(100.0*dt)
+run ${relax_run}
+unfix nose4
+
+#if "${msd_on} == 1" then &
+#   "group A type 1" &
+#   "group B type 2" &
+#   "compute msdA A msd" &
+#   "compute msdB B msd" &
+#   "fix msdAfix A ave/time 1 1 1 c_msdA[4] file msdA.data" &
+#   "fix msdBfix B ave/time 1 1 1 c_msdB[4] file msdB.data"
+
+
+if "${dsp_on} == 1" then &
+   "compute dsp all displace/atom" &
+   "dump 1 all custom 1 ${output_dir}/md${seed}.lammpstrj id type x y z vx vy vz c_dsp[4]" &
+else & 
+   "dump 2 all custom 1 ${output_dir}/md${seed}.lammpstrj id type x y z vx vy vz" &
+   "# dump 2 all h5md 1 md.h5 position velocity species"
+
+print nose5
+fix nose5 all nve
+run 10000
+unfix nose5
+

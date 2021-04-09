@@ -1,5 +1,6 @@
 from hyperverlet.factories.solver_factory import construct_solver
 from hyperverlet.datasets import PendulumDataset, SpringMassDataset, ThreeBodySpringMassDataset
+from hyperverlet.utils.misc import format_path
 
 
 def construct_dataset(config, trainable=True):
@@ -19,6 +20,9 @@ def construct_dataset(config, trainable=True):
 
     train_sequence_length = dataset_config["train_sequence_length"]
 
+    train_cache_path = format_path(config, dataset_config["cache_path"], split='train')
+    test_cache_path = format_path(config, dataset_config["cache_path"], split='test')
+
     coarsening_factor = dataset_config['coarsening_factor']
 
     gt_solver = construct_solver(gt_solver_name)
@@ -26,10 +30,10 @@ def construct_dataset(config, trainable=True):
     ds_mapping = dict(pendulum=PendulumDataset, spring_mass=SpringMassDataset, three_body_spring_mass=ThreeBodySpringMassDataset)
     ds_cls = ds_mapping[dataset]
 
-    test_ds = ds_cls(gt_solver, test_duration, test_trajectory_length, test_num_config, coarsening_factor, sequence_length=None)
+    test_ds = ds_cls(gt_solver, test_duration, test_trajectory_length, test_num_config, coarsening_factor, train_cache_path, sequence_length=None)
 
     train_ds = None
     if trainable:
-        train_ds = ds_cls(gt_solver, train_duration, train_trajectory_length, train_num_config, coarsening_factor, sequence_length=train_sequence_length)
+        train_ds = ds_cls(gt_solver, train_duration, train_trajectory_length, train_num_config, coarsening_factor, test_cache_path, sequence_length=train_sequence_length)
 
     return train_ds, test_ds
