@@ -9,5 +9,5 @@
    "test_duration": 100,
    "test_trajectory_length": 1000001,
    "test_num_configurations": 100,
-   "coarsening_factor": 100
+   "coarsening_factor": 200
 }

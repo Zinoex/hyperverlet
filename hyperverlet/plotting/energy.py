@@ -13,14 +13,13 @@ def energy_animate_update(pe_plot, ke_plot, te_plot, trajectory, i, pe, ke, te, 
         ax.set_xlim(traj_mid - traj_range_half, traj_mid + traj_range_half)
 
 
-def init_energy_plot(ax, trajectory, te, ke, pe, title="Energy plot", te_color='blue', ke_color='orange', pe_color='green', prefix=""):
-    te_plot, = ax.plot(trajectory[0], te[0], label=f'{prefix}TE', color=te_color)
-    ke_plot, = ax.plot(trajectory[0], ke[0], label=f'{prefix}KE', color=ke_color)
-    pe_plot, = ax.plot(trajectory[0], pe[0], label=f'{prefix}PE', color=pe_color)
+def init_energy_plot(ax, trajectory, te, ke, pe, title="Energy plot", cm=['blue', 'orange', 'green'], prefix=""):
+    te_plot, = ax.plot(trajectory[0], te[0], label=f'{prefix}TE', color=cm[0])
+    ke_plot, = ax.plot(trajectory[0], ke[0], label=f'{prefix}KE', color=cm[1])
+    pe_plot, = ax.plot(trajectory[0], pe[0], label=f'{prefix}PE', color=cm[2])
     ax.set_xlabel("Time")
     ax.set_ylabel("Energy")
     ax.set_title(title)
-    ax.set_ylim(-0.2, te.max() * 1.05)
 
     ax.legend(loc='upper center', bbox_to_anchor=(0.5, 0.20), fancybox=True, shadow=True, ncol=6)
 
