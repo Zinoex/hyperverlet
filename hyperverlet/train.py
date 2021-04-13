@@ -31,8 +31,14 @@ def train(solver, dataset, device, config):
             trajectory = batch['trajectory'].to(device, non_blocking=True).transpose_(0, 1)
             extra_args = send_to_device(batch['extra_args'], device, non_blocking=True)
 
-            q, p = solver.trajectory(dataset.experiment, q_base[0], p_base[0], mass, trajectory, disable_print=True, **extra_args)
-            loss = criterion(q, q_base) + criterion(p, p_base)
+            # q, p = solver.trajectory(dataset.experiment, q_base[0], p_base[0], mass, trajectory, disable_print=True, **extra_args)
+            #loss = criterion(q, q_base) + criterion(p, p_base)
+
+
+            q_base_res, p_base_res = solver.get_base_residual(dataset.experiment, q_base, p_base, mass, trajectory, disable_print=True, **extra_args)
+            q_hyper_res, p_hyper_res = solver.get_hyper_residual(dataset.experiment, q_base, p_base, mass, trajectory, disable_print=True, **extra_args)
+
+            loss = criterion(q_hyper_res, q_base_res) + criterion(p_base_res, p_base_res)
 
             loss.backward()
             # nn.utils.clip_grad_norm_(solver.parameters(), 1)

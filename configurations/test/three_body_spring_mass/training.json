@@ -1,5 +1,5 @@
 {
     "epoch": 10,
-    "batch_size": 200,
-    "num_workers": 8
+    "batch_size": 1000,
+    "num_workers": 4
 }
