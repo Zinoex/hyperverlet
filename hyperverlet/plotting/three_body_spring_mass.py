@@ -1,10 +1,11 @@
 from matplotlib.lines import Line2D
+from matplotlib import pyplot as plt, animation
+from matplotlib.patches import Circle
+import seaborn as sns
 
 from hyperverlet.energy import three_body_spring_mass
 from hyperverlet.utils.math import calc_dist_2d, calc_theta
 from hyperverlet.plotting.energy import plot_energy, init_energy_plot, energy_animate_update
-from matplotlib import pyplot as plt, animation
-from matplotlib.patches import Circle
 
 from hyperverlet.plotting.grid_spec import *
 from hyperverlet.plotting.utils import plot_spring, set_limits, save_animation
@@ -99,8 +100,9 @@ def animate_tbsm(config, show_trail=True, show_springs=False, show_plot=True, cf
     te_max = max(te.max(), gt_te.max())
 
     # Color maps
-    cm_gt = ["yellow", "red", "cyan"]
-    cm_pred = ["blue", "orange", "green"]
+    cm = sns.color_palette('Paired', as_cmap=True)
+    cm_gt = [cm(i * 2) for i in range(q.shape[1])]
+    cm_pred = [cm(i * 2 + 1) for i in range(q.shape[1])]
 
     # Get x, y coordinate limits
     xlim = gt_q[:, :, 0] if q[:, :, 0].max() < gt_q[:, :, 0].max() else q[:, :, 0]
@@ -126,17 +128,17 @@ def animate_tbsm(config, show_trail=True, show_springs=False, show_plot=True, cf
         set_limits(ax1, xlim, ylim, margin=1.2)
 
         if show_trail:
-            plot_trail(ax1, q, i, color_map=cm_pred, trail_len=15)
-            plot_trail(ax1, gt_q, i, color_map=cm_gt, trail_len=15)
+            plot_trail(ax1, gt_q, i, color_map=cm_gt, trail_len=5)
+            plot_trail(ax1, q, i, color_map=cm_pred, trail_len=5)
 
         if show_springs:
-            plot_springs(ax1, q, i, cm_pred)
             plot_springs(ax1, gt_q, i, cm_gt)
+            plot_springs(ax1, q, i, cm_pred)
 
         ax1.legend(handles=legend_elements, loc='upper left', bbox_to_anchor=(0, 1), ncol=2, fancybox=True, shadow=True)
 
-        energy_animate_update(pe_plot, ke_plot, te_plot, trajectory, i, pe, ke, te, ax2)
         energy_animate_update(gt_pe_plot, gt_ke_plot, gt_te_plot, trajectory, i, gt_pe, gt_ke, gt_te, ax2)
+        energy_animate_update(pe_plot, ke_plot, te_plot, trajectory, i, pe, ke, te, ax2)
 
         diff_animate_update(ax3, p1_x, p1_y, trajectory, i, gt_pred_diff[:, 0])
         diff_animate_update(ax4, p2_x, p2_y, trajectory, i, gt_pred_diff[:, 1])

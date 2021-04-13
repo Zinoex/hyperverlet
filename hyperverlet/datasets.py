@@ -27,6 +27,8 @@ class ExperimentDataset(Dataset):
 
         self.q, self.p, self.trajectory = self.coarsening(self.q, self.p, self.trajectory)
 
+        self.dt = self.trajectory[1:] - self.trajectory[:-1]
+
         if self.sequence_length is not None:
             assert self.coarsening.new_trajectory_length >= self.sequence_length, 'Trajectory length too short for coarsening'
 
@@ -64,6 +66,7 @@ class ExperimentDataset(Dataset):
         q = self.q
         p = self.p
         trajectory = self.trajectory
+        dt = self.dt
 
         if self.sequence_length is None:
             config_idx = idx
@@ -75,12 +78,14 @@ class ExperimentDataset(Dataset):
             q = q[time_idx:time_idx + self.sequence_length + 1]
             p = p[time_idx:time_idx + self.sequence_length + 1]
             trajectory = trajectory[time_idx:time_idx + self.sequence_length + 1]
+            dt = dt[time_idx:time_idx + self.sequence_length]
 
         return {
             'q': q[:, config_idx],
             'p': p[:, config_idx],
             'mass': self.mass[config_idx],
             'trajectory': trajectory,
+            'dt': dt,
             'extra_args': self.config_extra_args(config_idx)
         }
 
