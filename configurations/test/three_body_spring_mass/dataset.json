@@ -4,10 +4,10 @@
    "gt_solver": "FourthOrderRuth",
    "train_duration": 100,
    "train_trajectory_length": 1000001,
-   "train_sequence_length": 10,
+   "train_sequence_length": 100,
    "train_num_configurations": 100,
    "test_duration": 100,
    "test_trajectory_length": 1000001,
    "test_num_configurations": 100,
-   "coarsening_factor": 100
+   "coarsening_factor": 200
 }

@@ -1,3 +1,4 @@
+import torch
 from torch import nn
 from torch.nn import Linear
 
@@ -47,10 +48,10 @@ class EdgeModel(nn.Module):
         self.activate_last = model_args['activate_last']
         self.layer_norm = model_args['layer_norm']
 
-        self.mlp = MergeNDenseBlock((self.h_dim, self.h_dim, self.h_dim), self.h_dim, self.h_dim, self.n_dense, activate_last=self.activate_last)
+        self.mlp = NDenseBlock(3 * self.h_dim, self.h_dim, self.h_dim, self.n_dense, activate_last=self.activate_last)
 
     def forward(self, src, dest, e):
-        return self.mlp(e, dest, src)
+        return self.mlp(torch.cat([e, dest, src], dim=-1))
 
 
 class NodeModel(nn.Module):
@@ -62,13 +63,13 @@ class NodeModel(nn.Module):
         self.activate_last = model_args['activate_last']
         self.layer_norm = model_args['layer_norm']
 
-        self.mlp = MergeNDenseBlock((self.h_dim, self.h_dim), self.h_dim, self.h_dim, self.n_dense, activate_last=self.activate_last)
+        self.mlp = NDenseBlock(2 * self.h_dim, self.h_dim, self.h_dim, self.n_dense, activate_last=self.activate_last)
 
     def forward(self, v, edge_index, e):
         _, receiver = edge_index
         out = scatter_add(e, receiver, dim=0, dim_size=v.size(0))
 
-        return self.mlp(out, v)
+        return self.mlp(torch.cat([out, v], dim=-1))
 
 
 class GraphEncoder(nn.Module):

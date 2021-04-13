@@ -1,7 +1,7 @@
 import torch
 from torch import nn
 
-from hyperverlet.models.misc import MergeNDenseBlock
+from hyperverlet.models.misc import MergeNDenseBlock, NDenseBlock
 
 from hyperverlet.models.graph_model import GraphNetwork
 
@@ -41,6 +41,7 @@ class ThreeBodySpringMassGraphModel(nn.Module):
     def __init__(self, model_args):
         super().__init__()
 
+        self.node_input_dim = model_args['encoder_args']['node_input_dim']
         self.model_q = GraphNetwork(model_args)
         self.model_p = GraphNetwork(model_args)
 
@@ -68,39 +69,34 @@ class ThreeBodySpringMassGraphModel(nn.Module):
 
         return self.fully_connected(batch_size, num_particles, length.device), torch.stack([length, k], dim=-1).view(-1, 2)
 
-    def forward(self, q, p, dq, dp, m, t, dt, length, k, include_q=True, include_p=True, **kwargs):
-        num_particles = q.size(-2)
-        spatial_dim = q.size(-1)
+    def forward(self, q, p, dq, dp, m, t, dt, **kwargs):
+        return self.hq(q, dq, m, t, dt, **kwargs), self.hp(p, dp, m, t, dt, **kwargs)
+
+    def hq(self, q, dq, m, t, dt, **kwargs):
+        return self.process(self.model_q, q, dq, m, t, dt, **kwargs)
+
+    def hp(self, p, dp, m, t, dt, **kwargs):
+        return self.process(self.model_p, p, dp, m, t, dt, **kwargs)
+
+    def process(self, model, x, dx, m, t, dt, length, k, **kwargs):
+        num_particles = dx.size(-2)
+        spatial_dim = dx.size(-1)
 
         edge_index, edge_attr = self.preprocess_edges(num_particles, length, k)
 
         edge_attr = edge_attr.unsqueeze(1).repeat(1, spatial_dim, 1)
 
-        if len(q.size()) == 3:
+        if len(x.size()) == 3:
             m = m.repeat(1, 1, 2)
         else:
             m = m.repeat(1, 2)
 
-        if include_q:
-            node_attr = torch.stack([q, dq, m], dim=-1).view(-1, spatial_dim, 3)
-            hq = self.model_q(node_attr, edge_attr, edge_index)
+        node_attr = torch.stack([dx, m], dim=-1).view(-1, spatial_dim, self.node_input_dim)
+        hx = model(node_attr, edge_attr, edge_index)
 
-            if len(q.size()) == 3:
-                hq = hq.view(-1, num_particles, spatial_dim)
-            else:
-                hq = hq.view(num_particles, spatial_dim)
+        if len(dx.size()) == 3:
+            hx = hx.view(-1, num_particles, spatial_dim)
         else:
-            hq = None
+            hx = hx.view(num_particles, spatial_dim)
 
-        if include_p:
-            node_attr = torch.stack([p, dp, m], dim=-1).view(-1, spatial_dim, 3)
-            hp = self.model_p(node_attr, edge_attr, edge_index)
-
-            if len(q.size()) == 3:
-                hp = hp.view(-1, num_particles, spatial_dim)
-            else:
-                hp = hp.view(num_particles, spatial_dim)
-        else:
-            hp = None
-
-        return hq, hp
+        return hx
