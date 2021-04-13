@@ -109,15 +109,15 @@ class RungeKutta4(BaseSolver):
 class HyperVelocityVerlet(BaseSolver):
     trainable = True
     p_order = 2
+
     def __init__(self, hypersolver):
         super().__init__()
 
         self.hypersolver = hypersolver
 
-
     def forward(self, experiment: Experiment, q: torch.Tensor, p: torch.Tensor, m: torch.Tensor, t, dt, **kwargs):
         dt = dt.view(-1, *[1 for _ in range(len(q.size()) - 1)])
-        p, q, dp, dq = self.base(experiment, q, p, m, t, dt, **kwargs)
+        q, p, dq, dp = self.base(experiment, q, p, m, t, dt, **kwargs)
 
         hq, hp = self.hypersolver(q, p, dq, dp, m, t, dt, **kwargs)
         return experiment.shift(q + hq * dt ** (self.p_order + 1), **kwargs), p + hp * dt ** (self.p_order + 1)
