@@ -17,7 +17,7 @@ def train(solver, dataset, device, config):
     batch_size = train_args["batch_size"]
     num_workers = train_args["num_workers"]
 
-    assert loss_method in ['phase_space', 'energy']
+    assert loss_method in ['phase_space', 'energy', "residual"]
 
     optimizer = optim.AdamW(solver.parameters(), lr=1e-3)
     criterion = nn.MSELoss()
@@ -48,6 +48,11 @@ def train(solver, dataset, device, config):
                 pred_te = dataset.experiment.energy.total_energy(pred_ke, pred_pe)
 
                 loss = criterion(gt_te, pred_te)
+            elif loss_method == "residual":
+                q_base_res, p_base_res = solver.get_base_residuals(dataset.experiment, q_base, p_base, mass, trajectory, disable_print=True, **extra_args)
+                q_hyper_res, p_hyper_res = solver.get_hyper_residuals(dataset.experiment, q_base, p_base, mass, trajectory, disable_print=True, **extra_args)
+
+                loss = criterion(q_hyper_res, q_base_res) + criterion(p_hyper_res, p_base_res)
             else:
                 raise NotImplementedError()
 
