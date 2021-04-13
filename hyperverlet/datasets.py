@@ -128,7 +128,7 @@ class ThreeBodySpringMassDataset(ExperimentDataset):
         num_euclid = 2
 
         self.experiment = ThreeBodySpringMass()
-        length = sample_parameterized_truncated_normal((num_configurations, num_springs), 0.8, 0.1, 0.1, 1.5)
+        length = sample_parameterized_truncated_normal((num_configurations, num_springs), 5, 2, 0.1, 10)
         self.q0 = (torch.randn(num_configurations, num_particles, num_euclid) * 2 - 1) * length.max(dim=1, keepdim=True)[0].unsqueeze(2)
 
         # Don't judge, just accept
@@ -140,7 +140,7 @@ class ThreeBodySpringMassDataset(ExperimentDataset):
         length_matrix = length_matrix + length_matrix.transpose(1, 2)
 
         k_matrix = torch.zeros((num_configurations, num_particles, num_particles))
-        k_matrix[:, first_index, second_index] = sample_parameterized_truncated_normal((num_configurations, num_springs), 0.8, 0.35, 0.1, 1.5)
+        k_matrix[:, first_index, second_index] = sample_parameterized_truncated_normal((num_configurations, num_springs), 1.2, 0.5, 0.1, 2.5)
         k_matrix = k_matrix + k_matrix.transpose(1, 2)
 
         p0 = torch.randn(num_configurations, num_particles, num_euclid) * 0.1
