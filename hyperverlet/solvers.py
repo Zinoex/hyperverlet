@@ -136,14 +136,13 @@ class HyperVelocityVerlet(BaseSolver):
 
         return q, p, dq, dp
 
-    def base_trajectory(self, experiment: Experiment, gt_q: torch.Tensor, gt_p: torch.Tensor, m: torch.Tensor, trajectory: torch.Tensor, disable_print=False, **kwargs):
+    def base_trajectory(self, experiment: Experiment, gt_q: torch.Tensor, gt_p: torch.Tensor, m: torch.Tensor, trajectory: torch.Tensor, dtrajectory: torch.Tensor, disable_print=False, **kwargs):
         q_traj = torch.zeros_like(gt_q)
         p_traj = torch.zeros_like(gt_p)
 
         q_traj[0], p_traj[0] = gt_q[0], gt_p[0]
 
         trajectory = trajectory.unsqueeze(-1)
-        dtrajectory = trajectory[1:] - trajectory[:-1]
 
         for i, (t, dt) in enumerate(zip(tqdm(trajectory[:-1], disable=disable_print), dtrajectory)):
             q, p, _, _ = self.base(experiment, gt_q[i], gt_p[i], m, t, dt, **kwargs)
@@ -151,28 +150,27 @@ class HyperVelocityVerlet(BaseSolver):
 
         return q_traj, p_traj
 
-    def hyper_trajectory(self, experiment: Experiment, gt_q: torch.Tensor, gt_p: torch.Tensor, m: torch.Tensor, trajectory: torch.Tensor, disable_print=False, **kwargs):
+    def hyper_trajectory(self, experiment: Experiment, gt_q: torch.Tensor, gt_p: torch.Tensor, m: torch.Tensor, trajectory: torch.Tensor, dtrajectory: torch.Tensor, disable_print=False, **kwargs):
         q_traj = torch.zeros_like(gt_q)
         p_traj = torch.zeros_like(gt_p)
 
         q_traj[0], p_traj[0] = gt_q[0], gt_p[0]
 
         trajectory = trajectory.unsqueeze(-1)
-        dtrajectory = trajectory[1:] - trajectory[:-1]
 
         for i, (t, dt) in enumerate(zip(tqdm(trajectory[:-1], disable=disable_print), dtrajectory)):
-            q, p, _, _ = self(experiment, gt_q[i], gt_p[i], m, t, dt, **kwargs)
+            q, p = self(experiment, gt_q[i], gt_p[i], m, t, dt, **kwargs)
             q_traj[i + 1], p_traj[i + 1] = q, p
 
         return q_traj, p_traj
 
     def get_residuals(self, trajectory_fn, experiment, gt_q, gt_p, m, trajectory, **kwargs):
-        trajectory = trajectory.unsqueeze(-1)
         dt = trajectory[1:] - trajectory[:-1]
+        dt = dt.view(*dt.size(), 1, 1)
 
         gt_q = experiment.shift(gt_q, **kwargs)
 
-        q_pred, p_pred = trajectory_fn(experiment, gt_q, gt_p, m, trajectory, **kwargs)
+        q_pred, p_pred = trajectory_fn(experiment, gt_q, gt_p, m, trajectory, dt, **kwargs)
         res_q = (gt_q[1:] - q_pred[1:]) / dt ** (self.p_order + 1)
         res_p = (gt_p[1:] - p_pred[1:]) / dt ** (self.p_order + 1)
         return res_q, res_p
