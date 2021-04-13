@@ -37,7 +37,7 @@ def train(solver, dataset, device, config):
             q_base_res, p_base_res = solver.get_base_residuals(dataset.experiment, q_base, p_base, mass, trajectory, disable_print=True, **extra_args)
             q_hyper_res, p_hyper_res = solver.get_hyper_residuals(dataset.experiment, q_base, p_base, mass, trajectory, disable_print=True, **extra_args)
 
-            loss = criterion(q_hyper_res, q_base_res) + criterion(p_base_res, p_base_res)
+            loss = criterion(q_hyper_res, q_base_res) + criterion(p_hyper_res, p_base_res)
 
             loss.backward()
             # nn.utils.clip_grad_norm_(solver.parameters(), 1)
