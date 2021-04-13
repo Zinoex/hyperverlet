@@ -13,8 +13,11 @@ def train(solver, dataset, device, config):
 
     train_args = config["train_args"]
     epochs = train_args["epoch"]
+    loss_method = train_args["loss"]
     batch_size = train_args["batch_size"]
     num_workers = train_args["num_workers"]
+
+    assert loss_method in ['phase_space', 'energy']
 
     optimizer = optim.AdamW(solver.parameters(), lr=1e-3)
     criterion = nn.MSELoss()
@@ -32,7 +35,21 @@ def train(solver, dataset, device, config):
             extra_args = send_to_device(batch['extra_args'], device, non_blocking=True)
 
             q, p = solver.trajectory(dataset.experiment, q_base[0], p_base[0], mass, trajectory, disable_print=True, **extra_args)
-            loss = criterion(q, q_base) + criterion(p, p_base)
+
+            if loss_method == "phase_space":
+                loss = criterion(q, q_base) + criterion(p, p_base)
+            elif loss_method == "energy":
+                gt_ke = dataset.experiment.energy.kinetic_energy(mass, p_base, **extra_args)
+                gt_pe = dataset.experiment.energy.potential_energy(mass, q_base, **extra_args)
+                gt_te = dataset.experiment.energy.total_energy(gt_ke, gt_pe)
+
+                pred_ke = dataset.experiment.energy.kinetic_energy(mass, p, **extra_args)
+                pred_pe = dataset.experiment.energy.potential_energy(mass, q, **extra_args)
+                pred_te = dataset.experiment.energy.total_energy(pred_ke, pred_pe)
+
+                loss = criterion(gt_te, pred_te)
+            else:
+                raise NotImplementedError()
 
             loss.backward()
             # nn.utils.clip_grad_norm_(solver.parameters(), 1)

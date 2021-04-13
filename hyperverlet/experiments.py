@@ -3,6 +3,8 @@ import abc
 import torch
 from torch import nn
 
+from hyperverlet.energy.energy import PendulumEnergy, SpringMassEnergy, ThreeBodySpringMassEnergy
+
 
 class Experiment(nn.Module, abc.ABC):
     def forward(self, q, p, m, t, **kwargs):
@@ -20,6 +22,8 @@ class Experiment(nn.Module, abc.ABC):
 
 
 class Pendulum(Experiment):
+    energy = PendulumEnergy()
+
     def dq(self, p, m, t, length, **kwargs):
         return p / (m * length ** 2)
 
@@ -28,6 +32,8 @@ class Pendulum(Experiment):
 
 
 class SpringMass(Experiment):
+    energy = SpringMassEnergy()
+
     def dp(self, q, m, t, length, k, **kwargs):
         return -k * (q - length)
 
@@ -50,6 +56,8 @@ class BasePairPotential(Experiment):
 
 
 class ThreeBodySpringMass(BasePairPotential):
+    energy = ThreeBodySpringMassEnergy()
+
     def force(self, r, disp, k, length, **kwargs):
         num_particles = k.size(1)
         r_prime = (r + torch.eye(num_particles, num_particles, device=r.device)).unsqueeze(-1)
