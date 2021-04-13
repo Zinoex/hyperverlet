@@ -136,3 +136,6 @@ results/
 visualization/
 data/
 cache/
+*.sif
+slurm-*.out
+utilization/ 
