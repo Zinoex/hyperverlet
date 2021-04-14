@@ -3,12 +3,12 @@ from matplotlib import pyplot as plt, animation
 from matplotlib.patches import Circle
 import seaborn as sns
 
-from hyperverlet.energy import three_body_spring_mass
+from hyperverlet.energy import ThreeBodySpringMassEnergy
 from hyperverlet.utils.math import calc_dist_2d, calc_theta
 from hyperverlet.plotting.energy import plot_energy, init_energy_plot, energy_animate_update
 
 from hyperverlet.plotting.grid_spec import *
-from hyperverlet.plotting.utils import plot_spring, set_limits, save_animation
+from hyperverlet.plotting.utils import plot_spring, set_limits, save_animation, compute_limits
 from hyperverlet.utils.misc import load_pickle, format_path
 
 
@@ -59,9 +59,8 @@ def three_body_spring_mass_energy_plot(q, p, trajectory, m, k, l, plot_every=1):
     k = k.cpu().detach().numpy()
 
     # Calculate energy of the system
-    ke = three_body_spring_mass.calc_kinetic_energy(m, p)
-    pe = three_body_spring_mass.calc_potential_energy(k, q, l)
-    te = three_body_spring_mass.calc_total_energy(ke, pe)
+    energy = ThreeBodySpringMassEnergy()
+    ke, pe, te = energy.all_energies(m, q, p, k=k, length=l)
 
     plot_energy(trajectory, te, ke, pe)
 
@@ -90,13 +89,9 @@ def animate_tbsm(config, show_trail=True, show_springs=False, show_plot=True, cf
     ax1, ax2, ax3, ax4, ax5 = gs_5_3_2(fig)
 
     # Calculate energy of the system
-    ke = three_body_spring_mass.calc_kinetic_energy(m, p)
-    pe = three_body_spring_mass.calc_potential_energy(k, q, l)
-    te = three_body_spring_mass.calc_total_energy(ke, pe)
-
-    gt_ke = three_body_spring_mass.calc_kinetic_energy(m, gt_p)
-    gt_pe = three_body_spring_mass.calc_potential_energy(k, gt_q, l)
-    gt_te = three_body_spring_mass.calc_total_energy(gt_ke, gt_pe)
+    energy = ThreeBodySpringMassEnergy()
+    ke, pe, te = energy.all_energies(m, q, p, k=k, length=l)
+    gt_ke, gt_pe, gt_te = energy.all_energies(m, gt_q, gt_p, k=k, length=l)
     te_max = max(te.max(), gt_te.max())
 
     # Color maps
@@ -111,9 +106,8 @@ def animate_tbsm(config, show_trail=True, show_springs=False, show_plot=True, cf
     gt_pred_diff = gt_q - q
 
     # Initialize plots
-    p1_x, p1_y = init_diff_plot(ax3, trajectory, gt_pred_diff[:, 0])
-    p2_x, p2_y = init_diff_plot(ax4, trajectory, gt_pred_diff[:, 1])
-    p3_x, p3_y = init_diff_plot(ax5, trajectory, gt_pred_diff[:, 2])
+    diff_axes = [ax3, ax4, ax5]
+    diff_plots = [init_diff_plot(ax, trajectory, gt_pred_diff[:, i]) for i, ax in enumerate(diff_axes)]
 
     gt_pe_plot, gt_ke_plot, gt_te_plot = init_energy_plot(ax2, trajectory, gt_te, gt_ke, gt_pe, title="Ground truth energy plot", cm=cm_gt, prefix="GT_")
     pe_plot, ke_plot, te_plot = init_energy_plot(ax2, trajectory, te, ke, pe, cm=cm_pred)
@@ -137,12 +131,11 @@ def animate_tbsm(config, show_trail=True, show_springs=False, show_plot=True, cf
 
         ax1.legend(handles=legend_elements, loc='upper left', bbox_to_anchor=(0, 1), ncol=2, fancybox=True, shadow=True)
 
-        energy_animate_update(gt_pe_plot, gt_ke_plot, gt_te_plot, trajectory, i, gt_pe, gt_ke, gt_te, ax2)
-        energy_animate_update(pe_plot, ke_plot, te_plot, trajectory, i, pe, ke, te, ax2)
+        energy_animate_update(ax2, gt_pe_plot, gt_ke_plot, gt_te_plot, trajectory, i, gt_pe, gt_ke, gt_te)
+        energy_animate_update(ax2, pe_plot, ke_plot, te_plot, trajectory, i, pe, ke, te)
 
-        diff_animate_update(ax3, p1_x, p1_y, trajectory, i, gt_pred_diff[:, 0])
-        diff_animate_update(ax4, p2_x, p2_y, trajectory, i, gt_pred_diff[:, 1])
-        diff_animate_update(ax5, p3_x, p3_y, trajectory, i, gt_pred_diff[:, 2])
+        for i, (px, py) in enumerate(diff_plots):
+            diff_animate_update(ax3, px, py, trajectory, i, gt_pred_diff[:, i])
 
         return []
 
@@ -168,8 +161,8 @@ def create_gt_pred_legends(q, cm):
 
 
 def init_diff_plot(ax, trajectory, diff, title=None, x_color='blue', y_color='orange'):
-    x_plot, = ax.plot(trajectory[0], diff[0, 0], color=x_color, label=r'X')
-    y_plot, = ax.plot(trajectory[0], diff[0, 1], color=y_color, label=r'Y')
+    x_plot, = ax.plot(trajectory[0], diff[0, 0], color=x_color, label='X')
+    y_plot, = ax.plot(trajectory[0], diff[0, 1], color=y_color, label='Y')
     ax.set_xlabel("Time")
     ax.set_ylabel("Difference")
     ax.set_title(title)
@@ -184,8 +177,8 @@ def diff_animate_update(ax, x_plot, y_plot, trajectory, i, diff):
     ax.legend(loc='lower left')
 
     if i > 0:
-        traj_range_half = 1.05 * (trajectory[i] - trajectory[0]) / 2
-        traj_mid = (trajectory[0] + trajectory[i]) / 2
+        traj_lim = compute_limits(trajectory)
+        ax.set_xlim(*traj_lim)
 
-        ax.set_xlim(traj_mid - traj_range_half, traj_mid + traj_range_half)
-    ax.set_ylim(diff.min() * 1.05, diff.max() * 1.05)
+    diff_lim = compute_limits(diff)
+    ax.set_ylim(*diff_lim)

@@ -3,7 +3,7 @@ import abc
 import torch
 from torch import nn
 
-from hyperverlet.energy.energy import PendulumEnergy, SpringMassEnergy, ThreeBodySpringMassEnergy
+from hyperverlet.energy import PendulumEnergy, SpringMassEnergy, ThreeBodySpringMassEnergy
 
 
 class Experiment(nn.Module, abc.ABC):
