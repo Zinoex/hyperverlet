@@ -72,6 +72,7 @@ def format_path(config, path, **kwargs):
         solver=model_args['solver'],
         train_duration=dataset_args["train_duration"],
         train_trajectory_length=dataset_args["train_trajectory_length"],
+        train_sequence_length=dataset_args["train_sequence_length"],
         train_num_configurations=dataset_args["train_num_configurations"],
         coarsening_factor=dataset_args["coarsening_factor"],
         test_duration=dataset_args["test_duration"],

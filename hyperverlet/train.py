@@ -3,6 +3,7 @@ import random
 import torch
 from torch import optim, nn
 from torch.utils.data import DataLoader
+from torch.utils.tensorboard import SummaryWriter
 from tqdm import trange, tqdm
 
 from hyperverlet.utils.misc import send_to_device
@@ -23,6 +24,8 @@ def train(solver, dataset, device, config):
     criterion = nn.MSELoss()
 
     loader = DataLoader(dataset, num_workers=num_workers, pin_memory=device.type == 'cuda', batch_size=batch_size, shuffle=True)
+    data_len = len(dataset)
+    summary_writer = SummaryWriter()
 
     for epoch in trange(epochs, desc='Epoch'):
         for iteration, batch in enumerate(tqdm(loader, desc='Training iteration')):
@@ -41,13 +44,11 @@ def train(solver, dataset, device, config):
             elif loss_method == "energy":
                 gt_ke = dataset.experiment.energy.kinetic_energy(mass, p_base, **extra_args)
                 gt_pe = dataset.experiment.energy.potential_energy(mass, q_base, **extra_args)
-                gt_te = dataset.experiment.energy.total_energy(gt_ke, gt_pe)
 
                 pred_ke = dataset.experiment.energy.kinetic_energy(mass, p, **extra_args)
                 pred_pe = dataset.experiment.energy.potential_energy(mass, q, **extra_args)
-                pred_te = dataset.experiment.energy.total_energy(pred_ke, pred_pe)
 
-                loss = criterion(gt_te, pred_te)
+                loss = criterion(gt_ke, pred_ke) + criterion(gt_pe, pred_pe)
             elif loss_method == "residual":
                 q_base_res, p_base_res = solver.get_base_residuals(dataset.experiment, q_base, p_base, mass, trajectory, disable_print=True, **extra_args)
                 q_hyper_res, p_hyper_res = solver.get_hyper_residuals(dataset.experiment, q_base, p_base, mass, trajectory, disable_print=True, **extra_args)
@@ -60,5 +61,8 @@ def train(solver, dataset, device, config):
             # nn.utils.clip_grad_norm_(solver.parameters(), 1)
             optimizer.step()
 
+            loss = loss.item()
+            summary_writer.add_scalar('loss/{}'.format(loss_method), loss, global_step=epoch * data_len + iteration)
+
             if iteration % 100 == 0:
-                print(f'loss: {loss.item()}')
+                print(f'loss: {loss}')
