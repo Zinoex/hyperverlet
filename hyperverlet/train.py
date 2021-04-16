@@ -24,7 +24,7 @@ def train(solver, dataset, device, config):
     criterion = nn.MSELoss()
 
     loader = DataLoader(dataset, num_workers=num_workers, pin_memory=device.type == 'cuda', batch_size=batch_size, shuffle=True)
-    data_len = len(dataset)
+    data_len = len(loader)
     summary_writer = SummaryWriter()
 
     for epoch in trange(epochs, desc='Epoch'):

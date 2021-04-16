@@ -1,5 +1,5 @@
 import random
-from datetime import datetime
+from datetime import datetime, timezone
 
 import torch
 import numpy as np
@@ -78,6 +78,6 @@ def format_path(config, path, **kwargs):
         test_duration=dataset_args["test_duration"],
         test_trajectory_length=dataset_args["test_trajectory_length"],
         test_num_configurations=dataset_args["test_num_configurations"],
-        datetime=datetime.now(),
+        datetime=datetime.now(tz=timezone.utc).isoformat(),
         **kwargs
    )
