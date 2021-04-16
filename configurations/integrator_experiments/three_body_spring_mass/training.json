@@ -1,6 +1,6 @@
 {
-    "epoch": 10,
-    "batch_size": 200,
+    "epoch": 20,
+    "batch_size": 1000,
     "num_workers": 8,
-    "loss": "phase_space"
+    "loss": "residual"
 }
