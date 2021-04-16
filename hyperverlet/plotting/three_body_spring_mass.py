@@ -86,7 +86,7 @@ def animate_tbsm(config, show_trail=True, show_springs=False, show_plot=True, cf
 
     # Create grid spec
     fig = plt.figure(figsize=(20, 15))
-    ax1, ax2, ax3, ax4, ax5 = gs_5_3_2(fig)
+    ax_euclid, ax_energy, *diff_axes = gs_5_3_2(fig)
 
     # Calculate energy of the system
     energy = ThreeBodySpringMassEnergy()
@@ -106,36 +106,35 @@ def animate_tbsm(config, show_trail=True, show_springs=False, show_plot=True, cf
     gt_pred_diff = gt_q - q
 
     # Initialize plots
-    diff_axes = [ax3, ax4, ax5]
-    diff_plots = [init_diff_plot(ax, trajectory, gt_pred_diff[:, i]) for i, ax in enumerate(diff_axes)]
+    diff_plots = [(ax, *init_diff_plot(ax, trajectory, gt_pred_diff[:, i])) for i, ax in enumerate(diff_axes)]
 
-    gt_pe_plot, gt_ke_plot, gt_te_plot = init_energy_plot(ax2, trajectory, gt_te, gt_ke, gt_pe, title="Ground truth energy plot", cm=cm_gt, prefix="GT_")
-    pe_plot, ke_plot, te_plot = init_energy_plot(ax2, trajectory, te, ke, pe, cm=cm_pred)
-    ax2.set_ylim(-0.3 * te_max, te_max * 1.05)
+    gt_pe_plot, gt_ke_plot, gt_te_plot = init_energy_plot(ax_energy, trajectory, gt_te, gt_ke, gt_pe, title="Ground truth energy plot", cm=cm_gt, prefix="GT_")
+    pe_plot, ke_plot, te_plot = init_energy_plot(ax_energy, trajectory, te, ke, pe, cm=cm_pred)
+    ax_energy.set_ylim(-0.3 * te_max, te_max * 1.05)
 
     legend_elements = create_gt_pred_legends(q, cm_gt + cm_pred)
 
     def animate(i):
-        ax1.clear()
-        ax1.set_aspect('equal')
-        ax1.set_title("Three body spring mass experiment")
-        set_limits(ax1, xlim, ylim, margin=1.2)
+        ax_euclid.clear()
+        ax_euclid.set_aspect('equal')
+        ax_euclid.set_title("Three body spring mass experiment")
+        set_limits(ax_euclid, xlim, ylim, margin=1.2)
 
         if show_trail:
-            plot_trail(ax1, gt_q, i, color_map=cm_gt, trail_len=5)
-            plot_trail(ax1, q, i, color_map=cm_pred, trail_len=5)
+            plot_trail(ax_euclid, gt_q, i, color_map=cm_gt, trail_len=5)
+            plot_trail(ax_euclid, q, i, color_map=cm_pred, trail_len=5)
 
         if show_springs:
-            plot_springs(ax1, gt_q, i, cm_gt)
-            plot_springs(ax1, q, i, cm_pred)
+            plot_springs(ax_euclid, gt_q, i, cm_gt)
+            plot_springs(ax_euclid, q, i, cm_pred)
 
-        ax1.legend(handles=legend_elements, loc='upper left', bbox_to_anchor=(0, 1), ncol=2, fancybox=True, shadow=True)
+        ax_euclid.legend(handles=legend_elements, loc='upper left', bbox_to_anchor=(0, 1), ncol=2, fancybox=True, shadow=True)
 
-        energy_animate_update(ax2, gt_pe_plot, gt_ke_plot, gt_te_plot, trajectory, i, gt_pe, gt_ke, gt_te)
-        energy_animate_update(ax2, pe_plot, ke_plot, te_plot, trajectory, i, pe, ke, te)
+        energy_animate_update(ax_energy, gt_pe_plot, gt_ke_plot, gt_te_plot, trajectory, i, gt_pe, gt_ke, gt_te)
+        energy_animate_update(ax_energy, pe_plot, ke_plot, te_plot, trajectory, i, pe, ke, te)
 
-        for i, (px, py) in enumerate(diff_plots):
-            diff_animate_update(ax3, px, py, trajectory, i, gt_pred_diff[:, i])
+        for idx, (ax, px, py) in enumerate(diff_plots):
+            diff_animate_update(ax, px, py, trajectory, i, gt_pred_diff[:, idx])
 
         return []
 
