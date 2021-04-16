@@ -32,6 +32,6 @@ def lj_plot(trajectory: np.array, pe: np.array, ke: np.array, te: np.array, dist
         ax1.legend()
 
         # PLOT - 2: Energy
-        energy_animate_update(pe_plot, ke_plot, te_plot, trajectory, i, te, ke, pe, ax2)
+        energy_animate_update(ax2, pe_plot, ke_plot, te_plot, trajectory, i, te, ke, pe)
 
         plt.pause(1E-11)

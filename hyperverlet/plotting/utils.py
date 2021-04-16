@@ -87,20 +87,22 @@ def plot_spring_3d(ax, l, theta_x=0, theta_y=0, xshift=0, yshift=0, zshift=0):
     ax.plot3D(xs + xshift, ys + yshift, zs + zshift, c='k', lw=2)
 
 
-def set_limits(ax, x, y, z=None, margin=1.05):
+def compute_limits(x, margin=1.05):
     x_half_range_ext = (x.max() - x.min()) * margin / 2
     x_mid = (x.min() + x.max()) / 2
 
-    y_half_range_ext = (y.max() - y.min()) * margin / 2
-    y_mid = (y.min() + y.max()) / 2
+    return x_mid - x_half_range_ext, x_mid + x_half_range_ext
 
-    ax.set_xlim(x_mid - x_half_range_ext, x_mid + x_half_range_ext)
-    ax.set_ylim(y_mid - y_half_range_ext, y_mid + y_half_range_ext)
+
+def set_limits(ax, x, y, z=None, margin=1.05):
+    x_lim = compute_limits(x, margin)
+    y_lim = compute_limits(y, margin)
+    ax.set_xlim(*x_lim)
+    ax.set_ylim(*y_lim)
 
     if z is not None:
-        z_half_range_ext = (z.max() - z.min()) * margin / 2
-        z_mid = (z.min() + z.max()) / 2
-        ax.set_zlim(z_mid - z_half_range_ext, z_mid + z_half_range_ext)
+        z_lim = compute_limits(z, margin)
+        ax.set_zlim(*z_lim)
 
 
 def save_animation(animation, config):

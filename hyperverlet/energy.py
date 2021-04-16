@@ -15,6 +15,13 @@ class Energy(ABC):
     def total_energy(self, ke, pe):
         return ke + pe
 
+    def all_energies(self, m, q, p, **kwargs):
+        ke = self.kinetic_energy(m, p, **kwargs)
+        pe = self.potential_energy(m, q, **kwargs)
+        te = self.total_energy(ke, pe)
+
+        return ke, pe, te
+
     def trajectory_sum(self, e):
         sumaxis = list(range(1, len(e.shape)))
 
