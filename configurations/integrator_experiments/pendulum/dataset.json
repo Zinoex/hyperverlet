@@ -1,6 +1,6 @@
 {
    "dataset": "pendulum",
-   "cache_path": "{dataset}_{split}/{solver}_trd{train_duration}_trtl{train_trajectory_length}_trsl{train_sequence_length}_cf{coarsening_factor}_ted{test_duration}_tetl{test_trajectory_length}.pickle",
+   "cache_path": "cache/{dataset}_{split}/{train_duration}_{train_trajectory_length}_{train_num_configurations}_{test_duration}_{test_trajectory_length}_{train_num_configurations}.pickle",
    "gt_solver": "FourthOrderRuth",
    "train_duration": 100,
    "train_trajectory_length": 1000001,
