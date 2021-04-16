@@ -1,29 +1,26 @@
-import sys
-
 import numpy as np
 from matplotlib import pyplot as plt, animation
 
 from matplotlib.gridspec import GridSpec
-from hyperverlet.energy import pendulum
+from hyperverlet.energy import PendulumEnergy
 from hyperverlet.plotting.energy import init_energy_plot, plot_energy, energy_animate_update
+from hyperverlet.plotting.grid_spec import gs_3_2_3
 from hyperverlet.plotting.phasespace import init_phasespace_plot, update_phasespace_plot
 from hyperverlet.plotting.utils import save_animation
 from hyperverlet.utils.misc import load_pickle, format_path
 
 
-def spring_mass_energy_plot(q, p, trajectory, m, k, l, g, plot_every=1):
+def pendulum_energy_plot(q, p, trajectory, m, l, g, plot_every=1):
     # Detatch and trim data
     q = q.cpu().detach().numpy()[::plot_every]
     p = p.cpu().detach().numpy()[::plot_every]
     trajectory = trajectory.cpu().detach().numpy()[::plot_every]
     m = m.cpu().detach().numpy()
     l = l.cpu().detach().numpy()
-    k = k.cpu().detach().numpy()
 
     # Calculate energy of the system
-    pe = pendulum.calc_potential_energy(m, g, l, q)
-    ke = pendulum.calc_kinetic_energy(m, l, p)
-    te = pendulum.calc_total_energy(ke, pe)
+    energy = PendulumEnergy()
+    ke, pe, te = energy.all_energies(m, q, p, g=g, length=l)
 
     plot_energy(trajectory, te, ke, pe)
 
@@ -44,17 +41,12 @@ def animate_pendulum(config, show_gt=False, show_plot=True, cfg=0):
     # Ground Truth
     gt_q = result_dict["gt_q"][::plot_every, cfg]
 
-    pe = pendulum.calc_potential_energy(m, g, l, q)
-    ke = pendulum.calc_kinetic_energy(m, l, p)
-    te = pendulum.calc_total_energy(ke, pe)
+    energy = PendulumEnergy()
+    ke, pe, te = energy.all_energies(m, q, p, g=g, length=l)
 
     # Create grid spec
-    fig = plt.figure(figsize=(80, 60))
-    gs = GridSpec(2, 3)
-
-    ax1 = fig.add_subplot(gs[:, :2])
-    ax2 = fig.add_subplot(gs[0, 2])
-    ax3 = fig.add_subplot(gs[1, 2])
+    fig = plt.figure(figsize=(20, 15))
+    ax1, ax2, ax3 = gs_3_2_3(fig)
 
     # Initialize plots
     init_pendulum_plot(ax1, l)
@@ -67,7 +59,7 @@ def animate_pendulum(config, show_gt=False, show_plot=True, cfg=0):
         if show_gt:
             update_pendulum(ax1, gt_q, i, l, color="green", s=400, linewidth=2)
 
-        energy_animate_update(pe_plot, ke_plot, te_plot, trajectory, i, pe, ke, te, ax2)
+        energy_animate_update(ax2, pe_plot, ke_plot, te_plot, trajectory, i, pe, ke, te)
         update_phasespace_plot(ax3, q, p, i)
 
     anim = animation.FuncAnimation(fig, animate, frames=q.shape[0], save_count=q.shape[0])

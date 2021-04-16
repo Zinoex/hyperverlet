@@ -5,8 +5,9 @@ from matplotlib import pyplot as plt, animation
 from matplotlib.gridspec import GridSpec
 from matplotlib.patches import Circle
 
-from hyperverlet.energy import spring_mass
+from hyperverlet.energy import SpringMassEnergy
 from hyperverlet.plotting.energy import init_energy_plot, plot_energy, energy_animate_update
+from hyperverlet.plotting.grid_spec import gs_3_2_3
 from hyperverlet.plotting.phasespace import init_phasespace_plot, update_phasespace_plot
 from hyperverlet.plotting.utils import plot_spring, save_animation
 from hyperverlet.utils.misc import load_pickle, format_path
@@ -22,9 +23,8 @@ def spring_mass_energy_plot(q, p, trajectory, m, k, l, plot_every=1):
     k = k.cpu().detach().numpy()
 
     # Calculate energy of the system
-    ke = spring_mass.calc_kinetic_energy(m, p)
-    pe = spring_mass.calc_potential_energy(k, q, l)
-    te = spring_mass.calc_total_energy(ke, pe)
+    energy = SpringMassEnergy()
+    ke, pe, te = energy.all_energies(m, q, p, k=k, length=l)
 
     plot_energy(trajectory, te, ke, pe)
 
@@ -48,15 +48,11 @@ def animate_sm(config, show_gt=False, show_plot=True, cfg=0):
 
     # Create grid spec
     fig = plt.figure(figsize=(20, 15))
-    gs = GridSpec(2, 3)
-    ax1 = fig.add_subplot(gs[:, :2])
-    ax2 = fig.add_subplot(gs[0, 2])
-    ax3 = fig.add_subplot(gs[1, 2])
+    ax1, ax2, ax3 = gs_3_2_3(fig)
 
     # Calculate energy of the system
-    ke = spring_mass.calc_kinetic_energy(m, p)
-    pe = spring_mass.calc_potential_energy(k, q, l)
-    te = spring_mass.calc_total_energy(ke, pe)
+    energy = SpringMassEnergy()
+    ke, pe, te = energy.all_energies(m, q, p, k=k, length=l)
 
     # Initialize plots
     pe_plot, ke_plot, te_plot = init_energy_plot(ax2, trajectory, te, ke, pe)
@@ -69,7 +65,7 @@ def animate_sm(config, show_gt=False, show_plot=True, cfg=0):
             gt_c1 = Circle((gt_q[i, 0], 0), 0.05*0.75, fc='g', ec='g', zorder=10)
             ax1.add_patch(gt_c1)
 
-        energy_animate_update(pe_plot, ke_plot, te_plot, trajectory, i, pe, ke, te, ax2)
+        energy_animate_update(ax2, pe_plot, ke_plot, te_plot, trajectory, i, pe, ke, te)
         update_phasespace_plot(ax3, q, p, i)
 
     anim = animation.FuncAnimation(fig, animate, frames=q.shape[0], save_count=sys.maxsize)
