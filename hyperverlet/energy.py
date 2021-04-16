@@ -23,7 +23,7 @@ class Energy(ABC):
         return ke, pe, te
 
     def trajectory_sum(self, e):
-        sumaxis = list(range(1, len(e.shape)))
+        sumaxis = tuple(range(1, len(e.shape)))
 
         if torch.is_tensor(e):
             return e.sum(dim=sumaxis)
