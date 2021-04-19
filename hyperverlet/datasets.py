@@ -149,7 +149,7 @@ class ThreeBodySpringMassDataset(ExperimentDataset):
         k_matrix = k_matrix + k_matrix.transpose(1, 2)
 
         self.p0 = torch.randn(num_configurations, num_particles, num_euclid) * 0.1
-        #self.p0 = p0 - torch.mean(p0, dim=1, keepdim=True)
+        self.p0 = p0 - torch.mean(p0, dim=1, keepdim=True)
 
         self.mass = torch.randn(num_configurations, num_particles, 1) * mass_std + mass_mean
         self.extra_args = {
