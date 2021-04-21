@@ -22,7 +22,8 @@ class ExperimentDataset(Dataset):
         self.coarsening = Coarsening(coarsening_factor, num_samples)
         self.sequence_length = sequence_length
 
-        self.trajectory = torch.linspace(0, duration, num_samples)
+        self.trajectory = torch.stack([torch.linspace(0, duration + math.normal(0, 0.1 * duration), num_samples) for _ in range(num_configurations)], dim=1)
+
         self.load_data(cache_path)
 
         self.q, self.p, self.trajectory = self.coarsening(self.q, self.p, self.trajectory)
@@ -84,7 +85,7 @@ class ExperimentDataset(Dataset):
             'q': q[:, config_idx],
             'p': p[:, config_idx],
             'mass': self.mass[config_idx],
-            'trajectory': trajectory,
+            'trajectory': trajectory[config_idx],
             'dt': dt,
             'extra_args': self.config_extra_args(config_idx)
         }
