@@ -16,7 +16,7 @@ from hyperverlet.utils.misc import load_pickle, save_pickle
 
 
 class ExperimentDataset(Dataset):
-    def __init__(self, base_solver, duration, num_samples, num_configurations, coarsening_factor, cache_path, sequence_length=None):
+    def __init__(self, base_solver, duration, duration_stddev, num_samples, num_configurations, coarsening_factor, cache_path, sequence_length=None):
         self.base_solver = base_solver
         self.duration = duration
         self.num_samples = num_samples
@@ -24,7 +24,7 @@ class ExperimentDataset(Dataset):
         self.coarsening = Coarsening(coarsening_factor, num_samples)
         self.sequence_length = sequence_length
 
-        dist = NormalDist(0, 0.1 * duration)
+        dist = NormalDist(0, duration_stddev * duration)
         samples = dist.samples(num_configurations)
         self.trajectory = torch.stack([torch.linspace(0, duration + sample, num_samples) for sample in samples], dim=1)
 
@@ -99,7 +99,7 @@ class ExperimentDataset(Dataset):
 
 
 class PendulumDataset(ExperimentDataset):
-    def __init__(self, base_solver, duration, num_samples, num_configurations, coarsening_factor, cache_path, sequence_length=None,
+    def __init__(self, base_solver, duration, duration_stddev, num_samples, num_configurations, coarsening_factor, cache_path, sequence_length=None,
                  length_mean=1.0, length_std=0.5, mass_mean=0.9, mass_std=0.1, g=9.807):
 
         self.experiment = Pendulum()
@@ -111,11 +111,11 @@ class PendulumDataset(ExperimentDataset):
             'g': torch.full((num_configurations, 1), g)
         }
 
-        super().__init__(base_solver, duration, num_samples, num_configurations, coarsening_factor, cache_path, sequence_length)
+        super().__init__(base_solver, duration, duration_stddev, num_samples, num_configurations, coarsening_factor, cache_path, sequence_length)
 
 
 class SpringMassDataset(ExperimentDataset):
-    def __init__(self, base_solver, duration, num_samples, num_configurations, coarsening_factor, cache_path, sequence_length=None, mass_mean=0.9, mass_std=0.1):
+    def __init__(self, base_solver, duration, duration_stddev, num_samples, num_configurations, coarsening_factor, cache_path, sequence_length=None, mass_mean=0.9, mass_std=0.1):
 
         self.experiment = SpringMass()
         length = sample_parameterized_truncated_normal((num_configurations, 1), 0.8, 0.35, 0.1, 1.5)
@@ -127,11 +127,11 @@ class SpringMassDataset(ExperimentDataset):
             'k': sample_parameterized_truncated_normal((num_configurations, 1), 0.8, 0.35, 0.1, 1.5)
         }
 
-        super().__init__(base_solver, duration, num_samples, num_configurations, coarsening_factor, cache_path, sequence_length)
+        super().__init__(base_solver, duration, duration_stddev, num_samples, num_configurations, coarsening_factor, cache_path, sequence_length)
 
 
 class ThreeBodySpringMassDataset(ExperimentDataset):
-    def __init__(self, base_solver, duration, num_samples, num_configurations, coarsening_factor, cache_path, sequence_length=None, mass_mean=0.9, mass_std=0.1):
+    def __init__(self, base_solver, duration, duration_stddev, num_samples, num_configurations, coarsening_factor, cache_path, sequence_length=None, mass_mean=0.9, mass_std=0.1):
 
         num_particles = 3
         num_springs = num_particles * (num_particles - 1) // 2
@@ -163,11 +163,11 @@ class ThreeBodySpringMassDataset(ExperimentDataset):
             'k': k_matrix
         }
 
-        super().__init__(base_solver, duration, num_samples, num_configurations, coarsening_factor, cache_path, sequence_length)
+        super().__init__(base_solver, duration, duration_stddev, num_samples, num_configurations, coarsening_factor, cache_path, sequence_length)
 
 
 class LennardJonesDataset(ExperimentDataset):
-    def __init__(self, base_solver, duration, num_samples, num_configurations, coarsening_factor, cache_path, sequence_length=None, eps=1, sigma=1, num_particles=10):
+    def __init__(self, base_solver, duration, duration_stddev, num_samples, num_configurations, coarsening_factor, cache_path, sequence_length=None, eps=1, sigma=1, num_particles=10):
         self.experiment = LennardJones()
 
         self.spatial_dims = 3
@@ -188,7 +188,7 @@ class LennardJonesDataset(ExperimentDataset):
             'bbox': bbox
         }
 
-        super().__init__(base_solver, duration, num_samples, num_configurations, coarsening_factor, cache_path, sequence_length)
+        super().__init__(base_solver, duration, duration_stddev, num_samples, num_configurations, coarsening_factor, cache_path, sequence_length)
 
     @staticmethod
     def generate_bbox(num_configurations, spatial_dims, side_length=5):
