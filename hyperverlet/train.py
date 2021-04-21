@@ -64,5 +64,9 @@ def train(solver, dataset, device, config):
             loss = loss.item()
             summary_writer.add_scalar('loss/{}'.format(loss_method), loss, global_step=epoch * data_len + iteration)
 
+            # Log weights to Tensorboard
+            for name, param in solver.hypersolver.named_parameters():
+                summary_writer.add_histogram('weights/{}'.format(name), param, epoch)
+
             if iteration % 100 == 0:
                 print(f'loss: {loss}')
