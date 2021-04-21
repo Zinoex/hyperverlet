@@ -5,8 +5,10 @@
    "train_duration": 100,
    "train_trajectory_length": 1000001,
    "train_sequence_length": 10,
+   "train_num_configurations": 100,
    "test_duration": 100,
    "test_trajectory_length": 1000001,
-   "num_configurations": 100,
-   "coarsening_factor": 100
+   "test_num_configurations": 100,
+   "coarsening_factor": 100,
+   "duration_stddev": 0.1
 }
