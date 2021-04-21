@@ -104,7 +104,7 @@ class GraphDecoder(nn.Module):
         self.n_dense = model_args['n_dense']
         self.node_output_dim = model_args['node_output_dim']
 
-        self.node_decoder = NDenseBlock(self.h_dim, self.h_dim, self.node_output_dim, self.n_dense, activate_last=True)
+        self.node_decoder = NDenseBlock(self.h_dim, self.h_dim, self.node_output_dim, self.n_dense, activate_last=False)
 
     def forward(self, v):
         return self.node_decoder(v)
