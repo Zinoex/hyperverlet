@@ -1,6 +1,8 @@
 import os
 
 # import h5py
+from statistics import NormalDist
+
 import torch
 from torch.utils.data import Dataset
 
@@ -22,7 +24,9 @@ class ExperimentDataset(Dataset):
         self.coarsening = Coarsening(coarsening_factor, num_samples)
         self.sequence_length = sequence_length
 
-        self.trajectory = torch.stack([torch.linspace(0, duration + math.normal(0, 0.1 * duration), num_samples) for _ in range(num_configurations)], dim=1)
+        dist = NormalDist(0, 0.1 * duration)
+        samples = dist.samples(num_configurations)
+        self.trajectory = torch.stack([torch.linspace(0, duration + sample, num_samples) for sample in samples], dim=1)
 
         self.load_data(cache_path)
 
@@ -85,8 +89,8 @@ class ExperimentDataset(Dataset):
             'q': q[:, config_idx],
             'p': p[:, config_idx],
             'mass': self.mass[config_idx],
-            'trajectory': trajectory[config_idx],
-            'dt': dt,
+            'trajectory': trajectory[:, config_idx],
+            'dt': dt[:, config_idx],
             'extra_args': self.config_extra_args(config_idx)
         }
 
