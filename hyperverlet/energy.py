@@ -58,7 +58,7 @@ class ThreeBodySpringMassEnergy(CartesianKineticEnergy):
         dist = self.distance(disp)
         x = dist - length
 
-        return self.trajectory_sum(0.5 * k * x ** 2)
+        return self.trajectory_sum(0.25 * k * x ** 2)
 
 
 class SpringMassEnergy(CartesianKineticEnergy):

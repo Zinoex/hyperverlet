@@ -65,7 +65,7 @@ class ThreeBodySpringMass(BasePairPotential):
 
         offset = r - length
 
-        return -2 * (k * offset).unsqueeze(-1) * direction
+        return -(k * offset).unsqueeze(-1) * direction
 
 
 class LennardJones(BasePairPotential):
