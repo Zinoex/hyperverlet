@@ -25,8 +25,8 @@ class DenseBlock(nn.Sequential):
         self.reset_parameters()
 
     def reset_parameters(self) -> None:
-        # nn.init.kaiming_uniform_(self[0].weight, a=math.sqrt(5))
-        nn.init.xavier_uniform_(self[0].weight)
+        # nn.init.kaiming_normal_(self[0].weight, a=math.sqrt(5))
+        nn.init.xavier_normal_(self[0].weight)
 
         if self[0].bias is not None:
             nn.init.zeros_(self[0].bias)

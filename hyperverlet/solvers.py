@@ -117,10 +117,21 @@ class HyperVelocityVerlet(BaseSolver):
 
     def forward(self, experiment: Experiment, q: torch.Tensor, p: torch.Tensor, m: torch.Tensor, t, dt, **kwargs):
         dt = dt.view(-1, *[1 for _ in range(len(q.size()) - 1)])
-        q, p, dq, dp = self.base(experiment, q, p, m, t, dt, **kwargs)
+        one_half = 1 / 2
+        dq1, dp1 = experiment(q, p, m, t, **kwargs)
 
-        hq, hp = self.hypersolver(q, p, dq, dp, m, t, dt, **kwargs)
-        return experiment.shift(q + hq * dt ** (self.p_order + 1), **kwargs), p + hp * dt ** (self.p_order + 1)
+        dp = experiment.dp(q, m, t, **kwargs)
+        p = p + one_half * dp * dt
+
+        dq = experiment.dq(p, m, t, **kwargs)
+        q = experiment.shift(q + dq * dt, **kwargs)
+
+        dp = experiment.dp(q, m, t, **kwargs)
+        p = p + one_half * dp * dt
+
+        dq2, dp2 = experiment(q, p, m, t, **kwargs)
+        hq, hp = self.hypersolver(dq1, dp1, dq2, dp2, m, t, dt, **kwargs)
+        return experiment.shift(q + hq * dt ** 2, **kwargs), p + hp * dt ** 2
 
     def base(self, experiment: Experiment, q: torch.Tensor, p: torch.Tensor, m: torch.Tensor, t, dt, **kwargs):
         one_half = 1 / 2

@@ -42,7 +42,7 @@ class ThreeBodySpringMassGraphModel(nn.Module):
         super().__init__()
 
         self.node_input_dim = model_args['encoder_args']['node_input_dim']
-        self.model_q = GraphNetwork(model_args)
+        # self.model_q = GraphNetwork(model_args)
         self.model_p = GraphNetwork(model_args)
 
     def fully_connected(self, batch_size, num_particles, device):
@@ -69,8 +69,30 @@ class ThreeBodySpringMassGraphModel(nn.Module):
 
         return self.fully_connected(batch_size, num_particles, length.device), torch.stack([length, k], dim=-1).view(-1, 2)
 
-    def forward(self, q, p, dq, dp, m, t, dt, **kwargs):
-        return self.hq(q, dq, m, t, dt, **kwargs), self.hp(p, dp, m, t, dt, **kwargs)
+    def forward(self, dq1, dp1, dq2, dp2, m, t, dt, length, k, **kwargs):
+        num_particles = dq1.size(-2)
+        spatial_dim = dq1.size(-1)
+
+        edge_index, edge_attr = self.preprocess_edges(num_particles, length, k)
+
+        edge_attr = edge_attr.unsqueeze(1).repeat(1, spatial_dim, 1)
+
+        if len(dq1.size()) == 3:
+            m = m.repeat(1, 1, 2)
+        else:
+            m = m.repeat(1, 2)
+
+        node_attr = torch.stack([dq1, dp1, dq2, dp2, m], dim=-1).view(-1, spatial_dim, self.node_input_dim)
+        hx = self.model_p(node_attr, edge_attr, edge_index)
+
+        if len(dq1.size()) == 3:
+            hx = hx.view(-1, num_particles, spatial_dim, 2)
+        else:
+            hx = hx.view(num_particles, spatial_dim, 2)
+
+        return hx[..., 0], hx[..., 1]
+
+        # return self.hq(q, dq, m, t, dt, **kwargs), self.hp(p, dp, m, t, dt, **kwargs)
 
     def hq(self, q, dq, m, t, dt, **kwargs):
         return self.process(self.model_q, q, dq, m, t, dt, **kwargs)

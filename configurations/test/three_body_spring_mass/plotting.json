@@ -1,4 +1,4 @@
 {
-    "plot_every": 10,
+    "plot_every": 1,
     "save_plot": true
 }
