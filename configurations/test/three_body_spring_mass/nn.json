@@ -1,22 +1,22 @@
 {
   "module": "ThreeBodySpringMassGraphModel",
   "shared": false,
-  "message_passing_steps": 1,
+  "message_passing_steps": 3,
   "spatial_dim": 2,
   "edge_model": {
-    "h_dim": 16,
+    "h_dim": 64,
     "n_dense": 2,
     "activate_last": true,
     "layer_norm": false
   },
   "node_model": {
-    "h_dim": 16,
+    "h_dim": 64,
     "n_dense": 2,
     "activate_last": true,
     "layer_norm": false
   },
   "encoder_args": {
-    "h_dim": 16,
+    "h_dim": 64,
     "n_dense": 2,
     "activate_last": true,
     "layer_norm": false,
@@ -24,8 +24,8 @@
     "edge_input_dim": 2
   },
   "decoder_args": {
-    "h_dim": 16,
+    "h_dim": 64,
     "n_dense": 2,
-    "node_output_dim": 2
+    "node_output_dim": 1
   }
 }

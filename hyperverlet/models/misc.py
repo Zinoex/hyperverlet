@@ -16,24 +16,24 @@ _act = {
 
 
 class DenseBlock(nn.Sequential):
-    def __init__(self, input_dim, output_dim, activation='tanh'):
+    def __init__(self, input_dim, output_dim, activation='prelu'):
         super().__init__(
-            nn.Linear(input_dim, output_dim, bias=False),
+            nn.Linear(input_dim, output_dim, bias=True),
             _act[activation]()
         )
 
         self.reset_parameters()
 
     def reset_parameters(self) -> None:
-        # nn.init.kaiming_normal_(self[0].weight, a=math.sqrt(5))
-        nn.init.xavier_normal_(self[0].weight)
+        nn.init.kaiming_normal_(self[0].weight, a=math.sqrt(5))
+        # nn.init.xavier_normal_(self[0].weight)
 
         if self[0].bias is not None:
             nn.init.zeros_(self[0].bias)
 
 
 class NDenseBlock(nn.Sequential):
-    def __init__(self, input_dim: int, h_dim: int, output_dim: int, n_dense: int, activate_last=True, activation='tanh'):
+    def __init__(self, input_dim: int, h_dim: int, output_dim: int, n_dense: int, activate_last=True, activation='prelu'):
         def idim(i):
             return input_dim if i == 0 else h_dim
 
@@ -51,7 +51,7 @@ class NDenseBlock(nn.Sequential):
 
 
 class MergeNDenseBlock(nn.Module):
-    def __init__(self, input_dims, h_dim: int, output_dim: int, n_dense: int, activate_last=True, activation='tanh'):
+    def __init__(self, input_dims, h_dim: int, output_dim: int, n_dense: int, activate_last=True, activation='prelu'):
         super().__init__()
 
         self.num_inputs = len(input_dims)

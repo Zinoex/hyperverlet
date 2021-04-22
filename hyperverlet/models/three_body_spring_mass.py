@@ -42,7 +42,7 @@ class ThreeBodySpringMassGraphModel(nn.Module):
         super().__init__()
 
         self.node_input_dim = model_args['encoder_args']['node_input_dim']
-        # self.model_q = GraphNetwork(model_args)
+        self.model_q = GraphNetwork(model_args)
         self.model_p = GraphNetwork(model_args)
 
     def fully_connected(self, batch_size, num_particles, device):
@@ -86,37 +86,37 @@ class ThreeBodySpringMassGraphModel(nn.Module):
         hx = self.model_p(node_attr, edge_attr, edge_index)
 
         if len(dq1.size()) == 3:
-            hx = hx.view(-1, num_particles, spatial_dim, 2)
+            hx = hx.view(-1, num_particles, spatial_dim)
         else:
-            hx = hx.view(num_particles, spatial_dim, 2)
+            hx = hx.view(num_particles, spatial_dim)
 
-        return hx[..., 0], hx[..., 1]
+        return hx  # hx[..., 0], hx[..., 1]
 
         # return self.hq(q, dq, m, t, dt, **kwargs), self.hp(p, dp, m, t, dt, **kwargs)
 
-    def hq(self, q, dq, m, t, dt, **kwargs):
-        return self.process(self.model_q, q, dq, m, t, dt, **kwargs)
+    def hq(self, dq1, dq2, m, t, dt, **kwargs):
+        return self.process(self.model_q, dq1, dq2, m, t, dt, **kwargs)
 
-    def hp(self, p, dp, m, t, dt, **kwargs):
-        return self.process(self.model_p, p, dp, m, t, dt, **kwargs)
+    def hp(self, dp1, dp2, m, t, dt, **kwargs):
+        return self.process(self.model_p, dp1, dp2, m, t, dt, **kwargs)
 
-    def process(self, model, x, dx, m, t, dt, length, k, **kwargs):
-        num_particles = dx.size(-2)
-        spatial_dim = dx.size(-1)
+    def process(self, model, dx1, dx2, m, t, dt, length, k, **kwargs):
+        num_particles = dx1.size(-2)
+        spatial_dim = dx1.size(-1)
 
         edge_index, edge_attr = self.preprocess_edges(num_particles, length, k)
 
         edge_attr = edge_attr.unsqueeze(1).repeat(1, spatial_dim, 1)
 
-        if len(x.size()) == 3:
+        if len(dx1.size()) == 3:
             m = m.repeat(1, 1, 2)
         else:
             m = m.repeat(1, 2)
 
-        node_attr = torch.stack([dx, m], dim=-1).view(-1, spatial_dim, self.node_input_dim)
+        node_attr = torch.stack([dx1, dx2, m], dim=-1).view(-1, spatial_dim, self.node_input_dim)
         hx = model(node_attr, edge_attr, edge_index)
 
-        if len(dx.size()) == 3:
+        if len(dx1.size()) == 3:
             hx = hx.view(-1, num_particles, spatial_dim)
         else:
             hx = hx.view(num_particles, spatial_dim)
