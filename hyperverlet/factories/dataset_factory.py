@@ -31,10 +31,10 @@ def construct_dataset(config, trainable=True):
     ds_mapping = dict(pendulum=PendulumDataset, spring_mass=SpringMassDataset, three_body_spring_mass=ThreeBodySpringMassDataset)
     ds_cls = ds_mapping[dataset]
 
-    test_ds = ds_cls(gt_solver, test_duration, duration_stddev, test_trajectory_length, test_num_config, coarsening_factor, train_cache_path, sequence_length=None)
+    test_ds = ds_cls(gt_solver, test_duration, duration_stddev, test_trajectory_length, test_num_config, coarsening_factor, test_cache_path, sequence_length=None)
 
     train_ds = None
     if trainable:
-        train_ds = ds_cls(gt_solver, train_duration, duration_stddev, train_trajectory_length, train_num_config, coarsening_factor, test_cache_path, sequence_length=train_sequence_length)
+        train_ds = ds_cls(gt_solver, train_duration, duration_stddev, train_trajectory_length, train_num_config, coarsening_factor, train_cache_path, sequence_length=train_sequence_length)
 
     return train_ds, test_ds
