@@ -69,7 +69,7 @@ class ThreeBodySpringMassGraphModel(nn.Module):
 
         return self.fully_connected(batch_size, num_particles, length.device), torch.stack([length, k], dim=-1).view(-1, 2)
 
-    def forward(self, dq1, dp1, dq2, dp2, m, t, dt, length, k, **kwargs):
+    def forward(self, dq1, dq2, dp1, dp2, m, t, dt, length, k, **kwargs):
         num_particles = dq1.size(-2)
         spatial_dim = dq1.size(-1)
 
@@ -79,18 +79,20 @@ class ThreeBodySpringMassGraphModel(nn.Module):
 
         if len(dq1.size()) == 3:
             m = m.repeat(1, 1, 2)
+            dt = dt.repeat(1, num_particles, 2)
         else:
             m = m.repeat(1, 2)
+            dt = dt.repeat(num_particles, 2)
 
-        node_attr = torch.stack([dq1, dp1, dq2, dp2, m], dim=-1).view(-1, spatial_dim, self.node_input_dim)
+        node_attr = torch.stack([dq1, dq2, dp1, dp2, m], dim=-1).view(-1, spatial_dim, self.node_input_dim)
         hx = self.model_p(node_attr, edge_attr, edge_index)
 
         if len(dq1.size()) == 3:
-            hx = hx.view(-1, num_particles, spatial_dim)
+            hx = hx.view(-1, num_particles, spatial_dim, 2)
         else:
-            hx = hx.view(num_particles, spatial_dim)
+            hx = hx.view(num_particles, spatial_dim, 2)
 
-        return hx  # hx[..., 0], hx[..., 1]
+        return hx[..., 0], hx[..., 1]
 
         # return self.hq(q, dq, m, t, dt, **kwargs), self.hp(p, dp, m, t, dt, **kwargs)
 

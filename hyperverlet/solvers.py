@@ -230,8 +230,10 @@ class HyperVelocityVerlet(BaseSolver):
         p = p + one_half * dp * dt
 
         dq2, dp2 = experiment(q, p, m, t, **kwargs)
-        hq = self.hypersolver(dq1, dq2, dp1, dp2, m, t, dt, **kwargs)
-        return experiment.shift(q + hq * dt, **kwargs), p
+        hq, hp = self.hypersolver(dq1, dq2, dp1, dp2, m, t, dt, **kwargs)
+        q = experiment.shift(q + hq * dt, **kwargs)
+
+        return q, p
 
     def base(self, experiment: Experiment, q: torch.Tensor, p: torch.Tensor, m: torch.Tensor, t, dt, **kwargs):
         one_half = 1 / 2
