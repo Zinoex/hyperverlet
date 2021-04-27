@@ -17,12 +17,12 @@ class SpringMassModel(nn.Module):
         self.model_p = NDenseBlock(self.p_input_dim, self.h_dim, 1, **kwargs)
 
     def forward(self, q, p, dq, dp, m, t, dt, **kwargs):
-        return self.hq(q, dq, m, t, dt, **kwargs), self.hp(p, dp, m, t, dt, **kwargs)
+        return self.hq(q, dq, p, dp, m, t, dt, **kwargs), self.hp(q, dq, p, dp, m, t, dt, **kwargs)
 
-    def hp(self, p, dp,  m, t, dt, length, k, **kwargs):
-        hp = torch.cat([p, dp, m, length, k], dim=-1)
+    def hp(self, q, dq, p, dp, m, t, dt, length, k, **kwargs):
+        hp = torch.cat([q, dq, p, dp, m, length, k], dim=-1)
         return self.model_p(hp)
 
-    def hq(self, q, dq,  m, t, dt, length, k, **kwargs):
-        hq = torch.cat([q, dq, m, length, k], dim=-1)
+    def hq(self, q, dq, p, dp, m, t, dt, length, k, **kwargs):
+        hq = torch.cat([q, dq, p, dp, m, length, k], dim=-1)
         return self.model_q(hq)
