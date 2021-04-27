@@ -1,11 +1,11 @@
 {
   "result_path": "results/integrator_comparison/{dataset}/{solver}_trd{train_duration}_trtl{train_trajectory_length}_trsl{train_sequence_length}_cf{coarsening_factor}_ted{test_duration}_tetl{test_trajectory_length}.pickle",
   "plot_path": "visualization/integrator_comparison/{dataset}/{solver}_trd{train_duration}_trtl{train_trajectory_length}_trsl{train_sequence_length}_cf{coarsening_factor}_ted{test_duration}_tetl{test_trajectory_length}_{datetime}.mp4",
-  "train_args_path": "configurations/integrator_experiments/three_body_spring_mass/training.json",
+  "train_args_path": "configurations/integrator_comparison/three_body_spring_mass/training.json",
   "model_args": {
     "solver": "Heun",
-    "nn_path": "configurations/integrator_experiments/three_body_spring_mass/nn.json"
+    "nn_path": "configurations/integrator_comparison/three_body_spring_mass/nn.json"
   },
-  "dataset_args_path": "configurations/integrator_experiments/three_body_spring_mass/dataset.json",
-  "plotting_args_path": "configurations/integrator_experiments/three_body_spring_mass/plotting.json"
+  "dataset_args_path": "configurations/integrator_comparison/three_body_spring_mass/dataset.json",
+  "plotting_args_path": "configurations/integrator_comparison/three_body_spring_mass/plotting.json"
 }

@@ -1,11 +1,11 @@
 {
   "result_path": "results/integrator_comparison/{dataset}/{solver}_trd{train_duration}_trtl{train_trajectory_length}_trsl{train_sequence_length}_cf{coarsening_factor}_ted{test_duration}_tetl{test_trajectory_length}.pickle",
   "plot_path": "visualization/integrator_comparison/{dataset}/{solver}_trd{train_duration}_trtl{train_trajectory_length}_trsl{train_sequence_length}_cf{coarsening_factor}_ted{test_duration}_tetl{test_trajectory_length}_{datetime}.mp4",
-  "train_args_path": "configurations/integrator_experiments/pendulum/training.json",
+  "train_args_path": "configurations/integrator_comparison/pendulum/training.json",
   "model_args": {
     "solver": "ThirdOrderRuth",
-    "nn_path": "configurations/integrator_experiments/pendulum/nn.json"
+    "nn_path": "configurations/integrator_comparison/pendulum/nn.json"
   },
-  "dataset_args_path": "configurations/integrator_experiments/pendulum/dataset.json",
-  "plotting_args_path": "configurations/integrator_experiments/pendulum/plotting.json"
+  "dataset_args_path": "configurations/integrator_comparison/pendulum/dataset.json",
+  "plotting_args_path": "configurations/integrator_comparison/pendulum/plotting.json"
 }
