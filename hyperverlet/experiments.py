@@ -1,5 +1,6 @@
 import abc
 
+import numpy as np
 import torch
 from torch import nn
 
@@ -28,7 +29,11 @@ class Pendulum(Experiment):
         return p / (m * length ** 2)
 
     def dp(self, q, m, t, length, g, **kwargs):
-        return -m * g * length * torch.sin(q)
+        if torch.is_tensor(q):
+            sin_q = torch.sin(q)
+        else:
+            sin_q = np.sin(q)
+        return -m * g * length * sin_q
 
 
 class SpringMass(Experiment):
