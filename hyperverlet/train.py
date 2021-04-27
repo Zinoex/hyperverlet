@@ -40,6 +40,10 @@ def train(solver, dataset, device, config):
             q, p = solver.trajectory(dataset.experiment, q_base[0], p_base[0], mass, trajectory, disable_print=True, **extra_args)
 
             if loss_method == "phase_space":
+                # dq, dp = dataset.experiment(q, p, mass, trajectory, **extra_args)
+                # dq_base, dp_base = dataset.experiment(q_base, p_base, mass, trajectory, **extra_args)
+                #
+                # loss = torch.mean((dq * dp_base - dp * dq_base) ** 2)
                 loss = criterion(q, q_base) + criterion(p, p_base)
             elif loss_method == "energy":
                 gt_ke = dataset.experiment.energy.kinetic_energy(mass, p_base, **extra_args)
@@ -63,7 +67,7 @@ def train(solver, dataset, device, config):
                 raise NotImplementedError()
 
             loss.backward()
-            # nn.utils.clip_grad_norm_(solver.parameters(), 1)
+            nn.utils.clip_grad_norm_(solver.parameters(), 1)
             optimizer.step()
 
             loss = loss.item()
