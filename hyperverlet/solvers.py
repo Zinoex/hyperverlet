@@ -234,7 +234,7 @@ class HyperVelocityVerlet(BaseSolver):
         # p = p + one_half * hp * dt
 
         dq2, dp2 = experiment(q, p, m, t, **kwargs)
-        hq, hp = self.hypersolver(dq1, dq2, dp1, dp2, m, t, dt, **kwargs)
+        hq = self.hypersolver.hq(dq1, dq2, dp1, dp2, m, t, dt, **kwargs)
         q = experiment.shift(q + hq * dt, **kwargs)
 
         # dq2, dp2 = experiment(q, p, m, t, **kwargs)
