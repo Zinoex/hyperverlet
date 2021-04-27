@@ -1,5 +1,6 @@
 from argparse import ArgumentParser
 from collections import namedtuple
+from dataclasses import dataclass
 from datetime import datetime
 from multiprocessing import Pool
 
@@ -30,6 +31,11 @@ config_paths = {
 }
 
 
+@dataclass
+class ExpArgs:
+    config_path: str
+
+
 def parse_arguments():
     parser = ArgumentParser()
 
@@ -39,15 +45,12 @@ def parse_arguments():
     evaluate_parse.add_argument('--config-path', type=str, required=True, help="Path to the configuration file")
     evaluate_parse.set_defaults(func=evaluate)
 
-    experiment_parse = commands.add_parser("experiment", help="Run a full experiment")
-    experiment_parse.add_argument('--config-path', type=str, required=True, help="Path to the configuration file")
-    experiment_parse.set_defaults(func=experiment_parse)
-
     plot_parse = commands.add_parser("plot", help="Plot the results")
     plot_parse.add_argument('--config-path', type=str, required=True, help="Path to the configuration file")
     plot_parse.set_defaults(func=plot)
 
     full_parse = commands.add_parser("full", help="Run an evaluation and plotting")
+    full_parse.add_argument('--config-path', type=str, required=True, help="Path to the configuration file")
     full_parse.set_defaults(func=full_run)
 
     lyapunov_parse = commands.add_parser('lyapunov', help='Create a boxplot showing lyapunov exponent for solvers')
@@ -58,7 +61,7 @@ def parse_arguments():
     parallel_parse = commands.add_parser('parallel', help='Execute evaluate or plot in parallel')
     parallel_parse.add_argument('--experiment', type=str, required=True, choices=config_paths.keys(), help="Run experiment on set of predfefined json files")
     parallel_parse.add_argument('--system', type=str, required=True, choices=systems, help="Name of the system to test")
-    parallel_parse.add_argument('--num-processes', type=int, default=7, help="Number of parallel processes")
+    parallel_parse.add_argument('--num-processes', type=int, default=1, help="Number of parallel processes")
     parallel_parse.set_defaults(func=parallel)
 
     commands_parallel = parallel_parse.add_subparsers(help='commands', dest='command')
@@ -84,8 +87,6 @@ def lyapunov(args):
 
 
 def parallel(args):
-    ExpArgs = namedtuple('ExpArgs', ['config_path'])
-
     def replace_system(path):
         return ExpArgs(path.format(system=args.system))
 
