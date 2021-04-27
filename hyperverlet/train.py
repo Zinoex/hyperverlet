@@ -18,7 +18,7 @@ def train(solver, dataset, device, config):
     batch_size = train_args["batch_size"]
     num_workers = train_args["num_workers"]
 
-    assert loss_method in ['phase_space', 'energy', "residual"]
+    assert loss_method in ['phase_space', 'energy', "residual", "phase_space_decay"]
 
     optimizer = optim.AdamW(solver.parameters(), lr=1e-3)
     criterion = nn.MSELoss()
@@ -58,6 +58,11 @@ def train(solver, dataset, device, config):
                 q_hyper_res, p_hyper_res = solver.get_hyper_residuals(dataset.experiment, q_base, p_base, mass, trajectory, disable_print=True, **extra_args)
 
                 loss = criterion(q_hyper_res, q_base_res) + criterion(p_hyper_res, p_base_res)
+            elif loss_method == 'phase_space_decay':
+                q_mean = torch.mean((q_base - q) ** 2, list(range(1, len(q.size()))))
+                p_mean = torch.mean((p_base - p) ** 2, list(range(1, len(p.size()))))
+                decay_factor = torch.cumprod(torch.full_like(q_mean, 0.99), 0)
+                loss = torch.mean(q_mean * decay_factor) + torch.mean(p_mean * decay_factor)
             else:
                 raise NotImplementedError()
 
