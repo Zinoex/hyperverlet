@@ -1,5 +1,6 @@
 {
     "epoch": 10,
     "batch_size": 100,
-    "num_workers": 0
+    "num_workers": 0,
+    "loss": "phase_space"
 }

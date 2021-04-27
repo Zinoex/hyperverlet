@@ -5,6 +5,7 @@ import torch
 
 from hyperverlet.factories.dataset_factory import construct_dataset
 from hyperverlet.factories.solver_factory import construct_solver
+from hyperverlet.lyapunov import calc_lyapunov_stability, lyapunov_solvers_plot
 from hyperverlet.plotting.pendulum import animate_pendulum
 from hyperverlet.plotting.spring_mass import animate_sm
 from hyperverlet.plotting.three_body_spring_mass import animate_tbsm
@@ -34,7 +35,7 @@ def parse_arguments():
 def evaluate(config_path):
     seed_randomness()
     config = load_config(config_path)
-    device = torch.device('cuda')
+    device = torch.device('cpu')
 
     # Solver Construction
     model_config = config['model_args']
@@ -61,7 +62,19 @@ def plot(config_path):
     config = load_config(config_path)
     dataset = config["dataset_args"]['dataset']
 
+    configs = [
+        f'configurations/test/{dataset}/euler.json',
+        f'configurations/test/{dataset}/heun.json',
+        f'configurations/test/{dataset}/hypereuler.json',
+        f'configurations/test/{dataset}/velocityverlet.json',
+        f'configurations/test/{dataset}/hyperverlet.json',
+        f'configurations/test/{dataset}/hyperheun.json',
+        f'configurations/test/{dataset}/rk4.json',
+        f'configurations/test/{dataset}/ruth4.json'
+    ]
+
     if dataset == 'pendulum':
+        lyapunov_solvers_plot(configs)
         animate_pendulum(config, show_gt=True)
     elif dataset == 'spring_mass':
         animate_sm(config, show_gt=True)
