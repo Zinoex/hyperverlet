@@ -20,7 +20,7 @@ class BaseSolver(nn.Module):
         q_traj[0], p_traj[0] = q0, p0
         q, p = experiment.shift(q0, **kwargs), p0
 
-        trajectory = trajectory.unsqueeze(-1)
+        trajectory = self.view_like_q(trajectory, q_traj)
         dtrajectory = trajectory[1:] - trajectory[:-1]
 
         for i, (t, dt) in enumerate(zip(tqdm(trajectory[:-1], disable=disable_print), dtrajectory)):
@@ -28,6 +28,12 @@ class BaseSolver(nn.Module):
             q_traj[i + 1], p_traj[i + 1] = q, p
 
         return q_traj, p_traj
+
+    def view_like_q(self, trajectory, q):
+        traj_size = list(trajectory.size())
+        remaining_size = [1] * (len(q.size()) - len(traj_size))
+
+        return trajectory.view(*traj_size, *remaining_size)
 
 
 class Euler(BaseSolver):
@@ -249,8 +255,6 @@ class HyperVelocityVerlet(BaseSolver):
 
         q_traj[0], p_traj[0] = gt_q[0], gt_p[0]
 
-        trajectory = trajectory.unsqueeze(-1)
-
         for i, (t, dt) in enumerate(zip(tqdm(trajectory[:-1], disable=disable_print), dtrajectory)):
             q, p = self.base(experiment, gt_q[i], gt_p[i], m, t, dt, **kwargs)
             q_traj[i + 1], p_traj[i + 1] = q, p
@@ -263,7 +267,7 @@ class HyperVelocityVerlet(BaseSolver):
 
         gt_q = experiment.shift(gt_q, **kwargs)
 
-        trajectory = trajectory.unsqueeze(-1)
+        trajectory = self.view_like_q(trajectory, gt_q)
         dtrajectory = trajectory[1:] - trajectory[:-1]
 
         for i, (t, dt) in enumerate(zip(tqdm(trajectory[:-1], disable=disable_print), dtrajectory)):
@@ -288,14 +292,14 @@ class HyperVelocityVerlet(BaseSolver):
         return q_traj[:-1], p_traj[:-1]
 
     def get_residuals(self, experiment, gt_q, gt_p, m, trajectory, **kwargs):
-        dt = trajectory[1:] - trajectory[:-1]
-        dt = dt.view(*dt.size(), 1)
+        trajectory = self.view_like_q(trajectory, gt_q)
+        dtrajectory = trajectory[1:] - trajectory[:-1]
 
         gt_q = experiment.shift(gt_q, **kwargs)
 
-        q_pred, p_pred = self.base_trajectory(experiment, gt_q, gt_p, m, trajectory, dt, **kwargs)
-        res_q = (gt_q[1:] - q_pred[1:]) / dt ** (self.p_order + 1)
-        res_p = (gt_p[1:] - p_pred[1:]) / dt ** (self.p_order + 1)
+        q_pred, p_pred = self.base_trajectory(experiment, gt_q, gt_p, m, trajectory, dtrajectory, **kwargs)
+        res_q = (gt_q[1:] - q_pred[1:]) / dtrajectory ** (self.p_order + 1)
+        res_p = (gt_p[1:] - p_pred[1:]) / dtrajectory ** (self.p_order + 1)
         return res_q, res_p
 
 

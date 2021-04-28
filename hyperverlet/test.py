@@ -17,10 +17,10 @@ def test(solver, dataset, device, config):
     with torch.no_grad():
         batch = next(iter(loader))
 
-        q_base = batch['q'].to(device, non_blocking=True).transpose_(0, 1)
-        p_base = batch['p'].to(device, non_blocking=True).transpose_(0, 1)
+        q_base = batch['q'].transpose(0, 1).contiguous().to(device, non_blocking=True)
+        p_base = batch['p'].transpose(0, 1).contiguous().to(device, non_blocking=True)
         mass = batch['mass'].to(device, non_blocking=True)
-        trajectory = batch['trajectory'].to(device, non_blocking=True).transpose_(0, 1)
+        trajectory = batch['trajectory'].transpose(0, 1).contiguous().to(device, non_blocking=True)
         extra_args = send_to_device(batch['extra_args'], device, non_blocking=True)
 
         (q, p), inference_time = timer(lambda: solver.trajectory(dataset.experiment, q_base[0], p_base[0], mass, trajectory, **extra_args), 'solving', return_time=True)

@@ -1,6 +1,7 @@
 {
     "epoch": 10,
     "batch_size": 100,
-    "num_workers": 0,
-    "loss": "phase_space"
+    "num_workers": 8,
+    "loss": "residual",
+    "time_decay": 1
 }
