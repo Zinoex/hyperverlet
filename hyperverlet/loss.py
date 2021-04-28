@@ -12,7 +12,7 @@ class TimeDecayMSELoss(nn.Module):
         target = target.view(-1, 1)
 
         squared_diff = (input - target) ** 2
-        loss = torch.mean(squared_diff)
+        loss = torch.mean(squared_diff, dim=1)
         decay_factor = torch.cumprod(torch.full_like(loss, self.decay_factor), 0)
 
         return torch.mean(loss * decay_factor)
