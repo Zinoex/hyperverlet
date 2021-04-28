@@ -31,13 +31,14 @@ def train(solver, dataset, device, config):
         for iteration, batch in enumerate(tqdm(loader, desc='Training iteration')):
             optimizer.zero_grad(set_to_none=True)
 
-            q_base = batch['q'].to(device, non_blocking=True).transpose_(0, 1)
-            p_base = batch['p'].to(device, non_blocking=True).transpose_(0, 1)
+            q_base = batch['q'].transpose_(0, 1).to(device, non_blocking=True)
+            p_base = batch['p'].transpose_(0, 1).to(device, non_blocking=True)
             mass = batch['mass'].to(device, non_blocking=True)
-            trajectory = batch['trajectory'].to(device, non_blocking=True).transpose_(0, 1)
+            trajectory = batch['trajectory'].transpose_(0, 1).to(device, non_blocking=True)
             extra_args = send_to_device(batch['extra_args'], device, non_blocking=True)
 
-            q, p = solver.trajectory(dataset.experiment, q_base[0], p_base[0], mass, trajectory, disable_print=True, **extra_args)
+            if loss_method in ["phase_space", "energy", "phase_space_decay"]:
+                q, p = solver.trajectory(dataset.experiment, q_base[0], p_base[0], mass, trajectory, disable_print=True, **extra_args)
 
             if loss_method == "phase_space":
                 # dq, dp = dataset.experiment(q, p, mass, trajectory, **extra_args)
@@ -54,8 +55,8 @@ def train(solver, dataset, device, config):
 
                 loss = criterion(gt_ke, pred_ke) + criterion(gt_pe, pred_pe)
             elif loss_method == "residual":
-                q_base_res, p_base_res = solver.get_base_residuals(dataset.experiment, q_base, p_base, mass, trajectory, disable_print=True, **extra_args)
-                q_hyper_res, p_hyper_res = solver.get_hyper_residuals(dataset.experiment, q_base, p_base, mass, trajectory, disable_print=True, **extra_args)
+                q_base_res, p_base_res = solver.get_residuals(dataset.experiment, q_base, p_base, mass, trajectory, disable_print=True, **extra_args)
+                q_hyper_res, p_hyper_res = solver.hyper_trajectory(dataset.experiment, q_base, p_base, mass, trajectory, disable_print=True, **extra_args)
 
                 loss = criterion(q_hyper_res, q_base_res) + criterion(p_hyper_res, p_base_res)
             elif loss_method == 'phase_space_decay':
