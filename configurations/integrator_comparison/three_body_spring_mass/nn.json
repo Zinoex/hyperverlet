@@ -6,26 +6,26 @@
   "edge_model": {
     "h_dim": 16,
     "n_dense": 2,
-    "activate_last": false,
+    "activate_last": true,
     "layer_norm": false
   },
   "node_model": {
     "h_dim": 16,
     "n_dense": 2,
-    "activate_last": false,
+    "activate_last": true,
     "layer_norm": false
   },
   "encoder_args": {
     "h_dim": 16,
     "n_dense": 2,
-    "activate_last": false,
+    "activate_last": true,
     "layer_norm": false,
-    "node_input_dim": 2,
+    "node_input_dim": 5,
     "edge_input_dim": 2
   },
   "decoder_args": {
     "h_dim": 16,
     "n_dense": 2,
-    "node_output_dim": 1
+    "node_output_dim": 2
   }
 }
