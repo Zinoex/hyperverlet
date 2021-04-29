@@ -16,7 +16,7 @@ _act = {
 
 
 class DenseBlock(nn.Sequential):
-    def __init__(self, input_dim, output_dim, activation='prelu'):
+    def __init__(self, input_dim, output_dim, activation='tanh'):
         super().__init__(
             nn.Linear(input_dim, output_dim, bias=True),
             _act[activation]()
@@ -33,7 +33,7 @@ class DenseBlock(nn.Sequential):
 
 
 class NDenseBlock(nn.Sequential):
-    def __init__(self, input_dim: int, h_dim: int, output_dim: int, n_dense: int, activate_last=True, activation='prelu'):
+    def __init__(self, input_dim: int, h_dim: int, output_dim: int, n_dense: int, activate_last=True, activation='tanh'):
         def idim(i):
             return input_dim if i == 0 else h_dim
 
@@ -51,7 +51,7 @@ class NDenseBlock(nn.Sequential):
 
 
 class MergeNDenseBlock(nn.Module):
-    def __init__(self, input_dims, h_dim: int, output_dim: int, n_dense: int, activate_last=True, activation='prelu'):
+    def __init__(self, input_dims, h_dim: int, output_dim: int, n_dense: int, activate_last=True, activation='tanh'):
         super().__init__()
 
         self.num_inputs = len(input_dims)
