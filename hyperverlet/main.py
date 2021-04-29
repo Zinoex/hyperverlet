@@ -1,8 +1,6 @@
 from argparse import ArgumentParser
-from collections import namedtuple
 from dataclasses import dataclass
-from datetime import datetime
-from multiprocessing import Pool
+from torch.multiprocessing import Pool
 
 import torch
 
@@ -58,22 +56,21 @@ def parse_arguments():
     lyapunov_parse.add_argument('--system', type=str, required=True, choices=systems, help="Name of the system to test")
     lyapunov_parse.set_defaults(func=lyapunov)
 
-    parallel_parse = commands.add_parser('parallel', help='Execute evaluate or plot in parallel')
-    parallel_parse.add_argument('--experiment', type=str, required=True, choices=config_paths.keys(), help="Run experiment on set of predfefined json files")
-    parallel_parse.add_argument('--system', type=str, required=True, choices=systems, help="Name of the system to test")
-    parallel_parse.add_argument('--num-processes', type=int, default=1, help="Number of parallel processes")
-    parallel_parse.set_defaults(func=parallel)
+    sequential_parse = commands.add_parser('sequential', help='Execute evaluate or plot sequentially')
+    sequential_parse.add_argument('--experiment', type=str, required=True, choices=config_paths.keys(), help="Run experiment on set of predfefined json files")
+    sequential_parse.add_argument('--system', type=str, required=True, choices=systems, help="Name of the system to test")
+    sequential_parse.set_defaults(func=sequential)
 
-    commands_parallel = parallel_parse.add_subparsers(help='commands', dest='command')
+    commands_sequential = sequential_parse.add_subparsers(help='commands', dest='command')
 
-    evaluate_parse = commands_parallel.add_parser("evaluate", help="Test a model")
-    evaluate_parse.set_defaults(parallel_func=evaluate)
+    evaluate_parse = commands_sequential.add_parser("evaluate", help="Test a model")
+    evaluate_parse.set_defaults(sequential_func=evaluate)
 
-    plot_parse = commands_parallel.add_parser("plot", help="Plot the results")
-    plot_parse.set_defaults(parallel_func=plot)
+    plot_parse = commands_sequential.add_parser("plot", help="Plot the results")
+    plot_parse.set_defaults(sequential_func=plot)
 
-    full_parse = commands_parallel.add_parser("full", help="Run an evaluation and plotting")
-    full_parse.set_defaults(parallel_func=full_run)
+    full_parse = commands_sequential.add_parser("full", help="Run an evaluation and plotting")
+    full_parse.set_defaults(sequential_func=full_run)
 
     return parser.parse_args()
 
@@ -86,14 +83,14 @@ def lyapunov(args):
     lyapunov_solvers_plot(configs)
 
 
-def parallel(args):
+def sequential(args):
     def replace_system(path):
         return ExpArgs(path.format(system=args.system))
 
-    experiment_config_paths = map(replace_system, config_paths[args.experiment])
+    experiment_args = map(replace_system, config_paths[args.experiment])
 
-    with Pool(args.num_processes) as p:
-        p.map(args.parallel_func, experiment_config_paths)
+    for experiment_arg in experiment_args:
+        args.sequential_func(experiment_arg)
 
 
 def evaluate(args):
