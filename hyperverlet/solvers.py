@@ -9,6 +9,7 @@ from hyperverlet.experiments import Experiment
 
 class BaseSolver(nn.Module):
     trainable = False
+    residual_training = False
 
     def forward(self, experiment: Experiment, q: torch.Tensor, p: torch.Tensor, m: torch.Tensor, t, dt, **kwargs):
         raise NotImplemented()
@@ -43,8 +44,57 @@ class Euler(BaseSolver):
         return experiment.shift(q + dq * dt, **kwargs), p + dp * dt
 
 
-class HyperEuler(BaseSolver):
+class ResidualMixin:
+    def base_trajectory(self, experiment: Experiment, gt_q: torch.Tensor, gt_p: torch.Tensor, m: torch.Tensor, trajectory: torch.Tensor, dtrajectory: torch.Tensor, disable_print=False, **kwargs):
+        q_traj = torch.zeros_like(gt_q)
+        p_traj = torch.zeros_like(gt_p)
+
+        q_traj[0], p_traj[0] = gt_q[0], gt_p[0]
+
+        for i, (t, dt) in enumerate(zip(tqdm(trajectory[:-1], disable=disable_print), dtrajectory)):
+            q, p = self.base(experiment, gt_q[i], gt_p[i], m, t, dt, **kwargs)
+            q_traj[i + 1], p_traj[i + 1] = q, p
+
+        return q_traj, p_traj
+
+    def hyper_trajectory(self, experiment: Experiment, gt_q: torch.Tensor, gt_p: torch.Tensor, m: torch.Tensor, trajectory: torch.Tensor, disable_print=False, **kwargs):
+        q_traj = torch.zeros_like(gt_q)
+        p_traj = torch.zeros_like(gt_p)
+
+        gt_q = experiment.shift(gt_q, **kwargs)
+
+        trajectory = self.view_like_q(trajectory, gt_q)
+        dtrajectory = trajectory[1:] - trajectory[:-1]
+
+        for i, (t, dt) in enumerate(zip(tqdm(trajectory[:-1], disable=disable_print), dtrajectory)):
+            q, p = gt_q[i], gt_p[i]
+            dq1, dp1 = experiment(q, p, m, t, **kwargs)
+
+            q, p = self.base(experiment, q, p, m, t, dt, **kwargs)
+
+            dq2, dp2 = experiment(q, p, m, t, **kwargs)
+            hq, hp = self.hypersolver(dq1, dq2, dp1, dp2, m, t, dt, **kwargs)
+
+            q_traj[i], p_traj[i] = hq, hp
+
+        return q_traj[:-1], p_traj[:-1]
+
+    def get_residuals(self, experiment, gt_q, gt_p, m, trajectory, **kwargs):
+        trajectory = self.view_like_q(trajectory, gt_q)
+        dtrajectory = trajectory[1:] - trajectory[:-1]
+
+        gt_q = experiment.shift(gt_q, **kwargs)
+
+        q_pred, p_pred = self.base_trajectory(experiment, gt_q, gt_p, m, trajectory, dtrajectory, **kwargs)
+        res_q = (gt_q[1:] - q_pred[1:]) / dtrajectory ** (self.p_order + 1)
+        res_p = (gt_p[1:] - p_pred[1:]) / dtrajectory ** (self.p_order + 1)
+        return res_q, res_p
+
+
+class HyperEuler(BaseSolver, ResidualMixin):
     trainable = True
+    residual_training = True
+    p_order = 1
 
     def __init__(self, hypersolver):
         super().__init__()
@@ -57,6 +107,14 @@ class HyperEuler(BaseSolver):
 
         q_next = experiment.shift(q + dq * dt + hq * (dt ** 2), **kwargs)
         p_next = p + dp * dt + hp * (dt ** 2)
+
+        return q_next, p_next
+
+    def base(self, experiment: Experiment, q: torch.Tensor, p: torch.Tensor, m: torch.Tensor, t, dt, **kwargs):
+        dq, dp = experiment(q, p, m, t, **kwargs)
+
+        q_next = experiment.shift(q + dq * dt, **kwargs)
+        p_next = p + dp * dt
 
         return q_next, p_next
 
@@ -199,8 +257,9 @@ class HyperSymplecticEuler(BaseSolver):
         return q, p
 
 
-class HyperVelocityVerlet(BaseSolver):
+class HyperVelocityVerlet(BaseSolver, ResidualMixin):
     trainable = True
+    residual_trainable = True
     p_order = 2
 
     def __init__(self, hypersolver):
@@ -209,29 +268,13 @@ class HyperVelocityVerlet(BaseSolver):
         self.hypersolver = hypersolver
 
     def forward(self, experiment: Experiment, q: torch.Tensor, p: torch.Tensor, m: torch.Tensor, t, dt, **kwargs):
-        one_half = 1 / 2
         dq1, dp1 = experiment(q, p, m, t, **kwargs)
 
-        dp = experiment.dp(q, m, t, **kwargs)
-        p = p + one_half * dp * dt
-
-        dq = experiment.dq(p, m, t, **kwargs)
-        q = experiment.shift(q + dq * dt, **kwargs)
-
-        dp = experiment.dp(q, m, t, **kwargs)
-        p = p + one_half * dp * dt
-
-        # dq2, dp2 = experiment(q, p, m, t, **kwargs)
-        # hq, hp = self.hypersolver(dq1, dq2, dp1, dp2, m, t, dt, **kwargs)
-        # p = p + one_half * hp * dt
+        q, p = self.base(experiment, q, p, m, t, dt, **kwargs)
 
         dq2, dp2 = experiment(q, p, m, t, **kwargs)
         hq, hp = self.hypersolver(dq1, dq2, dp1, dp2, m, t, dt, **kwargs)
         q, p = experiment.shift(q + hq * dt ** (self.p_order + 1), **kwargs), p + hp * dt ** (self.p_order + 1)
-
-        # dq2, dp2 = experiment(q, p, m, t, **kwargs)
-        # hq, hp = self.hypersolver(dq1, dq2, dp1, dp2, m, t, dt, **kwargs)
-        # p = p + one_half * hp * dt
 
         return q, p
 
@@ -248,59 +291,6 @@ class HyperVelocityVerlet(BaseSolver):
         p = p + one_half * dp * dt
 
         return q, p
-
-    def base_trajectory(self, experiment: Experiment, gt_q: torch.Tensor, gt_p: torch.Tensor, m: torch.Tensor, trajectory: torch.Tensor, dtrajectory: torch.Tensor, disable_print=False, **kwargs):
-        q_traj = torch.zeros_like(gt_q)
-        p_traj = torch.zeros_like(gt_p)
-
-        q_traj[0], p_traj[0] = gt_q[0], gt_p[0]
-
-        for i, (t, dt) in enumerate(zip(tqdm(trajectory[:-1], disable=disable_print), dtrajectory)):
-            q, p = self.base(experiment, gt_q[i], gt_p[i], m, t, dt, **kwargs)
-            q_traj[i + 1], p_traj[i + 1] = q, p
-
-        return q_traj, p_traj
-
-    def hyper_trajectory(self, experiment: Experiment, gt_q: torch.Tensor, gt_p: torch.Tensor, m: torch.Tensor, trajectory: torch.Tensor, disable_print=False, **kwargs):
-        q_traj = torch.zeros_like(gt_q)
-        p_traj = torch.zeros_like(gt_p)
-
-        gt_q = experiment.shift(gt_q, **kwargs)
-
-        trajectory = self.view_like_q(trajectory, gt_q)
-        dtrajectory = trajectory[1:] - trajectory[:-1]
-
-        for i, (t, dt) in enumerate(zip(tqdm(trajectory[:-1], disable=disable_print), dtrajectory)):
-            q, p = gt_q[i], gt_p[i]
-            one_half = 1 / 2
-            dq1, dp1 = experiment(q, p, m, t, **kwargs)
-
-            dp = experiment.dp(q, m, t, **kwargs)
-            p = p + one_half * dp * dt
-
-            dq = experiment.dq(p, m, t, **kwargs)
-            q = experiment.shift(q + dq * dt, **kwargs)
-
-            dp = experiment.dp(q, m, t, **kwargs)
-            p = p + one_half * dp * dt
-
-            dq2, dp2 = experiment(q, p, m, t, **kwargs)
-            hq, hp = self.hypersolver(dq1, dq2, dp1, dp2, m, t, dt, **kwargs)
-
-            q_traj[i], p_traj[i] = hq, hp
-
-        return q_traj[:-1], p_traj[:-1]
-
-    def get_residuals(self, experiment, gt_q, gt_p, m, trajectory, **kwargs):
-        trajectory = self.view_like_q(trajectory, gt_q)
-        dtrajectory = trajectory[1:] - trajectory[:-1]
-
-        gt_q = experiment.shift(gt_q, **kwargs)
-
-        q_pred, p_pred = self.base_trajectory(experiment, gt_q, gt_p, m, trajectory, dtrajectory, **kwargs)
-        res_q = (gt_q[1:] - q_pred[1:]) / dtrajectory ** (self.p_order + 1)
-        res_p = (gt_p[1:] - p_pred[1:]) / dtrajectory ** (self.p_order + 1)
-        return res_q, res_p
 
 
 class SymplecticSolver(BaseSolver):
