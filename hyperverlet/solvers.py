@@ -9,7 +9,7 @@ from hyperverlet.experiments import Experiment
 
 class BaseSolver(nn.Module):
     trainable = False
-    residual_training = False
+    residual_trainable = False
 
     def forward(self, experiment: Experiment, q: torch.Tensor, p: torch.Tensor, m: torch.Tensor, t, dt, **kwargs):
         raise NotImplemented()
@@ -93,7 +93,7 @@ class ResidualMixin:
 
 class HyperEuler(BaseSolver, ResidualMixin):
     trainable = True
-    residual_training = True
+    residual_trainable = True
     p_order = 1
 
     def __init__(self, hypersolver):
