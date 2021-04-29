@@ -1,6 +1,3 @@
-import random
-
-import torch
 from torch import optim, nn
 from torch.utils.data import DataLoader
 from torch.utils.tensorboard import SummaryWriter
@@ -10,8 +7,9 @@ from hyperverlet.loss import TimeDecayMSELoss
 from hyperverlet.utils.misc import send_to_device
 
 
-def train(solver, dataset, device, config):
+def train(solver: nn.Module, dataset, device, config):
     assert solver.trainable, 'Solver is not trainable'
+    solver.train()
 
     train_args = config["train_args"]
     epochs = train_args["epoch"]
@@ -53,23 +51,22 @@ def train(solver, dataset, device, config):
 
                 loss = criterion(gt_ke, pred_ke) + criterion(gt_pe, pred_pe)
             elif loss_method == "residual":
-                q_base_res, p_base_res = solver.get_residuals(dataset.experiment, q_base, p_base, mass, trajectory, disable_print=True, **extra_args)
-                q_hyper_res, p_hyper_res = solver.hyper_trajectory(dataset.experiment, q_base, p_base, mass, trajectory, disable_print=True, **extra_args)
+                q_res, p_res = solver.get_residuals(dataset.experiment, q_base, p_base, mass, trajectory, disable_print=True, **extra_args)
+                q_hyper, p_hyper = solver.hyper_trajectory(dataset.experiment, q_base, p_base, mass, trajectory, disable_print=True, **extra_args)
 
-                loss = criterion(q_hyper_res, q_base_res) + criterion(p_hyper_res, p_base_res)
+                loss = criterion(q_hyper, q_res) + criterion(p_hyper, p_res)
             else:
                 raise NotImplementedError()
 
             loss.backward()
-            # nn.utils.clip_grad_norm_(solver.parameters(), 1)
             optimizer.step()
 
             loss = loss.item()
             summary_writer.add_scalar('loss/{}'.format(loss_method), loss, global_step=epoch * data_len + iteration)
 
-            # Log weights to Tensorboard
-            for name, param in solver.hypersolver.named_parameters():
-                summary_writer.add_histogram('weights/{}'.format(name), param, epoch)
-
             if iteration % 100 == 0:
                 print(f'loss: {loss}')
+
+        # Log weights to Tensorboard
+        for name, param in solver.hypersolver.named_parameters():
+            summary_writer.add_histogram('weights/{}'.format(name), param, epoch)

@@ -6,7 +6,8 @@ from hyperverlet.timer import timer
 from hyperverlet.utils.misc import send_to_device, torch_to_numpy
 
 
-def test(solver, dataset, device, config):
+def test(solver: nn.Module, dataset, device, config):
+    solver.eval()
     criterion = nn.MSELoss()
 
     train_args = config["train_args"]
