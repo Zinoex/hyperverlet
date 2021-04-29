@@ -172,7 +172,8 @@ class ThreeBodySpringMassDataset(ExperimentDataset):
                 'k':  self.fill_particle_matrix(num_configurations, num_particles, torch.full((num_configurations, num_springs), 0.8))
             }
 
-        self.q0 = (torch.randn(num_configurations, num_particles, num_euclid) * 2 - 1) * length.max(dim=1, keepdim=True)[0].unsqueeze(2)
+        q0 = torch.randn(num_configurations, num_particles, num_euclid) * length.max(dim=1, keepdim=True)[0].unsqueeze(2)
+        self.q0 = q0 - (q0 * self.mass).sum(dim=1, keepdim=True) / self.mass.sum(dim=1, keepdim=True)
 
         p0 = torch.randn(num_configurations, num_particles, num_euclid) * 0.1
         self.p0 = p0 - torch.mean(p0, dim=1, keepdim=True)
