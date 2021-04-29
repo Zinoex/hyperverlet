@@ -100,70 +100,95 @@ class ExperimentDataset(Dataset):
 
 class PendulumDataset(ExperimentDataset):
     def __init__(self, base_solver, duration, duration_stddev, num_samples, num_configurations, coarsening_factor, cache_path, sequence_length=None,
-                 length_mean=1.0, length_std=0.5, mass_mean=0.9, mass_std=0.1, g=9.807):
+                 length_mean=1.0, length_std=0.5, mass_mean=0.9, mass_std=0.1, g=9.807, random_parameters=False):
 
         self.experiment = Pendulum()
         self.q0 = (torch.rand(num_configurations, 1) * 2 - 1) * (np.pi / 2)
         self.p0 = torch.randn(num_configurations, 1) * 0.1
-        self.mass = torch.randn(num_configurations, 1) * mass_std + mass_mean
-        self.extra_args = {
-            'length': torch.randn(num_configurations, 1) * length_std + length_mean,
-            'g': torch.full((num_configurations, 1), g)
-        }
+
+        if random_parameters:
+            self.mass = torch.randn(num_configurations, 1) * mass_std + mass_mean
+            self.extra_args = {
+                'length': torch.randn(num_configurations, 1) * length_std + length_mean,
+                'g': torch.full((num_configurations, 1), g)
+            }
+        else:
+            self.mass = torch.full((num_configurations, 1), mass_mean)
+            self.extra_args = {
+                'length': torch.full((num_configurations, 1), length_mean),
+                'g': torch.full((num_configurations, 1), g)
+            }
 
         super().__init__(base_solver, duration, duration_stddev, num_samples, num_configurations, coarsening_factor, cache_path, sequence_length)
 
 
 class SpringMassDataset(ExperimentDataset):
-    def __init__(self, base_solver, duration, duration_stddev, num_samples, num_configurations, coarsening_factor, cache_path, sequence_length=None, mass_mean=0.9, mass_std=0.1):
+    def __init__(self, base_solver, duration, duration_stddev, num_samples, num_configurations, coarsening_factor, cache_path, sequence_length=None, mass_mean=0.9, mass_std=0.1, random_parameters=False):
 
         self.experiment = SpringMass()
-        length = sample_parameterized_truncated_normal((num_configurations, 1), 0.8, 0.35, 0.1, 1.5)
+
+        if random_parameters:
+            length = sample_parameterized_truncated_normal((num_configurations, 1), 0.8, 0.35, 0.1, 1.5)
+            self.mass = torch.randn(num_configurations, 1) * mass_std + mass_mean
+            self.extra_args = {
+                'length': length,
+                'k': sample_parameterized_truncated_normal((num_configurations, 1), 0.8, 0.35, 0.1, 1.5)
+            }
+        else:
+            length = torch.full((num_configurations, 1), 0.8)
+            self.mass = torch.full((num_configurations, 1), mass_mean)
+            self.extra_args = {
+                'length': length,
+                'k': torch.full((num_configurations, 1), 0.8)
+            }
+
         self.q0 = torch.rand(num_configurations, 1) * length * 2
         self.p0 = torch.randn(num_configurations, 1) * 0.1
-        self.mass = torch.randn(num_configurations, 1) * mass_std + mass_mean
-        self.extra_args = {
-            'length': length,
-            'k': sample_parameterized_truncated_normal((num_configurations, 1), 0.8, 0.35, 0.1, 1.5)
-        }
 
         super().__init__(base_solver, duration, duration_stddev, num_samples, num_configurations, coarsening_factor, cache_path, sequence_length)
 
 
 class ThreeBodySpringMassDataset(ExperimentDataset):
-    def __init__(self, base_solver, duration, duration_stddev, num_samples, num_configurations, coarsening_factor, cache_path, sequence_length=None, mass_mean=0.9, mass_std=0.1):
+    def __init__(self, base_solver, duration, duration_stddev, num_samples, num_configurations, coarsening_factor, cache_path, sequence_length=None, mass_mean=0.9, mass_std=0.1, random_parameters=False):
 
         num_particles = 3
         num_springs = num_particles * (num_particles - 1) // 2
         num_euclid = 2
 
         self.experiment = ThreeBodySpringMass()
-        length = sample_parameterized_truncated_normal((num_configurations, num_springs), 5, 2, 0.1, 10)
+
+        if random_parameters:
+            length = sample_parameterized_truncated_normal((num_configurations, num_springs), 5, 2, 0.1, 10)
+            self.mass = torch.randn(num_configurations, num_particles, 1) * mass_std + mass_mean
+            self.extra_args = {
+                'length': self.fill_particle_matrix(num_configurations, num_particles, length),
+                'k': self.fill_particle_matrix(num_configurations, num_particles, sample_parameterized_truncated_normal((num_configurations, num_springs), 0.8, 0.35, 0.1, 1.5))
+            }
+        else:
+            length = torch.full((num_configurations, num_springs), 5.0)
+            self.mass = torch.full((num_configurations, num_particles, 1), mass_mean)
+            self.extra_args = {
+                'length': self.fill_particle_matrix(num_configurations, num_particles, length),
+                'k':  self.fill_particle_matrix(num_configurations, num_particles, torch.full((num_configurations, num_springs), 0.8))
+            }
+
         self.q0 = (torch.randn(num_configurations, num_particles, num_euclid) * 2 - 1) * length.max(dim=1, keepdim=True)[0].unsqueeze(2)
-
-        # Don't judge, just accept
-        first_index = [i for i in range(0, num_particles) for j in range(i + 1, num_particles)]
-        second_index = [j for i in range(0, num_particles) for j in range(i + 1, num_particles)]
-
-        length_matrix = torch.zeros((num_configurations, num_particles, num_particles))
-        length_matrix[:, first_index, second_index] = length
-        length_matrix = length_matrix + length_matrix.transpose(1, 2)
-
-        k_matrix = torch.zeros((num_configurations, num_particles, num_particles))
-        k_matrix[:, first_index, second_index] = sample_parameterized_truncated_normal((num_configurations, num_springs), 1.2, 0.5, 0.1, 2.5)
-        k_matrix = k_matrix + k_matrix.transpose(1, 2)
 
         p0 = torch.randn(num_configurations, num_particles, num_euclid) * 0.1
         self.p0 = p0 - torch.mean(p0, dim=1, keepdim=True)
 
-        self.mass = torch.randn(num_configurations, num_particles, 1) * mass_std + mass_mean
-        self.extra_args = {
-            'length': length_matrix,
-            # The spring constant
-            'k': k_matrix
-        }
-
         super().__init__(base_solver, duration, duration_stddev, num_samples, num_configurations, coarsening_factor, cache_path, sequence_length)
+
+    def fill_particle_matrix(self, num_configurations, num_particles, lower_triangle):
+        # Don't judge, just accept
+        first_index = [i for i in range(0, num_particles) for j in range(i + 1, num_particles)]
+        second_index = [j for i in range(0, num_particles) for j in range(i + 1, num_particles)]
+
+        matrix = torch.zeros((num_configurations, num_particles, num_particles))
+        matrix[:, first_index, second_index] = lower_triangle
+        matrix = matrix + matrix.transpose(1, 2)
+
+        return matrix
 
 
 class LennardJonesDataset(ExperimentDataset):
