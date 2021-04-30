@@ -88,13 +88,18 @@ def animate_tbsm(config, show_trail=True, show_springs=False, show_plot=True, cf
 
     # Create grid spec
     fig = plt.figure(figsize=(20, 15))
-    ax_euclid, ax_energy, *diff_axes = gs_5_3_2(fig)
+    ax_experiment, ax_energy, ax_momentum, ax_center_mass, ax_energy_diff = gs_5_3_2(fig)
+    #ax_euclid, ax_energy, ax_momentum, *diff_axes = gs_6_4_2(fig)
+
 
     # Calculate energy of the system
     energy = ThreeBodySpringMassEnergy()
     ke, pe, te = energy.all_energies(m, q, p, k=k, length=l)
     gt_ke, gt_pe, gt_te = energy.all_energies(m, gt_q, gt_p, k=k, length=l)
     te_max = max(te.max(), gt_te.max())
+    diff_ke, diff_pe, diff_te = energy.energy_difference(m, q, p, gt_q, gt_p, k=k, length=l)
+    merged_energy_diff = np.concatenate((diff_ke, diff_pe, diff_te))
+
 
     # Color maps
     cm = sns.color_palette('Paired', as_cmap=True)
@@ -105,38 +110,58 @@ def animate_tbsm(config, show_trail=True, show_springs=False, show_plot=True, cf
     xlim = gt_q[:, :, 0] if q[:, :, 0].max() < gt_q[:, :, 0].max() else q[:, :, 0]
     ylim = gt_q[:, :, 1] if q[:, :, 1].max() < gt_q[:, :, 1].max() else q[:, :, 1]
 
-    gt_pred_diff = gt_q - q
+    # Compute difference between position
+    # gt_pred_q_diff = gt_q - q
+
+
+    # Compute difference in momentum
+    gt_total_p = np.sum(gt_p, axis=1)
+    pred_total_p = np.sum(p, axis=1)
+    gt_pred_p_diff = gt_total_p - pred_total_p
+
+    # Compute center of mass
+    total_mass = np.sum(m * gt_p.shape[1])
+    pred_center_mass = np.sum(q * np.expand_dims(m, axis=0), axis=1) / total_mass
 
     # Initialize plots
-    diff_plots = [(ax, *init_diff_plot(ax, trajectory, gt_pred_diff[:, i])) for i, ax in enumerate(diff_axes)]
+    #diff_plots = [(ax, *init_diff_plot(ax, trajectory, gt_pred_q_diff[:, i])) for i, ax in enumerate(diff_axes)]
+    p_xplot, p_yplot = init_line_plot(ax_momentum, trajectory, gt_pred_p_diff, title="Predicted momentum difference from ground truth")
+    q_xplot, q_yplot = init_line_plot(ax_center_mass, trajectory, pred_center_mass, title="Center of mass")
 
     gt_pe_plot, gt_ke_plot, gt_te_plot = init_energy_plot(ax_energy, trajectory, gt_te, gt_ke, gt_pe, title="Ground truth energy plot", cm=cm_gt, prefix="GT_")
     pe_plot, ke_plot, te_plot = init_energy_plot(ax_energy, trajectory, te, ke, pe, cm=cm_pred)
+    res_pe_plot, res_ke_plot, res_te_plot = init_energy_plot(ax_energy_diff, trajectory, diff_te, diff_ke, diff_pe, title="Energy difference from Ground truth", cm=cm_pred, y_label="Energy difference")
+
+    ax_energy_diff.set_ylim(1.05 * min(merged_energy_diff), max(merged_energy_diff) * 1.05)
     ax_energy.set_ylim(-0.3 * te_max, te_max * 1.05)
 
     legend_elements = create_gt_pred_legends(q, cm_gt + cm_pred)
 
     def animate(i):
-        ax_euclid.clear()
-        ax_euclid.set_aspect('equal')
-        ax_euclid.set_title("Three body spring mass experiment")
-        set_limits(ax_euclid, xlim, ylim, margin=1.2)
+        ax_experiment.clear()
+        ax_experiment.set_aspect('equal')
+        ax_experiment.set_title("Three body spring mass experiment")
+        set_limits(ax_experiment, xlim, ylim, margin=1.2)
 
         if show_trail:
-            plot_trail(ax_euclid, gt_q, i, color_map=cm_gt, trail_len=5)
-            plot_trail(ax_euclid, q, i, color_map=cm_pred, trail_len=5)
+            plot_trail(ax_experiment, gt_q, i, color_map=cm_gt, trail_len=5)
+            plot_trail(ax_experiment, q, i, color_map=cm_pred, trail_len=5)
 
         if show_springs:
-            plot_springs(ax_euclid, gt_q, i, cm_gt)
-            plot_springs(ax_euclid, q, i, cm_pred)
+            plot_springs(ax_experiment, gt_q, i, cm_gt)
+            plot_springs(ax_experiment, q, i, cm_pred)
 
-        ax_euclid.legend(handles=legend_elements, loc='upper left', bbox_to_anchor=(0, 1), ncol=2, fancybox=True, shadow=True)
+        ax_experiment.legend(handles=legend_elements, loc='upper left', bbox_to_anchor=(0, 1), ncol=2, fancybox=True, shadow=True)
 
         energy_animate_update(ax_energy, gt_pe_plot, gt_ke_plot, gt_te_plot, trajectory, i, gt_pe, gt_ke, gt_te)
         energy_animate_update(ax_energy, pe_plot, ke_plot, te_plot, trajectory, i, pe, ke, te)
+        energy_animate_update(ax_energy_diff, res_pe_plot, res_ke_plot, res_te_plot, trajectory, i, diff_pe, diff_ke, diff_te)
 
-        for idx, (ax, px, py) in enumerate(diff_plots):
-            diff_animate_update(ax, px, py, trajectory, i, gt_pred_diff[:, idx])
+        animate_lineplot(ax_momentum, p_xplot, p_yplot, trajectory, i, gt_pred_p_diff)
+        animate_lineplot(ax_center_mass, q_xplot, q_yplot, trajectory, i, pred_center_mass)
+
+        #for idx, (ax, px, py) in enumerate(diff_plots):
+        #    diff_animate_update(ax, px, py, trajectory, i, gt_pred_q_diff[:, idx])
 
         return []
 
@@ -161,28 +186,39 @@ def create_gt_pred_legends(q, cm):
     return legend_elements
 
 
-def init_diff_plot(ax, trajectory, diff, title=None, x_color='blue', y_color='orange'):
-    x_plot, = ax.plot(trajectory[0], diff[0, 0], color=x_color, label='X')
-    y_plot, = ax.plot(trajectory[0], diff[0, 1], color=y_color, label='Y')
-    ax.set_xlabel("Time")
-    ax.set_ylabel("Difference")
+def init_line_plot(ax, trajectory, line, title=None, x_color='blue', y_color='orange', ylabel="Difference", xlabel="Time"):
+    x_plot, = ax.plot(trajectory[0], line[0, 0], color=x_color, label='X')
+    y_plot, = ax.plot(trajectory[0], line[0, 1], color=y_color, label='Y')
+    ax.set_xlabel(xlabel)
+    ax.set_ylabel(ylabel)
     ax.set_title(title)
     ax.legend(loc='lower left')
 
     return x_plot, y_plot
 
 
-def diff_animate_update(ax, x_plot, y_plot, trajectory, i, diff):
-    x_plot.set_data(trajectory[:i + 1], diff[:i + 1, 0])
-    y_plot.set_data(trajectory[:i + 1], diff[:i + 1, 1])
+def init_diff_energy(ax, trajectory, energy, title=None, color="blue", label=None):
+    res_plot, = ax.plot(trajectory[0], energy[0], color=color, label=label)
+    ax.set_xlabel(label)
+    ax.set_title(title)
+    ax.legend(loc='best')
+    return res_plot
+
+
+def animate_lineplot(ax, x_plot, y_plot, trajectory, i, line):
+    x_plot.set_data(trajectory[:i + 1], line[:i + 1, 0])
+    y_plot.set_data(trajectory[:i + 1], line[:i + 1, 1])
     ax.legend(loc='lower left')
 
     if i > 0:
         traj_lim = compute_limits(trajectory)
         ax.set_xlim(*traj_lim)
 
-    diff_lim = compute_limits(diff)
+    diff_lim = compute_limits(line)
     ax.set_ylim(*diff_lim)
+
+def animate_energy_diff(ax, energy_diff, trajectory, i, energy):
+    energy_diff.set_data(trajectory[:i + 1],)
 
 
 def example_plot(q, show_trail=True, show_springs=True):
