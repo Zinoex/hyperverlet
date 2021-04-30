@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod, ABCMeta
 import numpy as np
 import torch
-
+from numpy import inf
 
 class Energy(ABC):
     @abstractmethod
@@ -21,6 +21,14 @@ class Energy(ABC):
         te = self.total_energy(ke, pe)
 
         return ke, pe, te
+
+    def energy_difference(self, m, pred_q, pred_p, gt_q, gt_p, **kwargs):
+        def fix_inf(x):
+            x[x == -inf] = 0
+            return x
+        pred_ke, pred_pe, pred_te = self.all_energies(m, pred_q, pred_p, **kwargs)
+        gt_ke, gt_pe, gt_te = self.all_energies(m, gt_q, gt_p, **kwargs)
+        return fix_inf(np.log(np.abs(gt_ke - pred_ke))), fix_inf(np.log(np.abs(gt_pe - pred_pe))), fix_inf(np.log(np.abs(gt_te - pred_te)))
 
     def trajectory_sum(self, e):
         sumaxis = tuple(range(1, len(e.shape)))
