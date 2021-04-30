@@ -93,7 +93,6 @@ class ResidualMixin:
 
 class HyperEuler(BaseSolver, ResidualMixin):
     trainable = True
-    residual_trainable = True
     p_order = 1
 
     def __init__(self, hypersolver):
@@ -128,8 +127,9 @@ class Heun(BaseSolver):
         return experiment.shift(q + dt / 2 * (dq + dq_hat), **kwargs), p + dt / 2 * (dp + dp_hat)
 
 
-class HyperHeun(BaseSolver):
+class HyperHeun(BaseSolver, ResidualMixin):
     trainable = True
+    p_order = 2
 
     def __init__(self, hypersolver):
         super().__init__()
@@ -137,13 +137,22 @@ class HyperHeun(BaseSolver):
         self.hypersolver = hypersolver
 
     def forward(self, experiment: Experiment, q: torch.Tensor, p: torch.Tensor, m: torch.Tensor, t, dt, **kwargs):
-        dq, dp = experiment(q, p, m, t, **kwargs)
-        hq, hp = self.hypersolver(q, p, dq, dp, m, t, dt, **kwargs)
-        q_hat, p_hat = experiment.shift(q + dq * dt + (dt ** 2) * hq, **kwargs), p + dp * dt + (dt ** 2) * hp
-        dq_hat, dp_hat = experiment(q_hat, p_hat, m, t + dt, **kwargs)
-        hq, hp = self.hypersolver(q_hat, p_hat, dq_hat, dp_hat, m, t + dt, dt, **kwargs)
+        dq1, dp1 = experiment(q, p, m, t, **kwargs)
+        q_hat, p_hat = experiment.shift(q + dq1 * dt, **kwargs), p + dp1 * dt
+        dq, dp = experiment(q_hat, p_hat, m, t + dt, **kwargs)
+        q, p = experiment.shift(q + dt / 2 * (dq + dq1), **kwargs), p + dt / 2 * (dp + dp1)
 
-        return experiment.shift(q + dt / 2 * (dq + dq_hat) + (dt ** 3) * hq, **kwargs), p + dt / 2 * (dp + dp_hat) + (dt ** 3) * hp
+        hq, hp = self.hypersolver(q, p, dq1, dp1, m, t + dt, dt, **kwargs)
+
+        return experiment.shift(q + hq * dt ** (self.p_order + 1), **kwargs), p + hp * dt ** (self.p_order + 1)
+
+    def base(self, experiment: Experiment, q: torch.Tensor, p: torch.Tensor, m: torch.Tensor, t, dt, **kwargs):
+        dq1, dp1 = experiment(q, p, m, t, **kwargs)
+        q_hat, p_hat = experiment.shift(q + dq1 * dt, **kwargs), p + dp1 * dt
+        dq, dp = experiment(q_hat, p_hat, m, t + dt, **kwargs)
+        q, p = experiment.shift(q + dt / 2 * (dq + dq1), **kwargs), p + dt / 2 * (dp + dp1)
+
+        return q, p
 
 
 class RungeKutta4(BaseSolver):
@@ -259,7 +268,6 @@ class HyperSymplecticEuler(BaseSolver):
 
 class HyperVelocityVerlet(BaseSolver, ResidualMixin):
     trainable = True
-    residual_trainable = True
     p_order = 2
 
     def __init__(self, hypersolver):

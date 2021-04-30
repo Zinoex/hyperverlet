@@ -14,9 +14,6 @@ def train(solver: nn.Module, dataset, device, config):
     train_args = config["train_args"]
     epochs = train_args["epoch"]
     loss_method = train_args["loss"]
-    if loss_method == 'residual' and not solver.residual_trainable:
-        loss_method = 'phase_space'
-
     batch_size = train_args["batch_size"]
     num_workers = train_args["num_workers"]
     time_decay = train_args["time_decay"]
