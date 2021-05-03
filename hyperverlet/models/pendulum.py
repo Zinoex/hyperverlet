@@ -1,7 +1,7 @@
 import torch
 from torch import nn
 
-from hyperverlet.models.misc import MergeNDenseBlock
+from hyperverlet.models.misc import NDenseBlock
 
 
 class PendulumModel(nn.Module):
@@ -13,11 +13,16 @@ class PendulumModel(nn.Module):
 
         kwargs = dict(n_dense=5, activate_last=False, activation='sigmoid')
 
-        self.model_q = MergeNDenseBlock(torch.ones(self.q_input_dim, dtype=torch.int).tolist(), self.h_dim, 1, **kwargs)
-        self.model_p = MergeNDenseBlock(torch.ones(self.p_input_dim, dtype=torch.int).tolist(), self.h_dim, 1, **kwargs)
+        self.model_q = NDenseBlock(self.q_input_dim, self.h_dim, 1, **kwargs)
+        self.model_p = NDenseBlock(self.p_input_dim, self.h_dim, 1, **kwargs)
 
-    def forward(self, q, p, dq, dp, m, t, dt, length, **kwargs):
-        hq = self.model_q(q, dq, m, length)
-        hp = self.model_p(p, dp, m, length)
+    def forward(self, q, p, dq, dp, m, t, dt, **kwargs):
+        return self.hq(q, dq, p, dp, m, t, dt, **kwargs), self.hp(q, dq, p, dp, m, t, dt, **kwargs)
 
-        return hq, hp
+    def hp(self, q, dq, p, dp, m, t, dt, length, **kwargs):
+        hp = torch.cat([p, dp, m, length], dim=-1)
+        return self.model_p(hp)
+
+    def hq(self, q, dq, p, dp, m, t, dt, length, **kwargs):
+        hq = torch.cat([q, dq, m, length], dim=-1)
+        return self.model_q(hq)
