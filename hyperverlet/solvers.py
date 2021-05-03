@@ -45,6 +45,17 @@ class Euler(BaseSolver):
 
 
 class ResidualMixin:
+    def hyper_forward(self, experiment: Experiment, q: torch.Tensor, p: torch.Tensor, m: torch.Tensor, t, dt, **kwargs):
+        dq1, dp1 = experiment(q, p, m, t, **kwargs)
+
+        q, p = self.base(experiment, q, p, m, t, dt, **kwargs)
+
+        dq2, dp2 = experiment(q, p, m, t, **kwargs)
+        hq, hp = self.hypersolver(dq1, dq2, dp1, dp2, m, t, dt, **kwargs)
+        q, p = experiment.shift(q + hq * dt ** (self.p_order + 1), **kwargs), p + hp * dt ** (self.p_order + 1)
+
+        return q, p
+
     def base_trajectory(self, experiment: Experiment, gt_q: torch.Tensor, gt_p: torch.Tensor, m: torch.Tensor, trajectory: torch.Tensor, dtrajectory: torch.Tensor, disable_print=False, **kwargs):
         q_traj = torch.zeros_like(gt_q)
         p_traj = torch.zeros_like(gt_p)
@@ -101,13 +112,7 @@ class HyperEuler(BaseSolver, ResidualMixin):
         self.hypersolver = hypersolver
 
     def forward(self, experiment: Experiment, q: torch.Tensor, p: torch.Tensor, m: torch.Tensor, t, dt, **kwargs):
-        dq, dp = experiment(q, p, m, t, **kwargs)
-        hq, hp = self.hypersolver(q, p, dq, dp, m, t, dt, **kwargs)
-
-        q_next = experiment.shift(q + dq * dt + hq * (dt ** 2), **kwargs)
-        p_next = p + dp * dt + hp * (dt ** 2)
-
-        return q_next, p_next
+        return self.hyper_forward(experiment, q, p, m, t, dt, **kwargs)
 
     def base(self, experiment: Experiment, q: torch.Tensor, p: torch.Tensor, m: torch.Tensor, t, dt, **kwargs):
         dq, dp = experiment(q, p, m, t, **kwargs)
@@ -137,14 +142,7 @@ class HyperHeun(BaseSolver, ResidualMixin):
         self.hypersolver = hypersolver
 
     def forward(self, experiment: Experiment, q: torch.Tensor, p: torch.Tensor, m: torch.Tensor, t, dt, **kwargs):
-        dq1, dp1 = experiment(q, p, m, t, **kwargs)
-        q_hat, p_hat = experiment.shift(q + dq1 * dt, **kwargs), p + dp1 * dt
-        dq, dp = experiment(q_hat, p_hat, m, t + dt, **kwargs)
-        q, p = experiment.shift(q + dt / 2 * (dq + dq1), **kwargs), p + dt / 2 * (dp + dp1)
-
-        hq, hp = self.hypersolver(q, p, dq1, dp1, m, t + dt, dt, **kwargs)
-
-        return experiment.shift(q + hq * dt ** (self.p_order + 1), **kwargs), p + hp * dt ** (self.p_order + 1)
+        return self.hyper_forward(experiment, q, p, m, t, dt, **kwargs)
 
     def base(self, experiment: Experiment, q: torch.Tensor, p: torch.Tensor, m: torch.Tensor, t, dt, **kwargs):
         dq1, dp1 = experiment(q, p, m, t, **kwargs)
@@ -276,15 +274,7 @@ class HyperVelocityVerlet(BaseSolver, ResidualMixin):
         self.hypersolver = hypersolver
 
     def forward(self, experiment: Experiment, q: torch.Tensor, p: torch.Tensor, m: torch.Tensor, t, dt, **kwargs):
-        dq1, dp1 = experiment(q, p, m, t, **kwargs)
-
-        q, p = self.base(experiment, q, p, m, t, dt, **kwargs)
-
-        dq2, dp2 = experiment(q, p, m, t, **kwargs)
-        hq, hp = self.hypersolver(dq1, dq2, dp1, dp2, m, t, dt, **kwargs)
-        q, p = experiment.shift(q + hq * dt ** (self.p_order + 1), **kwargs), p + hp * dt ** (self.p_order + 1)
-
-        return q, p
+        return self.hyper_forward(experiment, q, p, m, t, dt, **kwargs)
 
     def base(self, experiment: Experiment, q: torch.Tensor, p: torch.Tensor, m: torch.Tensor, t, dt, **kwargs):
         one_half = 1 / 2
