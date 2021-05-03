@@ -6,9 +6,9 @@
    "train_trajectory_length": 100001,
    "train_sequence_length": 10,
    "train_num_configurations": 1000,
-   "test_duration": 100,
-   "test_trajectory_length": 100001,
-   "test_num_configurations": 1000,
-   "coarsening_factor": 20,
+   "test_duration": 1000,
+   "test_trajectory_length": 1000001,
+   "test_num_configurations": 100,
+   "coarsening_factor": 80,
    "duration_stddev": 0.1
 }
