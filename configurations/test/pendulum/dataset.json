@@ -3,12 +3,12 @@
    "cache_path": "cache/{dataset}_{split}/{train_duration}_{train_trajectory_length}_{train_num_configurations}_{test_duration}_{test_trajectory_length}_{test_num_configurations}.pickle",
    "gt_solver": "FourthOrderRuth",
    "train_duration": 10,
-   "train_trajectory_length": 100001,
+   "train_trajectory_length": 10001,
    "train_sequence_length": 10,
-   "train_num_configurations": 10,
-   "test_duration": 10,
-   "test_trajectory_length": 100001,
-   "test_num_configurations": 10,
+   "train_num_configurations": 1000,
+   "test_duration": 50,
+   "test_trajectory_length": 50001,
+   "test_num_configurations": 100,
    "coarsening_factor": 100,
    "duration_stddev": 0.1
 }
