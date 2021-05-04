@@ -48,24 +48,24 @@ def animate_sm(config, show_gt=False, show_plot=True, cfg=0):
 
     # Create grid spec
     fig = plt.figure(figsize=(20, 15))
-    ax1, ax2, ax3 = gs_3_2_3(fig)
+    ax_spring, ax_energy, ax_phase_space = gs_3_2_3(fig)
 
     # Calculate energy of the system
     energy = SpringMassEnergy()
     ke, pe, te = energy.all_energies(m, q, p, k=k, length=l)
 
     # Initialize plots
-    pe_plot, ke_plot, te_plot = init_energy_plot(ax2, trajectory, te, ke, pe)
-    ps_plot = init_phasespace_plot(ax3, q, p)
+    pe_plot, ke_plot, te_plot = init_energy_plot(ax_energy, trajectory, te, ke, pe)
+    ps_plot = init_phasespace_plot(ax_phase_space, q, p)
 
     def animate(i):
-        ax1.clear()
-        update_sm(ax1, q, i)
+        ax_spring.clear()
+        update_sm(ax_spring, q, i)
         if show_gt:
             gt_c1 = Circle((gt_q[i, 0], 0), 0.05*0.75, fc='g', ec='g', zorder=10)
-            ax1.add_patch(gt_c1)
+            ax_spring.add_patch(gt_c1)
 
-        energy_animate_update(ax2, pe_plot, ke_plot, te_plot, trajectory, i, pe, ke, te)
+        energy_animate_update(ax_energy, pe_plot, ke_plot, te_plot, trajectory, i, pe, ke, te)
         update_phasespace_plot(ps_plot, q, p, i)
 
     anim = animation.FuncAnimation(fig, animate, frames=q.shape[0], save_count=sys.maxsize)
