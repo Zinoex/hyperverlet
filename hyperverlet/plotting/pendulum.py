@@ -57,7 +57,7 @@ def animate_pendulum(config, show_gt=False, show_plot=True, cfg=1):
     # Initialize plots
     init_pendulum_plot(ax_pendulum, x, length)
     pe_plot, ke_plot, te_plot = init_energy_plot(ax_energy, trajectory, te, ke, pe)
-    init_phasespace_plot(ax_phase_space, q, p)
+    ps_plot = init_phasespace_plot(ax_phase_space, q, p)
 
     line, scatter = init_pendulum(ax_pendulum, x, y, color="red", zorder=1)
     if show_gt:
@@ -69,7 +69,7 @@ def animate_pendulum(config, show_gt=False, show_plot=True, cfg=1):
             update_pendulum(gt_line, gt_scatter, gt_x, gt_y, i)
 
         energy_animate_update(ax_energy, pe_plot, ke_plot, te_plot, trajectory, i, pe, ke, te)
-        update_phasespace_plot(ax_phase_space, q, p, i)
+        update_phasespace_plot(ps_plot, q, p, i)
 
     anim = animation.FuncAnimation(fig, animate, frames=q.shape[0], save_count=q.shape[0])
 

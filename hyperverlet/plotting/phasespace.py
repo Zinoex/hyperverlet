@@ -24,6 +24,10 @@ def init_phasespace_plot(ax, q, p, margin=1.05):
 
     set_limits(ax, q, p, margin=margin)
 
+    points = ax.plot(q[0], p[0], marker='x', color='black')
 
-def update_phasespace_plot(ax, q, p, i):
-    ax.plot(q[i], p[i], marker='x', color='black')
+    return points[0]
+
+
+def update_phasespace_plot(points, q, p, i):
+    points.set_data(q[:i], p[:i])

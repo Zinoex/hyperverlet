@@ -56,7 +56,7 @@ def animate_sm(config, show_gt=False, show_plot=True, cfg=0):
 
     # Initialize plots
     pe_plot, ke_plot, te_plot = init_energy_plot(ax2, trajectory, te, ke, pe)
-    init_phasespace_plot(ax3, q, p)
+    ps_plot = init_phasespace_plot(ax3, q, p)
 
     def animate(i):
         ax1.clear()
@@ -66,7 +66,7 @@ def animate_sm(config, show_gt=False, show_plot=True, cfg=0):
             ax1.add_patch(gt_c1)
 
         energy_animate_update(ax2, pe_plot, ke_plot, te_plot, trajectory, i, pe, ke, te)
-        update_phasespace_plot(ax3, q, p, i)
+        update_phasespace_plot(ps_plot, q, p, i)
 
     anim = animation.FuncAnimation(fig, animate, frames=q.shape[0], save_count=sys.maxsize)
 
