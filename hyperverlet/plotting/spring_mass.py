@@ -9,7 +9,7 @@ from hyperverlet.energy import SpringMassEnergy
 from hyperverlet.plotting.energy import init_energy_plot, plot_energy, energy_animate_update
 from hyperverlet.plotting.grid_spec import gs_3_2_3
 from hyperverlet.plotting.phasespace import init_phasespace_plot, update_phasespace_plot
-from hyperverlet.plotting.utils import plot_spring, save_animation
+from hyperverlet.plotting.utils import plot_spring, save_animation, compute_spring
 from hyperverlet.utils.misc import load_pickle, format_path
 
 
@@ -55,20 +55,16 @@ def animate_sm(config, show_gt=False, show_plot=True, cfg=0):
     ke, pe, te = energy.all_energies(m, q, p, k=k, length=l)
 
     # Initialize plots
+    spring_plot = init_sm(ax_spring, q, gt_q, show_gt)
     pe_plot, ke_plot, te_plot = init_energy_plot(ax_energy, trajectory, te, ke, pe)
     ps_plot = init_phasespace_plot(ax_phase_space, q, p)
 
     def animate(i):
-        ax_spring.clear()
-        update_sm(ax_spring, q, i)
-        if show_gt:
-            gt_c1 = Circle((gt_q[i, 0], 0), 0.05*0.75, fc='g', ec='g', zorder=10)
-            ax_spring.add_patch(gt_c1)
-
+        update_sm(spring_plot, q, gt_q, i, show_gt)
         energy_animate_update(ax_energy, pe_plot, ke_plot, te_plot, trajectory, i, pe, ke, te)
         update_phasespace_plot(ps_plot, q, p, i)
 
-    anim = animation.FuncAnimation(fig, animate, frames=q.shape[0], save_count=sys.maxsize)
+    anim = animation.FuncAnimation(fig, animate, frames=q.shape[0], save_count=sys.maxsize, interval=1)
 
     if show_plot:
         plt.show()
@@ -77,14 +73,33 @@ def animate_sm(config, show_gt=False, show_plot=True, cfg=0):
         save_animation(anim, config)
 
 
-def update_sm(ax, q, i, wall_bottom=0.5, wall_top=-0.5, r=0.05):
+def init_sm(ax, q, gt_q, show_gt, wall_bottom=0.5, wall_top=-0.5, r=0.05):
     ax.set_xlim(-r, np.max(q) * 1.05 + r)
     ax.set_ylim(wall_bottom * 1.05, wall_top * 1.05)
     ax.set_aspect('equal')
 
-    plot_spring(ax, q[i])
+    spring = plot_spring(ax, q[0])
 
-    c0 = Circle((0, 0), r / 2, fc='k', zorder=10)
-    c1 = Circle((q[i, 0], 0), r, fc='r', ec='r', zorder=10)
-    ax.add_patch(c0)
-    ax.add_patch(c1)
+    mount = Circle((0, 0), r / 2, fc='k', zorder=10)
+    mass = Circle((q[0, 0], 0), r, fc='r', ec='r', zorder=10)
+    ax.add_patch(mount)
+    ax.add_patch(mass)
+
+    if show_gt:
+        gt_bob = Circle((gt_q[0, 0], 0), 0.05 * 0.75, fc='g', ec='g', zorder=11)
+        ax.add_patch(gt_bob)
+    else:
+        gt_bob = None
+
+    return spring, mass, gt_bob
+
+
+def update_sm(spring_mass, q, gt_q, i, show_gt):
+    spring, mass, gt_bob = spring_mass
+
+    xs, ys = compute_spring(q[i])
+    spring.set_data(xs, ys)
+    mass.set_center((q[i, 0], 0))
+
+    if show_gt:
+        gt_bob.set_center((gt_q[i, 0], 0))

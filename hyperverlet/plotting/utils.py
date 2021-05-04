@@ -36,8 +36,8 @@ def plot_2d_pos(q, plot_every=1, show=True):
         plt.show()
 
 
-def plot_spring(ax, l, theta=None, xshift=0, yshift=0):
-    """Plot the spring from (0,0) to (x,y) as the projection of a helix."""
+def compute_spring(l, theta=None, xshift=0, yshift=0):
+    """Compute the spring from (0,0) to (x,y) as the projection of a helix."""
     if theta is None:
         theta = np.pi / 2
 
@@ -56,7 +56,15 @@ def plot_spring(ax, l, theta=None, xshift=0, yshift=0):
     R = np.array([[np.cos(theta), -np.sin(theta)],
                   [np.sin(theta), np.cos(theta)]])
     xs, ys = - R @ np.vstack((xp, w))
-    ax.plot(xs + xshift, ys + yshift, c='k', lw=2)
+
+    return xs + xshift, ys + yshift
+
+
+def plot_spring(ax, l, theta=None, xshift=0, yshift=0):
+    """Plot the spring from (0,0) to (x,y)"""
+    xs, ys = compute_spring(l, theta, xshift, yshift)
+
+    return ax.plot(xs, ys, c='k', lw=2)[0]
 
 
 def plot_spring_3d(ax, l, theta_x=0, theta_y=0, xshift=0, yshift=0, zshift=0):
