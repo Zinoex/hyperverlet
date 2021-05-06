@@ -126,12 +126,15 @@ def plot(args):
     config = load_config(config_path)
     dataset = config["dataset_args"]['dataset']
 
+    plotting_config = config['plotting']
+    show_plot = plotting_config['show_plot']
+
     if dataset == 'pendulum':
-        animate_pendulum(config, show_gt=True)
+        animate_pendulum(config, show_gt=True, show_plot=show_plot)
     elif dataset == 'spring_mass':
-        animate_sm(config, show_gt=True)
+        animate_sm(config, show_gt=True, show_plot=show_plot)
     elif dataset == 'three_body_spring_mass':
-        animate_tbsm(config, show_trail=True, show_springs=True, show_plot=True)
+        animate_tbsm(config, show_trail=True, show_springs=True, show_plot=show_plot)
 
 
 def full_run(args):

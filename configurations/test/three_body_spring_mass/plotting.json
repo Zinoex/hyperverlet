@@ -1,4 +1,5 @@
 {
     "plot_every": 1,
-    "save_plot": true
+    "save_plot": true,
+    "show_plot": true
 }
