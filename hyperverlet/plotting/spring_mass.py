@@ -64,7 +64,7 @@ def animate_sm(config, show_gt=False, show_plot=True, cfg=0):
         energy_animate_update(ax_energy, pe_plot, ke_plot, te_plot, trajectory, i, pe, ke, te)
         update_phasespace_plot(ps_plot, q, p, i)
 
-    anim = animation.FuncAnimation(fig, animate, frames=q.shape[0], save_count=sys.maxsize, interval=1)
+    anim = animation.FuncAnimation(fig, animate, frames=q.shape[0], save_count=sys.maxsize)
 
     if show_plot:
         plt.show()
