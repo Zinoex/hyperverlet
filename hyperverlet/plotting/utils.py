@@ -51,7 +51,7 @@ def compute_spring(l, theta=None, xshift=0, yshift=0):
     w = np.linspace(0, l, Ns).flatten()
     # Set up the helix along the x-axis ...
     xp = np.zeros(Ns)
-    xp[ipad1:-ipad2] = rs * np.sin(2 * np.pi * ns * w[ipad1:-ipad2] / l)
+    xp[ipad1:-ipad2] = rs * np.cos(2 * np.pi * ns * w[ipad1:-ipad2] / l)
     # ... then rotate it to align with  the pendulum and plot.
     R = np.array([[np.cos(theta), -np.sin(theta)],
                   [np.sin(theta), np.cos(theta)]])
