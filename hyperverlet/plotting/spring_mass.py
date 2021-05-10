@@ -53,11 +53,13 @@ def animate_sm(config, show_gt=False, show_plot=True, cfg=0):
     # Calculate energy of the system
     energy = SpringMassEnergy()
     ke, pe, te = energy.all_energies(m, q, p, k=k, length=l)
+    te_max = te.max()
 
     # Initialize plots
     spring_plot = init_sm(ax_spring, q, gt_q, show_gt)
     pe_plot, ke_plot, te_plot = init_energy_plot(ax_energy, trajectory, te, ke, pe)
     ps_plot = init_phasespace_plot(ax_phase_space, q, p)
+    ax_energy.set_ylim(-0.3 * te_max, te_max * 1.05)
 
     def animate(i):
         update_sm(spring_plot, q, gt_q, i, show_gt)

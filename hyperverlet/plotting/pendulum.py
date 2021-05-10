@@ -58,6 +58,7 @@ def animate_pendulum(config, show_gt=False, show_plot=True, cfg=1):
     init_pendulum_plot(ax_pendulum, x, length)
     pe_plot, ke_plot, te_plot = init_energy_plot(ax_energy, trajectory, te, ke, pe)
     ps_plot = init_phasespace_plot(ax_phase_space, q, p)
+    ax_energy.set_ylim(-0.3 * te.max(), te.max() * 1.05)
 
     line, scatter = init_pendulum(ax_pendulum, x, y, color="red", zorder=1)
     if show_gt:
