@@ -7,6 +7,8 @@ import json
 import pickle
 import os
 
+from torch import nn
+
 
 def load_config(path):
     with open(path, 'r') as f:
@@ -80,4 +82,17 @@ def format_path(config, path, **kwargs):
         test_num_configurations=dataset_args["test_num_configurations"],
         datetime=datetime.now(tz=timezone.utc).isoformat(),
         **kwargs
-   )
+    )
+
+
+def final_loss(q, p, gt_q, gt_p):
+    if torch.is_tensor(q):
+        criterion = nn.MSELoss()
+
+        q_loss, p_loss = criterion(q, gt_q).item(), criterion(p, gt_p).item()
+    else:
+        def mse(pred, target):
+            return np.mean((pred - target) ** 2)
+        q_loss, p_loss = mse(q, gt_q), mse(p, gt_p)
+
+    print(f'final loss: {q_loss, p_loss}')

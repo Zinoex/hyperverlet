@@ -11,7 +11,7 @@ from hyperverlet.plotting.energy import plot_energy, init_energy_plot, energy_an
 
 from hyperverlet.plotting.grid_spec import *
 from hyperverlet.plotting.utils import plot_spring, set_limits, save_animation, compute_limits
-from hyperverlet.utils.misc import load_pickle, format_path
+from hyperverlet.utils.misc import load_pickle, format_path, final_loss
 
 
 def plot_springs(ax, q, i, colormap=None):
@@ -73,6 +73,8 @@ def animate_tbsm(config, show_trail=True, show_springs=False, show_plot=True, cf
     result_path = format_path(config, config["result_path"])
     result_dict = load_pickle(result_path)
     save_plot = config["plotting"]["save_plot"]
+
+    final_loss(result_dict["q"], result_dict["p"], result_dict["gt_q"], result_dict["gt_p"])
 
     # Predicted results
     q = result_dict["q"][::plot_every, cfg]
