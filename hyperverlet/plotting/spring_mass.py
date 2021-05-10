@@ -55,7 +55,7 @@ def animate_sm(config, show_gt=False, show_plot=True, cfg=0):
     # Calculate energy of the system
     energy = SpringMassEnergy()
     ke, pe, te = energy.all_energies(m, q, p, k=k, length=l)
-    te_max = te.max()
+    te_max = float(sys.maxsize) if te.max() == float('inf') else te.max()
 
     # Initialize plots
     spring_plot = init_sm(ax_spring, q, gt_q, show_gt)

@@ -95,4 +95,4 @@ def final_loss(q, p, gt_q, gt_p):
             return np.mean((pred - target) ** 2)
         q_loss, p_loss = mse(q, gt_q), mse(p, gt_p)
 
-    print(f'final loss: {q_loss, p_loss} = {(q_loss + p_loss) / 2}')
+    print("{:.3e} Final loss".format((q_loss + p_loss) / 2))

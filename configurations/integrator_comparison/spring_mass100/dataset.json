@@ -9,6 +9,6 @@
    "test_duration": 1000,
    "test_trajectory_length": 1000001,
    "test_num_configurations": 100,
-   "coarsening_factor": 50,
+   "coarsening_factor": 100,
    "duration_stddev": 0.1
 }
