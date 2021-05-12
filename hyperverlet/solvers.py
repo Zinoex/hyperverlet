@@ -52,7 +52,7 @@ class ResidualMixin:
 
         dq2, dp2 = experiment(q, p, m, t, **kwargs)
         hq, hp = self.hypersolver(dq1, dq2, dp1, dp2, m, t, dt, **kwargs)
-        q, p = experiment.shift(q + hq * dt ** (self.p_order + 1), **kwargs), p + hp * dt ** (self.p_order + 1)
+        q, p = experiment.shift(q + hq * dt ** (self.q_order + 1), **kwargs), p + hp * dt ** (self.p_order + 1)
 
         return q, p
 
@@ -97,13 +97,14 @@ class ResidualMixin:
         gt_q = experiment.shift(gt_q, **kwargs)
 
         q_pred, p_pred = self.base_trajectory(experiment, gt_q, gt_p, m, trajectory, dtrajectory, **kwargs)
-        res_q = (gt_q[1:] - q_pred[1:]) / dtrajectory ** (self.p_order + 1)
+        res_q = (gt_q[1:] - q_pred[1:]) / dtrajectory ** (self.q_order + 1)
         res_p = (gt_p[1:] - p_pred[1:]) / dtrajectory ** (self.p_order + 1)
         return res_q, res_p
 
 
 class HyperEuler(BaseSolver, ResidualMixin):
     trainable = True
+    q_order = 1
     p_order = 1
 
     def __init__(self, hypersolver):
@@ -134,6 +135,7 @@ class Heun(BaseSolver):
 
 class HyperHeun(BaseSolver, ResidualMixin):
     trainable = True
+    q_order = 2
     p_order = 2
 
     def __init__(self, hypersolver):
@@ -209,6 +211,8 @@ class AlternatingSymplecticEuler(SymplecticEuler):
 
 class HyperSymplecticEuler(BaseSolver):
     trainable = True
+    q_order = 1
+    p_order = 1
 
     def __init__(self, hypersolver):
         super().__init__()
@@ -266,7 +270,8 @@ class HyperSymplecticEuler(BaseSolver):
 
 class HyperVelocityVerlet(BaseSolver, ResidualMixin):
     trainable = True
-    p_order = 2
+    q_order = 2
+    p_order = 1
 
     def __init__(self, hypersolver):
         super().__init__()
