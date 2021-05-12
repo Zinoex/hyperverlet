@@ -271,7 +271,7 @@ class HyperSymplecticEuler(BaseSolver):
 class HyperVelocityVerlet(BaseSolver, ResidualMixin):
     trainable = True
     q_order = 2
-    p_order = 1
+    p_order = 2
 
     def __init__(self, hypersolver):
         super().__init__()
