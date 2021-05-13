@@ -1,0 +1,11 @@
+{
+  "result_path": "results/generalization/out_of_distribution/pendulum_length/{solver}_trd{train_duration}_trtl{train_trajectory_length}_trsl{train_sequence_length}_cf{coarsening_factor}_ted{test_duration}_tetl{test_trajectory_length}.pickle",
+  "plot_path": "visualization/generalization/out_of_distribution/pendulum_length/{solver}_trd{train_duration}_trtl{train_trajectory_length}_trsl{train_sequence_length}_cf{coarsening_factor}_ted{test_duration}_tetl{test_trajectory_length}_{datetime}.mp4",
+  "train_args_path": "configurations/generalization/out_of_distribution/training.json",
+  "model_args": {
+    "solver": "HyperVelocityVerlet",
+    "nn_path": "configurations/generalization/out_of_distribution/nn.json"
+  },
+  "dataset_args_path": "configurations/generalization/out_of_distribution/pendulum_length/dataset.json",
+  "plotting_args_path": "configurations/generalization/out_of_distribution/plotting.json"
+}
