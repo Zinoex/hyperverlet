@@ -1,0 +1,20 @@
+{
+   "dataset": "pendulum",
+   "cache_path": "cache/generalization/variable_parameters/{dataset}_{split}/{train_duration}_{train_trajectory_length}_{train_num_configurations}_{test_duration}_{test_trajectory_length}_{test_num_configurations}.pickle",
+   "gt_solver": "FourthOrderRuth",
+   "train_duration": 600,
+   "train_trajectory_length": 600001,
+   "train_sequence_length": 10,
+   "train_num_configurations": 100,
+   "test_duration": 600,
+   "test_trajectory_length": 600001,
+   "test_num_configurations": 100,
+   "coarsening_factor": 30,
+   "duration_stddev": 0.1,
+   "test_experiment_args": {
+      "random_parameters": true
+   },
+   "train_experiment_args": {
+      "random_parameters": true
+   }
+}
