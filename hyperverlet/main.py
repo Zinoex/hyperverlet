@@ -12,7 +12,7 @@ from hyperverlet.plotting.spring_mass import animate_sm
 from hyperverlet.plotting.three_body_spring_mass import animate_tbsm
 from hyperverlet.test import test
 from hyperverlet.train import train
-from hyperverlet.utils.misc import seed_randomness, load_config, save_pickle, format_path, load_pickle, final_loss
+from hyperverlet.utils.misc import seed_randomness, load_config, save_pickle, format_path
 
 systems = ['pendulum20', 'pendulum40', 'pendulum60', 'pendulum80', 'pendulum100', 'spring_mass', 'spring_mass25', 'spring_mass50', 'spring_mass100', 'spring_mass200', 'three_body_spring_mass']
 config_paths = {

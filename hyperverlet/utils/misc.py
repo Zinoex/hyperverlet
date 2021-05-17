@@ -85,7 +85,7 @@ def format_path(config, path, **kwargs):
     )
 
 
-def final_loss(q, p, gt_q, gt_p):
+def qp_loss(q, p, gt_q, gt_p, label='final loss'):
     if torch.is_tensor(q):
         criterion = nn.MSELoss()
 
@@ -95,4 +95,4 @@ def final_loss(q, p, gt_q, gt_p):
             return np.mean((pred - target) ** 2)
         q_loss, p_loss = mse(q, gt_q), mse(p, gt_p)
 
-    print("{:.3e} Final loss".format((q_loss + p_loss) / 2))
+    print("{:.3e} {}".format((q_loss + p_loss) / 2, label))

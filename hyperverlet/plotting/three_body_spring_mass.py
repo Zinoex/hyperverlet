@@ -11,7 +11,7 @@ from hyperverlet.plotting.energy import plot_energy, init_energy_plot, energy_an
 
 from hyperverlet.plotting.grid_spec import *
 from hyperverlet.plotting.utils import plot_spring, set_limits, save_animation, compute_limits
-from hyperverlet.utils.misc import load_pickle, format_path, final_loss
+from hyperverlet.utils.misc import load_pickle, format_path, qp_loss
 
 
 def plot_springs(ax, q, i, colormap=None):
@@ -74,7 +74,8 @@ def animate_tbsm(config, show_trail=True, show_springs=False, show_plot=True, cf
     result_dict = load_pickle(result_path)
     save_plot = config["plotting"]["save_plot"]
 
-    final_loss(result_dict["q"], result_dict["p"], result_dict["gt_q"], result_dict["gt_p"])
+    qp_loss(result_dict["q"], result_dict["p"], result_dict["gt_q"], result_dict["gt_p"], label='total loss')
+    qp_loss(result_dict["q"][:, cfg], result_dict["p"][:, cfg], result_dict["gt_q"][:, cfg], result_dict["gt_p"][:, cfg], label='cfg loss')
 
     # Predicted results
     q = result_dict["q"][::plot_every, cfg]
@@ -167,7 +168,7 @@ def animate_tbsm(config, show_trail=True, show_springs=False, show_plot=True, cf
 
         return []
 
-    anim = animation.FuncAnimation(fig, animate, frames=q.shape[0], repeat=False)
+    anim = animation.FuncAnimation(fig, animate, frames=q.shape[0], repeat=False, interval=1)
 
     if show_plot:
         plt.show()
