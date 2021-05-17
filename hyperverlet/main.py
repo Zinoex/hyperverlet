@@ -25,6 +25,17 @@ config_paths = {
         'configurations/integrator_comparison/{system}/hyperverlet.json',
         'configurations/integrator_comparison/{system}/ruth4.json',
         'configurations/integrator_comparison/{system}/rk4.json'
+    ],
+    'generalization': [
+        'configurations/generalization/out_of_distribution/pendulum_length/hyperverlet.json',
+        'configurations/generalization/out_of_distribution/pendulum_mass/hyperverlet.json',
+        'configurations/generalization/variable_parameters/pendulum_not_variable/hyperverlet.json',
+        'configurations/generalization/variable_parameters/pendulum_variable/hyperverlet.json',
+        'configurations/generalization/train_duration/pendulum_00/hyperverlet.json',
+        'configurations/generalization/train_duration/pendulum_01/hyperverlet.json',
+        'configurations/generalization/train_duration/pendulum_02/hyperverlet.json',
+        'configurations/generalization/train_duration/pendulum_03/hyperverlet.json',
+        'configurations/generalization/train_duration/pendulum_04/hyperverlet.json'
     ]
 }
 
