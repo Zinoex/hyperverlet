@@ -7,8 +7,8 @@ import torch
 from hyperverlet.factories.dataset_factory import construct_dataset
 from hyperverlet.factories.solver_factory import construct_solver
 from hyperverlet.lyapunov import lyapunov_solvers_plot
-from hyperverlet.plotting.pendulum import animate_pendulum
-from hyperverlet.plotting.spring_mass import animate_sm
+from hyperverlet.plotting.pendulum import animate_pendulum, pendulum_snapshot
+from hyperverlet.plotting.spring_mass import animate_sm, sm_snapshot
 from hyperverlet.plotting.three_body_spring_mass import animate_tbsm
 from hyperverlet.test import test
 from hyperverlet.train import train

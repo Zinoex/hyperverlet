@@ -1,3 +1,4 @@
+import os
 import sys
 
 import numpy as np
@@ -7,9 +8,9 @@ from matplotlib.patches import Circle
 
 from hyperverlet.energy import SpringMassEnergy
 from hyperverlet.plotting.energy import init_energy_plot, plot_energy, energy_animate_update
-from hyperverlet.plotting.grid_spec import gs_3_2_3
+from hyperverlet.plotting.grid_spec import gs_3_2_3, gs_line
 from hyperverlet.plotting.phasespace import init_phasespace_plot, update_phasespace_plot
-from hyperverlet.plotting.utils import plot_spring, save_animation, compute_spring
+from hyperverlet.plotting.utils import plot_spring, save_animation, compute_spring, create_gt_pred_legends
 from hyperverlet.utils.misc import load_pickle, format_path, qp_loss
 
 
@@ -78,10 +79,57 @@ def animate_sm(config, show_gt=False, show_plot=True, cfg=0):
         save_animation(anim, config)
 
 
-def init_sm(ax, q, gt_q, show_gt, wall_bottom=0.5, wall_top=-0.5, r=0.05):
+def sm_snapshot(config, cfg=0, slices=6):
+    result_path = format_path(config, config["result_path"])
+    result_dict = load_pickle(result_path)
+
+    # Predicted results
+    q = result_dict["q"][:, cfg]
+    p = result_dict["p"][:, cfg]
+    trajectory = result_dict["trajectory"][:, cfg]
+    m = result_dict["mass"][cfg]
+    l = result_dict["extra_args"]["length"][cfg]
+    k = result_dict["extra_args"]["k"][cfg]
+
+    # Ground Truth
+    gt_q = result_dict["gt_q"][:, cfg]
+
+    fig = plt.figure(figsize=(20, 15))
+    ax_sms = gs_line(fig, slices)
+
+    step_size = (q.shape[0] - 1) // (slices - 1)
+    cm = ["green", "red"]
+    legend_handles = create_gt_pred_legends(q, cm)
+
+    for idx, (slice, ax_sm) in enumerate(zip(range(slices), ax_sms)):
+        if idx == 0:
+            ax_sm.legend(handles=legend_handles, loc='upper left', bbox_to_anchor=(0, 1), ncol=1, fancybox=True, shadow=True)
+        index = step_size * slice
+        label = f"Time {int(trajectory[index])}"
+
+        spring_plot = init_sm(ax_sm, q, gt_q, True, title=label, set_ylabel=idx==0)
+        update_sm(spring_plot, q, gt_q, index, True)
+
+    config_name = config["train_args_path"].split('/')[-2]
+    solver_name = config["model_args"]["solver"]
+    plot_path = f"visualization/{config_name}"
+    os.makedirs(plot_path, exist_ok=True)
+    filepath = os.path.join(plot_path, solver_name)
+    plt.savefig(f'{filepath}.pdf', bbox_inches='tight')
+    print(f"Plot saved at {filepath}.pdf")
+
+
+def init_sm(ax, q, gt_q, show_gt, wall_bottom=0.5, wall_top=-0.5, r=0.05, title="Spring mass experiment", set_ylabel=True):
     ax.set_xlim(-r, np.max(q) * 1.05 + r)
     ax.set_ylim(wall_bottom * 1.05, wall_top * 1.05)
     ax.set_aspect('equal')
+    ax.set_title(title)
+    ax.set_xlabel('X')
+    if set_ylabel:
+        ax.set_ylabel('Y')
+    else:
+        ax.get_yaxis().set_visible(False)
+
 
     spring = plot_spring(ax, q[0])
 
