@@ -14,7 +14,7 @@ class Coarsening:
         return q, p, t
 
     def coarse(self, x):
-        return torch.cat([x[:1], x[1::self.coarsening_factor]], dim=0)
+        return x[::self.coarsening_factor]
 
     @property
     def new_trajectory_length(self):
