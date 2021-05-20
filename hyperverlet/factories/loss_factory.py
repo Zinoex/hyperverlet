@@ -6,7 +6,7 @@ from hyperverlet.loss import TimeDecayMSELoss, MeanNormLoss
 def construct_loss(train_args):
     criterion = train_args['criterion']
 
-    if train_args == 'TimeDecayMSELoss':
+    if criterion == 'TimeDecayMSELoss':
         time_decay = train_args["time_decay"]
         return TimeDecayMSELoss(time_decay)
     else:
