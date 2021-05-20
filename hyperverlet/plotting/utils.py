@@ -3,8 +3,21 @@ import os
 
 from matplotlib import pyplot as plt
 import numpy as np
+from matplotlib.lines import Line2D
 
 from hyperverlet.utils.misc import format_path
+
+def create_gt_pred_legends(q, cm):
+    legend_elements = []
+
+    for idx, color in enumerate(cm):
+        if idx >= q.shape[1]:
+            label = 'Prediction'
+        else:
+            label = "Ground truth"
+        legend_elements.append(Line2D([0], [0], color="white", label=label, marker='o', markerfacecolor=color, markersize=10))
+    return legend_elements
+
 
 
 def plot_3d_pos(q, plot_every=1, show=True):

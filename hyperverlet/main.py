@@ -7,12 +7,12 @@ import torch
 from hyperverlet.factories.dataset_factory import construct_dataset
 from hyperverlet.factories.solver_factory import construct_solver
 from hyperverlet.lyapunov import lyapunov_solvers_plot
-from hyperverlet.plotting.pendulum import animate_pendulum
-from hyperverlet.plotting.spring_mass import animate_sm
+from hyperverlet.plotting.pendulum import animate_pendulum, pendulum_snapshot
+from hyperverlet.plotting.spring_mass import animate_sm, sm_snapshot
 from hyperverlet.plotting.three_body_spring_mass import animate_tbsm
 from hyperverlet.test import test
 from hyperverlet.train import train
-from hyperverlet.utils.misc import seed_randomness, load_config, save_pickle, format_path
+from hyperverlet.utils.misc import seed_randomness, load_config, save_pickle, format_path, qp_loss, load_pickle
 
 systems = ['pendulum20', 'pendulum40', 'pendulum60', 'pendulum80', 'pendulum100', 'spring_mass', 'spring_mass25', 'spring_mass50', 'spring_mass100', 'spring_mass200', 'three_body_spring_mass']
 config_paths = {
@@ -109,7 +109,7 @@ def evaluate(args):
     config_path = args.config_path
     seed_randomness()
     config = load_config(config_path)
-    device = torch.device('cuda')
+    device = torch.device('cpu')
 
     # Solver Construction
     model_config = config['model_args']
@@ -137,6 +137,18 @@ def plot(args):
     config = load_config(config_path)
     dataset = config["dataset_args"]['dataset']
 
+    make_animation = False
+    take_snapshot = False
+    gather_data = False
+
+    if make_animation:
+        animate(config, dataset)
+    if take_snapshot:
+        snapshot(config, dataset, slices=6)
+    if gather_data:
+        log_data(config)
+
+def animate(config, dataset):
     plotting_config = config['plotting']
     show_plot = plotting_config['show_plot']
 
@@ -146,6 +158,19 @@ def plot(args):
         animate_sm(config, show_gt=True, show_plot=show_plot)
     elif dataset == 'three_body_spring_mass':
         animate_tbsm(config, show_trail=True, show_springs=True, show_plot=show_plot)
+
+
+def log_data(config):
+    result_path = format_path(config, config["result_path"])
+    result_dict = load_pickle(result_path)
+    qp_loss(result_dict["q"], result_dict["p"], result_dict["gt_q"], result_dict["gt_p"], label='')
+
+
+def snapshot(config, dataset, slices=6):
+    if dataset == 'pendulum':
+        pendulum_snapshot(config, slices=slices)
+    elif dataset == 'spring_mass':
+        sm_snapshot(config, slices=slices)
 
 
 def full_run(args):

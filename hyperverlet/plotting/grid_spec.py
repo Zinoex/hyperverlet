@@ -1,6 +1,12 @@
 from matplotlib.gridspec import GridSpec
 
 
+def gs_1_1_1(fig):
+    gs = GridSpec(1, 1)
+    ax1 = fig.add_subplot(gs)
+    return ax1
+
+
 def gs_3_2_3(fig):
     gs = GridSpec(2, 3)
     ax1 = fig.add_subplot(gs[:, :2])
@@ -54,3 +60,8 @@ def gs_6_4_2(fig):
     ax5 = fig.add_subplot(gs[2, -1])
     ax6 = fig.add_subplot(gs[3, -1])
     return ax1, ax2, ax3, ax4, ax5, ax6
+
+
+def gs_line(fig, ncol):
+    gs = GridSpec(1, ncol)
+    return [fig.add_subplot(gs[0, i]) for i in range(ncol)]
