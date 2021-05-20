@@ -1,9 +1,10 @@
+import torch
 from torch import optim, nn
 from torch.utils.data import DataLoader
 from torch.utils.tensorboard import SummaryWriter
 from tqdm import trange, tqdm
 
-from hyperverlet.loss import TimeDecayMSELoss
+from hyperverlet.factories.loss_factory import construct_loss
 from hyperverlet.utils.misc import send_to_device
 
 
@@ -16,12 +17,12 @@ def train(solver: nn.Module, dataset, device, config):
     loss_method = train_args["loss"]
     batch_size = train_args["batch_size"]
     num_workers = train_args["num_workers"]
-    time_decay = train_args["time_decay"]
+    regularization = train_args.get("regularization", [])
 
     assert loss_method in ['phase_space', 'energy', "residual"]
 
     optimizer = optim.AdamW(solver.parameters(), lr=1e-3)
-    criterion = TimeDecayMSELoss(time_decay)
+    criterion = construct_loss(train_args)
 
     loader = DataLoader(dataset, num_workers=num_workers, pin_memory=device.type == 'cuda', batch_size=batch_size, shuffle=True)
     data_len = len(loader)
@@ -55,6 +56,14 @@ def train(solver: nn.Module, dataset, device, config):
                 q_hyper, p_hyper = solver.hyper_trajectory(dataset.experiment, q_base, p_base, mass, trajectory, disable_print=True, **extra_args)
 
                 loss = criterion(q_hyper, q_res) + criterion(p_hyper, p_res)
+
+                if 'center_mass' in regularization:
+                    center_mass_regularization = torch.mean(torch.abs((q_hyper * mass).sum(dim=-2) / mass.sum(dim=-2)))
+                    loss += center_mass_regularization
+
+                if 'total_momentum' in regularization:
+                    total_momentum_regularization = torch.mean(torch.abs(p_hyper.sum(dim=-2)))
+                    loss += total_momentum_regularization
             else:
                 raise NotImplementedError()
 
