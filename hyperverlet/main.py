@@ -109,7 +109,7 @@ def evaluate(args):
     config_path = args.config_path
     seed_randomness()
     config = load_config(config_path)
-    device = torch.device('cuda')
+    device = torch.device('cpu')
 
     # Solver Construction
     model_config = config['model_args']
@@ -137,11 +137,11 @@ def plot(args):
     config = load_config(config_path)
     dataset = config["dataset_args"]['dataset']
 
-    animate = False
+    make_animation = False
     take_snapshot = False
     gather_data = False
 
-    if animate:
+    if make_animation:
         animate(config, dataset)
     if take_snapshot:
         snapshot(config, dataset, slices=6)
