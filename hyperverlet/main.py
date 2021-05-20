@@ -43,10 +43,12 @@ config_paths = {
 @dataclass
 class ExpArgs:
     config_path: str
+    device: str
 
 
 def parse_arguments():
     parser = ArgumentParser()
+    parser.add_argument('--device', choices=['cuda', 'cpu'], default='cuda', help='Select device for tensor operations')
 
     commands = parser.add_subparsers(help='commands', dest='command')
 
@@ -96,7 +98,7 @@ def lyapunov(args):
 
 def sequential(args):
     def replace_system(path):
-        return ExpArgs(path.format(system=args.system))
+        return ExpArgs(path.format(system=args.system), device=args.device)
 
     experiment_args = map(replace_system, config_paths[args.experiment])
 
@@ -109,7 +111,7 @@ def evaluate(args):
     config_path = args.config_path
     seed_randomness()
     config = load_config(config_path)
-    device = torch.device('cpu')
+    device = torch.device(args.device)
 
     # Solver Construction
     model_config = config['model_args']
