@@ -46,6 +46,13 @@ config_paths = {
         'configurations/ablation/model_input/{system}/hyperverlet_statepost.json',
         'configurations/ablation/model_input/{system}/hyperverlet_timepost.json',
     ],
+    'loss_function': [
+        'configurations/ablation/loss_function/{system}/hyperverlet_residual_l1.json',
+        'configurations/ablation/loss_function/{system}/hyperverlet_residual_l2.json',
+        'configurations/ablation/loss_function/{system}/hyperverlet_trajectory_l1.json',
+        'configurations/ablation/loss_function/{system}/hyperverlet_trajectory_l2.json',
+        'configurations/ablation/loss_function/{system}/hyperverlet_trajectory_timedecay.json',
+    ],
     'generalization': [
         'configurations/generalization/out_of_distribution/pendulum_length/hyperverlet.json',
         'configurations/generalization/out_of_distribution/pendulum_mass/hyperverlet.json',

@@ -1,0 +1,11 @@
+{
+  "result_path": "results/ablation/loss_function/residual_l1/{dataset}/{solver}_trd{train_duration}_trtl{train_trajectory_length}_trsl{train_sequence_length}_cf{coarsening_factor}_ted{test_duration}_tetl{test_trajectory_length}.pickle",
+  "plot_path": "visualization/ablation/loss_function/residual_l1/{dataset}/{solver}_trd{train_duration}_trtl{train_trajectory_length}_trsl{train_sequence_length}_cf{coarsening_factor}_ted{test_duration}_tetl{test_trajectory_length}_{datetime}.mp4",
+  "train_args_path": "configurations/ablation/loss_function/{dataset}/training_trajectory_l1.json",
+  "model_args": {
+    "solver": "HyperVelocityVerlet",
+    "nn_path": "configurations/ablation/loss_function/{dataset}/nn.json"
+  },
+  "dataset_args_path": "configurations/ablation/loss_function/{dataset}/dataset.json",
+  "plotting_args_path": "configurations/ablation/loss_function/{dataset}/plotting.json"
+}
