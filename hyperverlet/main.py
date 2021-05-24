@@ -34,24 +34,24 @@ config_paths = {
         'configurations/ablation/hypersolver_placement/{system}/alternating_hyperverlet.json',
         'configurations/ablation/hypersolver_placement/{system}/ponly_hyperverlet.json',
         'configurations/ablation/hypersolver_placement/{system}/qonly_hyperverlet.json',
-        'configurations/ablation/hypersolver_placement/{system}/sequentialpost_hyperverlet.json',
+        'configurations/ablation/hypersolver_placement/{system}/sequentialpost_hyperverlet.json'
     ],
     'shared_unshared': [
         'configurations/ablation/shared_unshared/{system}/hyperverlet_shared.json',
-        'configurations/ablation/shared_unshared/{system}/hyperverlet_unshared.json',
+        'configurations/ablation/shared_unshared/{system}/hyperverlet_unshared.json'
     ],
     'model_input': [
         'configurations/ablation/model_input/{system}/hyperverlet_post.json',
         'configurations/ablation/model_input/{system}/hyperverlet_prepost.json',
         'configurations/ablation/model_input/{system}/hyperverlet_statepost.json',
-        'configurations/ablation/model_input/{system}/hyperverlet_timepost.json',
+        'configurations/ablation/model_input/{system}/hyperverlet_timepost.json'
     ],
     'loss_function': [
         'configurations/ablation/loss_function/{system}/hyperverlet_residual_l1.json',
         'configurations/ablation/loss_function/{system}/hyperverlet_residual_l2.json',
         'configurations/ablation/loss_function/{system}/hyperverlet_trajectory_l1.json',
         'configurations/ablation/loss_function/{system}/hyperverlet_trajectory_l2.json',
-        'configurations/ablation/loss_function/{system}/hyperverlet_trajectory_timedecay.json',
+        'configurations/ablation/loss_function/{system}/hyperverlet_trajectory_timedecay.json'
     ],
     'generalization': [
         'configurations/generalization/out_of_distribution/pendulum_length/hyperverlet.json',

@@ -1,11 +1,11 @@
 {
-  "result_path": "results/ablation/hypersolver_placement/{dataset}/{solver}_trd{train_duration}_trtl{train_trajectory_length}_trsl{train_sequence_length}_cf{coarsening_factor}_ted{test_duration}_tetl{test_trajectory_length}.pickle",
-  "plot_path": "visualization/ablation/hypersolver_placement/{dataset}/{solver}_trd{train_duration}_trtl{train_trajectory_length}_trsl{train_sequence_length}_cf{coarsening_factor}_ted{test_duration}_tetl{test_trajectory_length}_{datetime}.mp4",
-  "train_args_path": "configurations/ablation/hypersolver_placement/{dataset}/training.json",
+  "result_path": "results/ablation/hypersolver_placement/pendulum/{solver}_trd{train_duration}_trtl{train_trajectory_length}_trsl{train_sequence_length}_cf{coarsening_factor}_ted{test_duration}_tetl{test_trajectory_length}.pickle",
+  "plot_path": "visualization/ablation/hypersolver_placement/pendulum/{solver}_trd{train_duration}_trtl{train_trajectory_length}_trsl{train_sequence_length}_cf{coarsening_factor}_ted{test_duration}_tetl{test_trajectory_length}_{datetime}.mp4",
+  "train_args_path": "configurations/ablation/hypersolver_placement/pendulum/training.json",
   "model_args": {
     "solver": "POnlyHyperVelocityVerlet",
-    "nn_path": "configurations/ablation/hypersolver_placement/{dataset}/nn.json"
+    "nn_path": "configurations/ablation/hypersolver_placement/pendulum/nn.json"
   },
-  "dataset_args_path": "configurations/ablation/hypersolver_placement/{dataset}/dataset.json",
-  "plotting_args_path": "configurations/ablation/hypersolver_placement/{dataset}/plotting.json"
+  "dataset_args_path": "configurations/ablation/hypersolver_placement/pendulum/dataset.json",
+  "plotting_args_path": "configurations/ablation/hypersolver_placement/pendulum/plotting.json"
 }
