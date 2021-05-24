@@ -196,6 +196,78 @@ class HyperVelocityVerlet(BaseSolver, ResidualMixin):
         return q, p
 
 
+class QOnlyHyperVelocityVerlet(BaseSolver):
+    trainable = True
+    q_order = 2
+    p_order = 2
+
+    def __init__(self, hypersolver):
+        super().__init__()
+
+        self.hypersolver = hypersolver
+
+    def forward(self, experiment: Experiment, q: torch.Tensor, p: torch.Tensor, m: torch.Tensor, t, dt, **kwargs):
+        dq1, dp1 = experiment(q, p, m, t, **kwargs)
+
+        q, p = self.base(experiment, q, p, m, t, dt, **kwargs)
+
+        dq2, dp2 = experiment(q, p, m, t, **kwargs)
+        hq = self.hypersolver.hq(dq1, dq2, dp1, dp2, m, t, dt, **kwargs)
+        q = experiment.shift(q + hq * dt ** (self.q_order + 1), **kwargs)
+
+        return q, p
+
+    def base(self, experiment: Experiment, q: torch.Tensor, p: torch.Tensor, m: torch.Tensor, t, dt, **kwargs):
+        one_half = 1 / 2
+
+        dp = experiment.dp(q, m, t, **kwargs)
+        p = p + one_half * dp * dt
+
+        dq = experiment.dq(p, m, t, **kwargs)
+        q = experiment.shift(q + dq * dt, **kwargs)
+
+        dp = experiment.dp(q, m, t, **kwargs)
+        p = p + one_half * dp * dt
+
+        return q, p
+
+
+class POnlyHyperVelocityVerlet(BaseSolver):
+    trainable = True
+    q_order = 2
+    p_order = 2
+
+    def __init__(self, hypersolver):
+        super().__init__()
+
+        self.hypersolver = hypersolver
+
+    def forward(self, experiment: Experiment, q: torch.Tensor, p: torch.Tensor, m: torch.Tensor, t, dt, **kwargs):
+        dq1, dp1 = experiment(q, p, m, t, **kwargs)
+
+        q, p = self.base(experiment, q, p, m, t, dt, **kwargs)
+
+        dq2, dp2 = experiment(q, p, m, t, **kwargs)
+        hp = self.hypersolver.hp(dq1, dq2, dp1, dp2, m, t, dt, **kwargs)
+        p = p + hp * dt ** (self.p_order + 1)
+
+        return q, p
+
+    def base(self, experiment: Experiment, q: torch.Tensor, p: torch.Tensor, m: torch.Tensor, t, dt, **kwargs):
+        one_half = 1 / 2
+
+        dp = experiment.dp(q, m, t, **kwargs)
+        p = p + one_half * dp * dt
+
+        dq = experiment.dq(p, m, t, **kwargs)
+        q = experiment.shift(q + dq * dt, **kwargs)
+
+        dp = experiment.dp(q, m, t, **kwargs)
+        p = p + one_half * dp * dt
+
+        return q, p
+
+
 class SequentialPostHyperVelocityVerlet(BaseSolver):
     trainable = True
     q_order = 2

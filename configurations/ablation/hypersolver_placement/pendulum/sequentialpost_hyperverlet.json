@@ -1,0 +1,11 @@
+{
+  "result_path": "results/ablation/hypersolver_placement/{dataset}/{solver}_trd{train_duration}_trtl{train_trajectory_length}_trsl{train_sequence_length}_cf{coarsening_factor}_ted{test_duration}_tetl{test_trajectory_length}.pickle",
+  "plot_path": "visualization/ablation/hypersolver_placement/{dataset}/{solver}_trd{train_duration}_trtl{train_trajectory_length}_trsl{train_sequence_length}_cf{coarsening_factor}_ted{test_duration}_tetl{test_trajectory_length}_{datetime}.mp4",
+  "train_args_path": "configurations/ablation/hypersolver_placement/training.json",
+  "model_args": {
+    "solver": "SequentialPostHyperVelocityVerlet",
+    "nn_path": "configurations/ablation/hypersolver_placement/nn.json"
+  },
+  "dataset_args_path": "configurations/ablation/hypersolver_placement/dataset.json",
+  "plotting_args_path": "configurations/ablation/hypersolver_placement/plotting.json"
+}

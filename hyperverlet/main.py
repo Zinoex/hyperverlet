@@ -29,6 +29,13 @@ config_paths = {
         'configurations/integrator_comparison/{system}/ruth4.json',
         'configurations/integrator_comparison/{system}/rk4.json'
     ],
+    'hypersolver_placement': [
+        'configurations/ablation/hypersolver_placement/{system}/hyperverlet.json',
+        'configurations/ablation/hypersolver_placement/{system}/alternating_hyperverlet.json',
+        'configurations/ablation/hypersolver_placement/{system}/ponly_hyperverlet.json',
+        'configurations/ablation/hypersolver_placement/{system}/qonly_hyperverlet.json',
+        'configurations/ablation/hypersolver_placement/{system}/sequentialpost_hyperverlet.json',
+    ],
     'generalization': [
         'configurations/generalization/out_of_distribution/pendulum_length/hyperverlet.json',
         'configurations/generalization/out_of_distribution/pendulum_mass/hyperverlet.json',
