@@ -36,6 +36,10 @@ config_paths = {
         'configurations/ablation/hypersolver_placement/{system}/qonly_hyperverlet.json',
         'configurations/ablation/hypersolver_placement/{system}/sequentialpost_hyperverlet.json',
     ],
+    'shared_unshared': [
+        'configurations/ablation/shared_unshared/{system}/hyperverlet_shared.json',
+        'configurations/ablation/shared_unshared/{system}/hyperverlet_unshared.json',
+    ],
     'generalization': [
         'configurations/generalization/out_of_distribution/pendulum_length/hyperverlet.json',
         'configurations/generalization/out_of_distribution/pendulum_mass/hyperverlet.json',
