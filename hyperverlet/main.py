@@ -14,7 +14,9 @@ from hyperverlet.test import test
 from hyperverlet.train import train
 from hyperverlet.utils.misc import seed_randomness, load_config, save_pickle, format_path, qp_loss, load_pickle
 
-systems = ['pendulum20', 'pendulum40', 'pendulum60', 'pendulum80', 'pendulum100', 'spring_mass', 'spring_mass25', 'spring_mass50', 'spring_mass100', 'spring_mass200', 'three_body_spring_mass']
+systems = ['pendulum', 'pendulum20', 'pendulum40', 'pendulum60', 'pendulum80', 'pendulum100',
+           'spring_mass', 'spring_mass25', 'spring_mass50', 'spring_mass100', 'spring_mass200',
+           'three_body_spring_mass', 'three_body_spring_mass25', 'three_body_spring_mass50', 'three_body_spring_mass100', 'three_body_spring_mass200']
 config_paths = {
     'integrator_comparison': [
         'configurations/integrator_comparison/{system}/euler.json',
