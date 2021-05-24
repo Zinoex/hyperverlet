@@ -139,7 +139,7 @@ def plot(args):
     config = load_config(config_path)
     dataset = config["dataset_args"]['dataset']
 
-    make_animation = False
+    make_animation = True
     take_snapshot = False
     gather_data = False
 
@@ -149,6 +149,7 @@ def plot(args):
         snapshot(config, dataset, slices=6)
     if gather_data:
         log_data(config)
+
 
 def animate(config, dataset):
     plotting_config = config['plotting']

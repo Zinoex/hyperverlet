@@ -1,7 +1,7 @@
 import torch
 from torch import nn
 
-from hyperverlet.models.misc import MergeNDenseBlock, NDenseBlock
+from hyperverlet.models.misc import NDenseBlock
 
 from hyperverlet.models.graph_model import GraphNetwork
 
@@ -13,28 +13,28 @@ class ThreeBodySpringMassModel(nn.Module):
         self.q_input_dim = model_args['q_input_dim']
         self.p_input_dim = model_args['p_input_dim']
 
-        self.model_q = MergeNDenseBlock(self.q_input_dim, self.h_dim, 1, n_dense=5, activate_last=False, activation='prelu')
-        self.model_p = MergeNDenseBlock(self.p_input_dim, self.h_dim, 1, n_dense=5, activate_last=False, activation='prelu')
+        kwargs = dict(n_dense=5, activate_last=False, activation='sigmoid')
 
-    def forward(self, q, p, dq, dp, m, t, dt, length, k, include_q=True, include_p=True, **kwargs):
-        if len(q.size()) == 3:
-            m = m.repeat(1, 1, 2)
+        self.model_q = NDenseBlock(self.q_input_dim, self.h_dim, 2, **kwargs)
+        self.model_p = NDenseBlock(self.p_input_dim, self.h_dim, 2, **kwargs)
+
+    def forward(self, dq1, dq2, dp1, dp2, m, t, dt, length, k, **kwargs):
+        return self.process(self.model_q, dq1, dq2, dp1, dp2, m, t, dt, length, k, **kwargs), self.process(self.model_p, dq1, dq2, dp1, dp2, m, t, dt, length, k, **kwargs)
+
+    def process(self, model, dq1, dq2, dp1, dp2, m, t, dt, length, k, **kwargs):
+        num_particles = dq1.size(-2)
+        spatial_dim = dq1.size(-1)
+
+        hx = torch.stack([dq1, dq2, dp1, dp2], dim=-1).view(-1, 4 * spatial_dim)
+        hx = torch.cat([hx, m.view(-1, 1)], dim=-1)
+        hx = model(hx)
+
+        if len(dq1.size()) == 3:
+            hx = hx.view(-1, num_particles, spatial_dim)
         else:
-            m = m.repeat(1, 2)
+            hx = hx.view(num_particles, spatial_dim)
 
-        if include_q:
-            hq = torch.stack([q, dq, m], dim=-1)
-            hq = self.model_q(hq).squeeze(-1)
-        else:
-            hq = None
-
-        if include_p:
-            hp = torch.stack([p, dp, m], dim=-1)
-            hp = self.model_p(hp).squeeze(-1)
-        else:
-            hp = None
-
-        return hq, hp
+        return hx
 
 
 class ThreeBodySpringMassGraphModel(nn.Module):
@@ -69,56 +69,26 @@ class ThreeBodySpringMassGraphModel(nn.Module):
 
         return self.fully_connected(batch_size, num_particles, length.device), torch.stack([length, k], dim=-1).view(-1, 2)
 
-    def forward(self, dq1, dq2, dp1, dp2, m, t, dt, length, k, **kwargs):
+    def forward(self, dq1, dq2, dp1, dp2, m, t, dt, **kwargs):
+        return self.hq(dq1, dq2, dp1, dp2, m, t, dt, **kwargs), self.hp(dq1, dq2, dp1, dp2, m, t, dt, **kwargs)
+
+    def hq(self, dq1, dq2, dp1, dp2, m, t, dt, **kwargs):
+        return self.process(self.model_q, dq1, dq2, dp1, dp2, m, t, dt, **kwargs)
+
+    def hp(self, dq1, dq2, dp1, dp2, m, t, dt, **kwargs):
+        return self.process(self.model_p, dq1, dq2, dp1, dp2, m, t, dt, **kwargs)
+
+    def process(self, model, dq1, dq2, dp1, dp2, m, t, dt, length, k, **kwargs):
         num_particles = dq1.size(-2)
         spatial_dim = dq1.size(-1)
 
         edge_index, edge_attr = self.preprocess_edges(num_particles, length, k)
 
-        edge_attr = edge_attr.unsqueeze(1).repeat(1, spatial_dim, 1)
-
-        if len(dq1.size()) == 3:
-            m = m.repeat(1, 1, 2)
-            dt = dt.repeat(1, num_particles, 2)
-        else:
-            m = m.repeat(1, 2)
-            dt = dt.repeat(num_particles, 2)
-
-        node_attr = torch.stack([dq1, dq2, dp1, dp2, m], dim=-1).view(-1, spatial_dim, self.node_input_dim)
-        hx = self.model_p(node_attr, edge_attr, edge_index)
-
-        if len(dq1.size()) == 3:
-            hx = hx.view(-1, num_particles, spatial_dim, 2)
-        else:
-            hx = hx.view(num_particles, spatial_dim, 2)
-
-        return hx[..., 0], hx[..., 1]
-
-        # return self.hq(q, dq, m, t, dt, **kwargs), self.hp(p, dp, m, t, dt, **kwargs)
-
-    def hq(self, dq1, dq2, m, t, dt, **kwargs):
-        return self.process(self.model_q, dq1, dq2, m, t, dt, **kwargs)
-
-    def hp(self, dp1, dp2, m, t, dt, **kwargs):
-        return self.process(self.model_p, dp1, dp2, m, t, dt, **kwargs)
-
-    def process(self, model, dx1, dx2, m, t, dt, length, k, **kwargs):
-        num_particles = dx1.size(-2)
-        spatial_dim = dx1.size(-1)
-
-        edge_index, edge_attr = self.preprocess_edges(num_particles, length, k)
-
-        edge_attr = edge_attr.unsqueeze(1).repeat(1, spatial_dim, 1)
-
-        if len(dx1.size()) == 3:
-            m = m.repeat(1, 1, 2)
-        else:
-            m = m.repeat(1, 2)
-
-        node_attr = torch.stack([dx1, dx2, m], dim=-1).view(-1, spatial_dim, self.node_input_dim)
+        node_attr = torch.stack([dq1, dq2, dp1, dp2], dim=-1).view(-1, 4 * spatial_dim)
+        node_attr = torch.cat([node_attr, m.view(-1, 1)], dim=-1)
         hx = model(node_attr, edge_attr, edge_index)
 
-        if len(dx1.size()) == 3:
+        if len(dq1.size()) == 3:
             hx = hx.view(-1, num_particles, spatial_dim)
         else:
             hx = hx.view(num_particles, spatial_dim)

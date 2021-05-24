@@ -26,10 +26,17 @@ class DenseBlock(nn.Sequential):
 
     def reset_parameters(self) -> None:
         nn.init.kaiming_normal_(self[0].weight, a=math.sqrt(5))
+        # nn.init.kaiming_uniform_(self[0].weight, a=math.sqrt(5))
         # nn.init.xavier_normal_(self[0].weight)
+        # nn.init.orthogonal_(self[0].weight)
 
         if self[0].bias is not None:
+            # nn.init.ones_(self[0].bias)
             nn.init.zeros_(self[0].bias)
+
+            # fan_in, _ = nn.init._calculate_fan_in_and_fan_out(self[0].weight)
+            # bound = 1 / math.sqrt(fan_in)
+            # nn.init.uniform_(self[0].bias, -bound, bound)
 
 
 class NDenseBlock(nn.Sequential):
@@ -98,3 +105,27 @@ def scatter_add(src: torch.Tensor, index: torch.Tensor, dim: int = -1,
         return out.scatter_add_(dim, index, src)
     else:
         return out.scatter_add_(dim, index, src)
+
+
+def scatter_mean(src: torch.Tensor, index: torch.Tensor, dim: int = -1,
+                 out: Optional[torch.Tensor] = None,
+                 dim_size: Optional[int] = None) -> torch.Tensor:
+
+    out = scatter_add(src, index, dim, out, dim_size)
+    dim_size = out.size(dim)
+
+    index_dim = dim
+    if index_dim < 0:
+        index_dim = index_dim + src.dim()
+    if index.dim() <= index_dim:
+        index_dim = index.dim() - 1
+
+    ones = torch.ones(index.size(), dtype=src.dtype, device=src.device)
+    count = scatter_add(ones, index, index_dim, None, dim_size)
+    count.clamp_(min=1)
+    count = broadcast(count, out, dim)
+    if torch.is_floating_point(out):
+        out.true_divide_(count)
+    else:
+        out.floor_divide_(count)
+    return out

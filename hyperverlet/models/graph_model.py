@@ -3,7 +3,7 @@ from torch import nn
 from torch.nn import Linear
 
 from hyperverlet.models.meta_layer import MetaLayer
-from hyperverlet.models.misc import NDenseBlock, MergeNDenseBlock, scatter_add
+from hyperverlet.models.misc import NDenseBlock, MergeNDenseBlock, scatter_add, scatter_mean
 
 
 class GraphNetwork(nn.Module):
@@ -70,7 +70,7 @@ class NodeModel(nn.Module):
 
     def forward(self, v, edge_index, e):
         _, receiver = edge_index
-        out = scatter_add(e, receiver, dim=0, dim_size=v.size(0))
+        out = scatter_mean(e, receiver, dim=0, dim_size=v.size(0))
 
         return self.mlp(torch.cat([out, v], dim=-1))
 
