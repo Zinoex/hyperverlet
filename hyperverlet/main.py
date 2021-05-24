@@ -40,6 +40,12 @@ config_paths = {
         'configurations/ablation/shared_unshared/{system}/hyperverlet_shared.json',
         'configurations/ablation/shared_unshared/{system}/hyperverlet_unshared.json',
     ],
+    'model_input': [
+        'configurations/ablation/model_input/{system}/hyperverlet_post.json',
+        'configurations/ablation/model_input/{system}/hyperverlet_prepost.json',
+        'configurations/ablation/model_input/{system}/hyperverlet_statepost.json',
+        'configurations/ablation/model_input/{system}/hyperverlet_timepost.json',
+    ],
     'generalization': [
         'configurations/generalization/out_of_distribution/pendulum_length/hyperverlet.json',
         'configurations/generalization/out_of_distribution/pendulum_mass/hyperverlet.json',

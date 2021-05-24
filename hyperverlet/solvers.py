@@ -196,7 +196,7 @@ class HyperVelocityVerlet(BaseSolver, ResidualMixin):
         return q, p
 
 
-class FullHyperVelocityVerlet(BaseSolver):
+class FullHyperVelocityVerlet(BaseSolver, ResidualMixin):
     trainable = True
     q_order = 2
     p_order = 2
@@ -230,6 +230,28 @@ class FullHyperVelocityVerlet(BaseSolver):
         p = p + one_half * dp * dt
 
         return q, p
+
+    def hyper_trajectory(self, experiment: Experiment, gt_q: torch.Tensor, gt_p: torch.Tensor, m: torch.Tensor, trajectory: torch.Tensor, disable_print=False, **kwargs):
+        q_traj = torch.zeros_like(gt_q)
+        p_traj = torch.zeros_like(gt_p)
+
+        gt_q = experiment.shift(gt_q, **kwargs)
+
+        trajectory = self.view_like_q(trajectory, gt_q)
+        dtrajectory = trajectory[1:] - trajectory[:-1]
+
+        for i, (t, dt) in enumerate(zip(tqdm(trajectory[:-1], disable=disable_print), dtrajectory)):
+            q, p = gt_q[i], gt_p[i]
+            dq1, dp1 = experiment(q, p, m, t, **kwargs)
+
+            q, p = self.base(experiment, q, p, m, t, dt, **kwargs)
+
+            dq2, dp2 = experiment(q, p, m, t, **kwargs)
+            hq, hp = self.hypersolver(q, p, dq1, dq2, dp1, dp2, m, t, dt, **kwargs)
+
+            q_traj[i], p_traj[i] = hq, hp
+
+        return q_traj[:-1], p_traj[:-1]
 
 
 class QOnlyHyperVelocityVerlet(BaseSolver):
