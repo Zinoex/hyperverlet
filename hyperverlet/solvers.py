@@ -168,106 +168,6 @@ class RungeKutta4(BaseSolver):
         return experiment.shift(q + (dq1 + 2 * dq2 + 2 * dq3 + dq4) / 6 * dt, **kwargs), p + (dp1 + 2 * dp2 + 2 * dp3 + dp4) / 6 * dt
 
 
-class SymplecticEuler(BaseSolver):
-    def __init__(self):
-        super().__init__()
-
-        self.q_first = True
-
-    def forward(self, experiment: Experiment, q: torch.Tensor, p: torch.Tensor, m: torch.Tensor, t, dt, **kwargs):
-        foward_func = self.get_forward_func()
-
-        return foward_func(experiment, q, p, m, t, dt, **kwargs)
-
-    def get_forward_func(self):
-        return self.forward_q if self.q_first else self.forward_p
-
-    def forward_q(self, experiment: Experiment, q: torch.Tensor, p: torch.Tensor, m: torch.Tensor, t, dt, **kwargs):
-        dq = experiment.dq(p, m, t, **kwargs)
-        q = experiment.shift(q + dq * dt, **kwargs)
-
-        dp = experiment.dp(q, m, t, **kwargs)
-        p = p + dp * dt
-
-        return q, p
-
-    def forward_p(self, experiment: Experiment, q: torch.Tensor, p: torch.Tensor, m: torch.Tensor, t, dt, **kwargs):
-        dp = experiment.dp(q, m, t, **kwargs)
-        p = p + dp * dt
-
-        dq = experiment.dq(p, m, t, **kwargs)
-        q = experiment.shift(q + dq * dt, **kwargs)
-
-        return q, p
-
-
-class AlternatingSymplecticEuler(SymplecticEuler):
-    def get_forward_func(self):
-        foward_func = self.forward_q if self.q_first else self.forward_p
-        self.q_first = not self.q_first
-
-        return foward_func
-
-
-class HyperSymplecticEuler(BaseSolver):
-    trainable = True
-    q_order = 1
-    p_order = 1
-
-    def __init__(self, hypersolver):
-        super().__init__()
-
-        self.hypersolver = hypersolver
-        self.q_first = True
-
-    def forward(self, experiment: Experiment, q: torch.Tensor, p: torch.Tensor, m: torch.Tensor, t, dt, **kwargs):
-        foward_func = self.get_forward_func()
-
-        return foward_func(experiment, q, p, m, t, dt, **kwargs)
-
-    def get_forward_func(self):
-        foward_func = self.forward_q if self.q_first else self.forward_p
-        self.q_first = not self.q_first
-
-        return foward_func
-
-    def forward_q(self, experiment: Experiment, q: torch.Tensor, p: torch.Tensor, m: torch.Tensor, t, dt, **kwargs):
-        dq1, dp1 = experiment(q, p, m, t, **kwargs)
-        dq = experiment.dq(p, m, t, **kwargs)
-        q = experiment.shift(q + dq * dt, **kwargs)
-
-        dq2, dp2 = experiment(q, p, m, t, **kwargs)
-        hq = self.hypersolver.hq(dq1, dp1, dq2, dp2, m, t, dt, **kwargs)
-        q = experiment.shift(q + hq * dt, **kwargs)
-
-        dq1, dp1 = experiment(q, p, m, t, **kwargs)
-        dp = experiment.dp(q, m, t, **kwargs)
-        p = p + dp * dt
-
-        dq2, dp2 = experiment(q, p, m, t, **kwargs)
-        hp = self.hypersolver.hp(dq1, dp1, dq2, dp2, m, t, dt, **kwargs)
-        p = p + hp * dt
-        return q, p
-
-    def forward_p(self, experiment: Experiment, q: torch.Tensor, p: torch.Tensor, m: torch.Tensor, t, dt, **kwargs):
-        dq1, dp1 = experiment(q, p, m, t, **kwargs)
-        dp = experiment.dp(q, m, t, **kwargs)
-        p = p + dp * dt
-
-        dq2, dp2 = experiment(q, p, m, t, **kwargs)
-        hp = self.hypersolver.hp(dq1, dp1, dq2, dp2, m, t, dt, **kwargs)
-        p = p + hp * dt
-
-        dq1, dp1 = experiment(q, p, m, t, **kwargs)
-        dq = experiment.dq(p, m, t, **kwargs)
-        q = q + dq * dt
-
-        dq2, dp2 = experiment(q, p, m, t, **kwargs)
-        hq = self.hypersolver.hq(dq1, dp1, dq2, dp2, m, t, dt, **kwargs)
-        q = experiment.shift(q + hq * dt, **kwargs)
-        return q, p
-
-
 class HyperVelocityVerlet(BaseSolver, ResidualMixin):
     trainable = True
     q_order = 2
@@ -296,6 +196,89 @@ class HyperVelocityVerlet(BaseSolver, ResidualMixin):
         return q, p
 
 
+class SequentialPostHyperVelocityVerlet(BaseSolver):
+    trainable = True
+    q_order = 2
+    p_order = 2
+
+    def __init__(self, hypersolver):
+        super().__init__()
+
+        self.hypersolver = hypersolver
+
+    def forward(self, experiment: Experiment, q: torch.Tensor, p: torch.Tensor, m: torch.Tensor, t, dt, **kwargs):
+        one_half = 1 / 2
+        dq1, dp1 = experiment(q, p, m, t, **kwargs)
+
+        q, p = self.base(experiment, q, p, m, t, dt, **kwargs)
+
+        dq2, dp2 = experiment(q, p, m, t, **kwargs)
+        hp = self.hypersolver.hp(dq1, dq2, dp1, dp2, m, t, dt, **kwargs)
+        p = p + one_half * hp * dt ** (self.p_order + 1)
+
+        dq2, dp2 = experiment(q, p, m, t, **kwargs)
+        hq = self.hypersolver.hq(dq1, dq2, dp1, dp2, m, t, dt, **kwargs)
+        q = experiment.shift(q + hq * dt ** (self.q_order + 1), **kwargs)
+
+        dq2, dp2 = experiment(q, p, m, t, **kwargs)
+        hp = self.hypersolver.hp(dq1, dq2, dp1, dp2, m, t, dt, **kwargs)
+        p = p + one_half * hp * dt ** (self.p_order + 1)
+
+        return q, p
+
+    def base(self, experiment: Experiment, q: torch.Tensor, p: torch.Tensor, m: torch.Tensor, t, dt, **kwargs):
+        one_half = 1 / 2
+
+        dp = experiment.dp(q, m, t, **kwargs)
+        p = p + one_half * dp * dt
+
+        dq = experiment.dq(p, m, t, **kwargs)
+        q = experiment.shift(q + dq * dt, **kwargs)
+
+        dp = experiment.dp(q, m, t, **kwargs)
+        p = p + one_half * dp * dt
+
+        return q, p
+
+
+class AlternatingHyperVelocityVerlet(BaseSolver):
+    trainable = True
+    q_order = 2
+    p_order = 2
+
+    def __init__(self, hypersolver):
+        super().__init__()
+
+        self.hypersolver = hypersolver
+
+    def forward(self, experiment: Experiment, q: torch.Tensor, p: torch.Tensor, m: torch.Tensor, t, dt, **kwargs):
+        one_half = 1 / 2
+        dq1, dp1 = experiment(q, p, m, t, **kwargs)
+
+        dp = experiment.dp(q, m, t, **kwargs)
+        p = p + dp * dt
+
+        dq2, dp2 = experiment(q, p, m, t, **kwargs)
+        hp = self.hypersolver.hp(dq1, dq2, dp1, dp2, m, t, dt, **kwargs)
+        p = p + one_half * hp * dt ** (self.p_order + 1)
+
+        dq = experiment.dq(p, m, t, **kwargs)
+        q = experiment.shift(q + dq * dt, **kwargs)
+
+        dq2, dp2 = experiment(q, p, m, t, **kwargs)
+        hq = self.hypersolver.hq(dq1, dq2, dp1, dp2, m, t, dt, **kwargs)
+        q = experiment.shift(q + hq * dt ** (self.q_order + 1), **kwargs)
+
+        dp = experiment.dp(q, m, t, **kwargs)
+        p = p + one_half * dp * dt
+
+        dq2, dp2 = experiment(q, p, m, t, **kwargs)
+        hp = self.hypersolver.hp(dq1, dq2, dp1, dp2, m, t, dt, **kwargs)
+        p = p + one_half * hp * dt ** (self.p_order + 1)
+
+        return q, p
+
+
 class SymplecticSolver(BaseSolver):
     def __init__(self, c, d):
         super().__init__()
@@ -306,6 +289,9 @@ class SymplecticSolver(BaseSolver):
         self.d = d
 
     def forward(self, experiment: Experiment, q: torch.Tensor, p: torch.Tensor, m: torch.Tensor, t, dt, **kwargs):
+        return self.base(experiment, q, p, m, t, dt, **kwargs)
+
+    def base(self, experiment: Experiment, q: torch.Tensor, p: torch.Tensor, m: torch.Tensor, t, dt, **kwargs):
         for c, d in zip(self.c, self.d):
             if c != 0:
                 dq = experiment.dq(p, m, t, **kwargs)

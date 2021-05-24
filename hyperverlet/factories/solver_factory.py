@@ -17,9 +17,8 @@ def construct_solver(solver_name, nn_args=None):
         "HyperVelocityVerlet": HyperVelocityVerlet,
         "ThirdOrderRuth": ThirdOrderRuth,
         "FourthOrderRuth": FourthOrderRuth,
-        "SymplecticEuler": SymplecticEuler,
-        "AlternatingSymplecticEuler": AlternatingSymplecticEuler,
-        "HyperSymplecticEuler": HyperSymplecticEuler,
+        "SequentialPostHyperVelocityVerlet": SequentialPostHyperVelocityVerlet,
+        "AlternatingHyperVelocityVerlet": AlternatingHyperVelocityVerlet,
     }
 
     solver = solvers[solver_name]
