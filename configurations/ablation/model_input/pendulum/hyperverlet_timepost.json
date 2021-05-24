@@ -1,0 +1,11 @@
+{
+  "result_path": "results/ablation/model_input/timepost/{dataset}/{solver}_trd{train_duration}_trtl{train_trajectory_length}_trsl{train_sequence_length}_cf{coarsening_factor}_ted{test_duration}_tetl{test_trajectory_length}.pickle",
+  "plot_path": "visualization/ablation/ablation/model_input/timepost/{dataset}/{solver}_trd{train_duration}_trtl{train_trajectory_length}_trsl{train_sequence_length}_cf{coarsening_factor}_ted{test_duration}_tetl{test_trajectory_length}_{datetime}.mp4",
+  "train_args_path": "configurations/ablation/ablation/model_input/{dataset}/training.json",
+  "model_args": {
+    "solver": "FullHyperVelocityVerlet",
+    "nn_path": "configurations/ablation/ablation/model_input/{dataset}/nn_timepost.json"
+  },
+  "dataset_args_path": "configurations/ablation/ablation/model_input/{dataset}/dataset.json",
+  "plotting_args_path": "configurations/ablation/ablation/model_input/{dataset}/plotting.json"
+}

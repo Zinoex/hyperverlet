@@ -21,6 +21,7 @@ def construct_solver(solver_name, nn_args=None):
         "AlternatingHyperVelocityVerlet": AlternatingHyperVelocityVerlet,
         "QOnlyHyperVelocityVerlet": QOnlyHyperVelocityVerlet,
         "POnlyHyperVelocityVerlet": POnlyHyperVelocityVerlet,
+        "FullHyperVelocityVerlet": FullHyperVelocityVerlet,
     }
 
     solver = solvers[solver_name]
