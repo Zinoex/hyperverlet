@@ -1,12 +1,13 @@
+import functools
 from argparse import ArgumentParser
 from dataclasses import dataclass
-from torch.multiprocessing import Pool
 
 import torch
 
 from hyperverlet.factories.dataset_factory import construct_dataset
 from hyperverlet.factories.solver_factory import construct_solver
 from hyperverlet.lyapunov import lyapunov_solvers_plot
+from hyperverlet.plotting.energy import total_energy_plot
 from hyperverlet.plotting.pendulum import animate_pendulum, pendulum_snapshot
 from hyperverlet.plotting.spring_mass import animate_sm, sm_snapshot
 from hyperverlet.plotting.three_body_spring_mass import animate_tbsm
@@ -18,7 +19,7 @@ systems = ['pendulum', 'pendulum20', 'pendulum40', 'pendulum60', 'pendulum80', '
            'spring_mass', 'spring_mass25', 'spring_mass50', 'spring_mass100', 'spring_mass200',
            'three_body_spring_mass', 'three_body_spring_mass25', 'three_body_spring_mass50', 'three_body_spring_mass100', 'three_body_spring_mass200']
 
-config_paths = {
+evaluate_config_paths = {
     'integrator_comparison': [
         'configurations/integrator_comparison/{system}/euler.json',
         'configurations/integrator_comparison/{system}/hypereuler.json',
@@ -67,6 +68,26 @@ config_paths = {
 }
 
 
+plot_config_paths = {
+    'total_energy': [
+            'configurations/integrator_comparison/{system}/velocityverlet.json',
+            'configurations/integrator_comparison/{system}/hyperheun.json',
+            'configurations/integrator_comparison/{system}/hyperverlet.json',
+            'configurations/integrator_comparison/{system}/ruth4.json',
+            'configurations/integrator_comparison/{system}/rk4.json'
+    ],
+    'total_energy_full': [
+            'configurations/integrator_comparison/{system}/velocityverlet.json',
+            'configurations/integrator_comparison/{system}/hypereuler.json',
+            'configurations/integrator_comparison/{system}/heun.json',
+            'configurations/integrator_comparison/{system}/hyperheun.json',
+            'configurations/integrator_comparison/{system}/hyperverlet.json',
+            'configurations/integrator_comparison/{system}/ruth4.json',
+            'configurations/integrator_comparison/{system}/rk4.json'
+    ]
+}
+
+
 @dataclass
 class ExpArgs:
     config_path: str
@@ -92,12 +113,17 @@ def parse_arguments():
     full_parse.set_defaults(func=full_run)
 
     lyapunov_parse = commands.add_parser('lyapunov', help='Create a boxplot showing lyapunov exponent for solvers')
-    lyapunov_parse.add_argument('--experiment', type=str, required=True, choices=config_paths.keys(), help="Run experiment on set of predfefined json files")
+    lyapunov_parse.add_argument('--experiment', type=str, required=True, choices=evaluate_config_paths.keys(), help="Run experiment on set of predefined json files")
     lyapunov_parse.add_argument('--system', type=str, required=True, choices=systems, help="Name of the system to test")
     lyapunov_parse.set_defaults(func=lyapunov)
 
+    combined_parse = commands.add_parser('combined', help="Used for plotting multiple configs in the same plot")
+    combined_parse.add_argument('--experiment', type=str, required=True, choices=plot_config_paths.keys(), help="Predefined set of json files used for plotting")
+    combined_parse.add_argument('--system', type=str, required=True, choices=systems, help="Name of the system to test")
+    combined_parse.set_defaults(func=combined)
+
     sequential_parse = commands.add_parser('sequential', help='Execute evaluate or plot sequentially')
-    sequential_parse.add_argument('--experiment', type=str, required=True, choices=config_paths.keys(), help="Run experiment on set of predfefined json files")
+    sequential_parse.add_argument('--experiment', type=str, required=True, choices=evaluate_config_paths.keys(), help="Run experiment on set of predefined json files")
     sequential_parse.add_argument('--system', type=str, required=True, choices=systems, help="Name of the system to test")
     sequential_parse.set_defaults(func=sequential)
 
@@ -115,19 +141,26 @@ def parse_arguments():
     return parser.parse_args()
 
 
-def lyapunov(args):
-    def replace_system(path):
-        return path.format(system=args.system)
+def replace_system(path, args):
+    return ExpArgs(path.format(system=args.system), device=args.device)
 
-    configs = map(replace_system, config_paths[args.experiment])
+
+def combined(args):
+    replace_system_closure = functools.partial(replace_system, args=args)
+    expArgs = map(replace_system_closure, plot_config_paths[args.experiment])
+
+    return total_energy_plot(expArgs, args.experiment)
+
+
+def lyapunov(args):
+    replace_system_closure = functools.partial(replace_system, args=args)
+    configs = map(replace_system_closure, evaluate_config_paths[args.experiment])
     lyapunov_solvers_plot(configs)
 
 
 def sequential(args):
-    def replace_system(path):
-        return ExpArgs(path.format(system=args.system), device=args.device)
-
-    experiment_args = map(replace_system, config_paths[args.experiment])
+    replace_system_closure = functools.partial(replace_system, args=args)
+    experiment_args = map(replace_system_closure, evaluate_config_paths[args.experiment])
 
     for experiment_arg in experiment_args:
         print('Running: {}'.format(experiment_arg.config_path))
@@ -166,7 +199,7 @@ def plot(args):
     config = load_config(config_path)
     dataset = config["dataset_args"]['dataset']
 
-    make_animation = True
+    make_animation = False
     take_snapshot = False
     gather_data = False
 
