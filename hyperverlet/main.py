@@ -234,6 +234,8 @@ def snapshot(config, dataset, slices=6):
         pendulum_snapshot(config, slices=slices)
     elif dataset == 'spring_mass':
         sm_snapshot(config, slices=slices)
+    elif dataset == 'three_body_spring_mass':
+        tbsm_snapshot(config, slices=slices)
 
 
 def full_run(args):
