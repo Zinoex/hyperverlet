@@ -17,7 +17,7 @@ from hyperverlet.utils.misc import load_pickle, format_path
 
 def plot_springs(ax, q, i, colormap=None):
     # Plotted bob circle radius
-    r = 0.1
+    r = 0.4
     num_particles = q.shape[1]
 
     for particle in range(num_particles):
@@ -176,6 +176,61 @@ def animate_tbsm(config, show_trail=True, show_springs=False, show_plot=True, cf
 
     if save_plot:
         save_animation(anim, config)
+
+
+def tbsm_snapshot(config, cfg=0, slices=6):
+    result_path = format_path(config, config["result_path"])
+    result_dict = load_pickle(result_path)
+
+    q = result_dict["q"][:, cfg]
+    p = result_dict["p"][:, cfg]
+    trajectory = result_dict["trajectory"][:, cfg]
+    m = result_dict["mass"][cfg]
+    l = result_dict["extra_args"]["length"][cfg]
+    k = result_dict["extra_args"]["k"][cfg]
+
+    gt_q = result_dict["gt_q"][:, cfg]
+    gt_p = result_dict["gt_p"][:, cfg]
+
+    fig = plt.figure(figsize=(25, 10))
+    ax_tbsms = gs_line(fig, slices)
+
+    step_size = (q.shape[0] - 1) // (slices - 1)
+
+    # Color maps
+    cm = sns.color_palette('Paired', as_cmap=True)
+    cm_gt = [cm(i * 2) for i in range(q.shape[1])]
+    cm_pred = [cm(i * 2 + 1) for i in range(q.shape[1])]
+
+    xlim = gt_q[:, :, 0] if q[:, :, 0].max() < gt_q[:, :, 0].max() else q[:, :, 0]
+    ylim = gt_q[:, :, 1] if q[:, :, 1].max() < gt_q[:, :, 1].max() else q[:, :, 1]
+
+    legend_elements = create_gt_pred_legends(q, cm_gt + cm_pred)
+
+    for idx, (slice, ax_tbsm) in enumerate(zip(range(slices), ax_tbsms)):
+        if idx == 0:
+            ax_tbsm.legend(handles=legend_elements, loc='lower left', bbox_to_anchor=(0, 0), ncol=2, fancybox=True, shadow=True, fontsize=9)
+        index = step_size * slice
+        label = f"Time {round(trajectory[index])}"
+
+        ax_tbsm.set_aspect('equal')
+        set_limits(ax_tbsm, xlim, ylim, margin=1.2)
+        ax_tbsm.set_title(label)
+
+        plot_trail(ax_tbsm, gt_q, index, color_map=cm_gt, trail_len=30)
+        plot_trail(ax_tbsm, q, index, color_map=cm_pred, trail_len=30)
+
+        plot_springs(ax_tbsm, gt_q, index, cm_gt)
+        plot_springs(ax_tbsm, q, index, cm_pred)
+
+    config_name = config["train_args_path"].split('/')[-2]
+    solver_name = config["model_args"]["solver"]
+    plot_path = f"visualization/{config_name}"
+    os.makedirs(plot_path, exist_ok=True)
+    filepath = os.path.join(plot_path, solver_name)
+    plt.savefig(f'{filepath}.pdf', bbox_inches='tight')
+    print(f"Plot saved at {filepath}.pdf")
+
 
 
 def init_line_plot(ax, trajectory, line, title=None, x_color='blue', y_color='orange', ylabel="Difference", xlabel="Time"):

@@ -10,7 +10,7 @@ from hyperverlet.lyapunov import lyapunov_solvers_plot
 from hyperverlet.plotting.energy import total_energy_plot
 from hyperverlet.plotting.pendulum import animate_pendulum, pendulum_snapshot
 from hyperverlet.plotting.spring_mass import animate_sm, sm_snapshot
-from hyperverlet.plotting.three_body_spring_mass import animate_tbsm
+from hyperverlet.plotting.three_body_spring_mass import animate_tbsm, tbsm_snapshot
 from hyperverlet.test import test
 from hyperverlet.train import train
 from hyperverlet.utils.measures import print_valid_prediction_time
@@ -241,6 +241,8 @@ def snapshot(config, dataset, slices=6):
         pendulum_snapshot(config, slices=slices)
     elif dataset == 'spring_mass':
         sm_snapshot(config, slices=slices)
+    elif dataset == 'three_body_spring_mass':
+        tbsm_snapshot(config, slices=slices)
 
 
 def full_run(args):
