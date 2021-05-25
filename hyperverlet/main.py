@@ -13,8 +13,8 @@ from hyperverlet.plotting.spring_mass import animate_sm, sm_snapshot
 from hyperverlet.plotting.three_body_spring_mass import animate_tbsm, tbsm_snapshot
 from hyperverlet.test import test
 from hyperverlet.train import train
-from hyperverlet.utils.measures import print_valid_prediction_time
-from hyperverlet.utils.misc import seed_randomness, load_config, save_pickle, format_path, print_qp_loss, load_pickle
+from hyperverlet.utils.measures import print_valid_prediction_time, print_qp_loss
+from hyperverlet.utils.misc import seed_randomness, load_config, save_pickle, format_path, load_pickle
 
 systems = ['pendulum', 'pendulum20', 'pendulum40', 'pendulum60', 'pendulum80', 'pendulum100',
            'spring_mass', 'spring_mass25', 'spring_mass50', 'spring_mass100', 'spring_mass200',

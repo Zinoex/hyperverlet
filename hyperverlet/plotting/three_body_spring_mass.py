@@ -169,7 +169,7 @@ def animate_tbsm(config, show_trail=True, show_springs=False, show_plot=True, cf
 
         return []
 
-    anim = animation.FuncAnimation(fig, animate, frames=q.shape[0], repeat=False, interval=1)
+    anim = animation.FuncAnimation(fig, animate, frames=q.shape[0], repeat=False)
 
     if show_plot:
         plt.show()
