@@ -42,7 +42,7 @@ class PendulumSharedModel(nn.Module):
         hx = torch.cat([dq1, dq2, dp1, dp2, m, length], dim=-1)
         hx = self.model(hx)
 
-        return hx[..., 0], hx[..., 1]
+        return hx[..., 0].unsqueeze(-1), hx[..., 1].unsqueeze(-1)
 
 
 class PostPendulumModel(nn.Module):
