@@ -10,7 +10,7 @@ from hyperverlet.lyapunov import lyapunov_solvers_plot
 from hyperverlet.plotting.energy import total_energy_plot
 from hyperverlet.plotting.pendulum import animate_pendulum, pendulum_snapshot
 from hyperverlet.plotting.spring_mass import animate_sm, sm_snapshot
-from hyperverlet.plotting.three_body_spring_mass import animate_tbsm
+from hyperverlet.plotting.three_body_spring_mass import animate_tbsm, tbsm_snapshot
 from hyperverlet.test import test
 from hyperverlet.train import train
 from hyperverlet.utils.misc import seed_randomness, load_config, save_pickle, format_path, qp_loss, load_pickle
