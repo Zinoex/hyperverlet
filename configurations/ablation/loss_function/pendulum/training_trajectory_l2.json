@@ -2,7 +2,7 @@
     "epoch": 200,
     "batch_size": 10000,
     "num_workers": 8,
-    "loss": "trajectory",
+    "loss": "phase_space",
     "time_decay": 1,
     "criterion": "TimeDecayMSELoss"
 }
