@@ -11,7 +11,8 @@ from hyperverlet.plotting.energy import init_energy_plot, plot_energy, energy_an
 from hyperverlet.plotting.grid_spec import gs_3_2_3, gs_line
 from hyperverlet.plotting.phasespace import init_phasespace_plot, update_phasespace_plot
 from hyperverlet.plotting.utils import plot_spring, save_animation, compute_spring, create_gt_pred_legends
-from hyperverlet.utils.misc import load_pickle, format_path, qp_loss
+from hyperverlet.utils.measures import print_qp_loss
+from hyperverlet.utils.misc import load_pickle, format_path
 
 
 def spring_mass_energy_plot(q, p, trajectory, m, k, l, plot_every=1):
@@ -36,8 +37,8 @@ def animate_sm(config, show_gt=False, show_plot=True, cfg=0):
     result_dict = load_pickle(result_path)
     save_plot = config["plotting"]["save_plot"]
 
-    qp_loss(result_dict["q"], result_dict["p"], result_dict["gt_q"], result_dict["gt_p"], label='total loss')
-    qp_loss(result_dict["q"][:, cfg], result_dict["p"][:, cfg], result_dict["gt_q"][:, cfg], result_dict["gt_p"][:, cfg], label='cfg loss')
+    print_qp_loss(result_dict["q"], result_dict["p"], result_dict["gt_q"], result_dict["gt_p"], label='total loss')
+    print_qp_loss(result_dict["q"][:, cfg], result_dict["p"][:, cfg], result_dict["gt_q"][:, cfg], result_dict["gt_p"][:, cfg], label='cfg loss')
 
     # Predicted results
     q = result_dict["q"][::plot_every, cfg]
