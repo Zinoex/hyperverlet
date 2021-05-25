@@ -9,7 +9,7 @@
    "test_duration": 600,
    "test_trajectory_length": 600001,
    "test_num_configurations": 100,
-   "coarsening_factor": 30,
+   "coarsening_factor": 80,
    "duration_stddev": 0.1,
    "test_experiment_args": {
       "random_parameters": true,
