@@ -3,7 +3,8 @@ from torch import nn
 from torch.utils.data import DataLoader
 
 from hyperverlet.timer import timer
-from hyperverlet.utils.misc import send_to_device, torch_to_numpy, print_qp_loss
+from hyperverlet.utils.measures import print_qp_loss
+from hyperverlet.utils.misc import send_to_device, torch_to_numpy
 
 
 def test(solver: nn.Module, dataset, device, config):
