@@ -3,7 +3,7 @@ from torch import nn
 from torch.utils.data import DataLoader
 
 from hyperverlet.timer import timer
-from hyperverlet.utils.misc import send_to_device, torch_to_numpy, qp_loss
+from hyperverlet.utils.misc import send_to_device, torch_to_numpy, print_qp_loss
 
 
 def test(solver: nn.Module, dataset, device, config):
@@ -25,7 +25,7 @@ def test(solver: nn.Module, dataset, device, config):
         extra_args = send_to_device(batch['extra_args'], device, non_blocking=True)
 
         (q, p), inference_time = timer(lambda: solver.trajectory(dataset.experiment, q_base[0], p_base[0], mass, trajectory, **extra_args), 'solving', return_time=True)
-        qp_loss(q, p, q_base, p_base)
+        print_qp_loss(q, p, q_base, p_base)
 
     return {
         "inference_time": inference_time,
