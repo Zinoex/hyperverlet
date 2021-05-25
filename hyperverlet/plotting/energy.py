@@ -1,4 +1,10 @@
+import os
+
 import matplotlib.pyplot as plt
+import seaborn as sns
+
+from hyperverlet.energy import PendulumEnergy, SpringMassEnergy, ThreeBodySpringMassEnergy
+from hyperverlet.utils.misc import load_config, format_path, load_pickle
 
 
 def energy_animate_update(ax, pe_plot, ke_plot, te_plot, trajectory, i, pe, ke, te):
@@ -33,3 +39,59 @@ def plot_energy(trajectory, te, ke, pe):
     plt.legend(loc='lower left')
 
     plt.show()
+
+
+def total_energy_plot(expargs, experiment, cfg=0):
+    cm = sns.color_palette("muted")
+
+    for idx, args in enumerate(expargs):
+        config_path = args.config_path
+        config = load_config(config_path)
+
+        result_path = format_path(config, config["result_path"])
+        result_dict = load_pickle(result_path)
+
+        dataset_config = config["dataset_args"]
+        dataset = dataset_config['dataset']
+
+        q = result_dict["q"][:, cfg]
+        p = result_dict["p"][:, cfg]
+        trajectory = result_dict["trajectory"][:, cfg]
+        mass = result_dict["mass"][cfg]
+
+        extra_args = {k: v[cfg] for k, v in result_dict["extra_args"].items()}
+
+        energy_mapping = dict(pendulum=PendulumEnergy, spring_mass=SpringMassEnergy, three_body_spring_mass=ThreeBodySpringMassEnergy)
+        energy_cls = energy_mapping[dataset]()
+        _, _, te = energy_cls.all_energies(mass, q, p, **extra_args)
+
+        solver = config["model_args"]["solver"]
+        label_mapping = dict(FourthOrderRuth="FR4", RungeKutta4="RK4", HyperVelocityVerlet="HyperVerlet", VelocityVerlet="Velocity Verlet")
+        label = label_mapping.get(solver, solver)
+
+        linewidth = 1.5
+        alpha = 1
+        linestyle = "-"
+
+        if solver == "VelocityVerlet":
+            linewidth = 0.75
+            alpha = 0.5
+            linestyle = "-"
+
+        if experiment == "total_energy_full":
+            loc = 'best'
+            num_samples = trajectory.shape[0]
+        else:
+            loc = "lower left"
+            num_samples = int((trajectory.shape[0] - 1) * 0.4 + 1)
+
+        plt.plot(trajectory[:num_samples], te[:num_samples], label=label, linewidth=linewidth, color=cm[idx], alpha=alpha, linestyle=linestyle)
+
+    plt.legend(loc=loc)
+
+    plot_path = f"visualization/{experiment}"
+    os.makedirs(plot_path, exist_ok=True)
+    filepath = os.path.join(plot_path, dataset)
+    plt.savefig(f'{filepath}.pdf', bbox_inches='tight')
+    print(f"Plot saved at {filepath}.pdf")
+
