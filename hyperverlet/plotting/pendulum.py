@@ -7,8 +7,8 @@ from hyperverlet.energy import PendulumEnergy
 from hyperverlet.plotting.energy import init_energy_plot, plot_energy, energy_animate_update
 from hyperverlet.plotting.grid_spec import gs_3_2_3, gs_line
 from hyperverlet.plotting.phasespace import init_phasespace_plot, update_phasespace_plot
-from hyperverlet.plotting.utils import save_animation, create_gt_pred_legends
-from hyperverlet.utils.measures import print_qp_loss
+from hyperverlet.plotting.utils import save_animation, create_gt_pred_legends, save_figure
+from hyperverlet.utils.measures import print_qp_mean_loss
 from hyperverlet.utils.misc import load_pickle, format_path
 
 
@@ -33,8 +33,8 @@ def animate_pendulum(config, show_gt=False, show_plot=True, cfg=1):
     result_dict = load_pickle(result_path)
     save_plot = config["plotting"]["save_plot"]
 
-    print_qp_loss(result_dict["q"], result_dict["p"], result_dict["gt_q"], result_dict["gt_p"], label='total loss')
-    print_qp_loss(result_dict["q"][:, cfg], result_dict["p"][:, cfg], result_dict["gt_q"][:, cfg], result_dict["gt_p"][:, cfg], label='cfg loss')
+    print_qp_mean_loss(result_dict["q"], result_dict["p"], result_dict["gt_q"], result_dict["gt_p"], label='total loss')
+    print_qp_mean_loss(result_dict["q"][:, cfg], result_dict["p"][:, cfg], result_dict["gt_q"][:, cfg], result_dict["gt_p"][:, cfg], label='cfg loss')
 
     q = result_dict["q"][::plot_every, cfg]
     p = result_dict["p"][::plot_every, cfg]
@@ -122,11 +122,8 @@ def pendulum_snapshot(config, cfg=0, slices=6):
 
     config_name = config["train_args_path"].split('/')[-2]
     solver_name = config["model_args"]["solver"]
-    plot_path = f"visualization/{config_name}"
-    os.makedirs(plot_path, exist_ok=True)
-    filepath = os.path.join(plot_path, solver_name)
-    plt.savefig(f'{filepath}.pdf', bbox_inches='tight')
-    print(f"Plot saved at {filepath}.pdf")
+
+    save_figure(f"visualization/{config_name}", solver_name)
 
 
 def update_pendulum(line, scatter, x, y, i):
@@ -162,7 +159,7 @@ def init_pendulum(ax, x, y, color='red', s=500, linewidth=4, zorder=1):
     x = x[0, 0]
     y = y[0, 0]
 
-    lines = ax.plot([0, x], [0, y], linewidth=linewidth, color=color, zorder=zorder)
-    scatter = ax.scatter(x, y, color=color, marker='o', s=s, zorder=zorder)
+    lines = ax.plot([0, x], [0, y], linewidth=linewidth, color="k", zorder=zorder)
+    scatter = ax.scatter(x, y, color=color, marker='o', s=s, zorder=zorder + 1)
 
     return lines[0], scatter

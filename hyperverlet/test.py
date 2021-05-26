@@ -3,7 +3,7 @@ from torch import nn
 from torch.utils.data import DataLoader
 
 from hyperverlet.timer import timer
-from hyperverlet.utils.measures import print_qp_loss
+from hyperverlet.utils.measures import print_qp_mean_loss
 from hyperverlet.utils.misc import send_to_device, torch_to_numpy
 
 
@@ -44,7 +44,7 @@ def inference(solver: nn.Module, dataset, device, train_args, label):
         extra_args = send_to_device(batch['extra_args'], device, non_blocking=True)
 
         (q, p), inference_time = timer(run, f'solving {label}', return_time=True)
-        print_qp_loss(q, p, q_base, p_base, label=f'final loss {label}')
+        print_qp_mean_loss(q, p, q_base, p_base, label=f'final loss {label}')
 
     return {
         "inference_time": inference_time,

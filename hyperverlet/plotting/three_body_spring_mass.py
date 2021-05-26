@@ -10,14 +10,15 @@ from hyperverlet.utils.math import calc_dist_2d, calc_theta
 from hyperverlet.plotting.energy import plot_energy, init_energy_plot, energy_animate_update
 
 from hyperverlet.plotting.grid_spec import *
-from hyperverlet.plotting.utils import plot_spring, set_limits, save_animation, compute_limits, create_gt_pred_legends
-from hyperverlet.utils.measures import print_qp_loss
+from hyperverlet.plotting.utils import plot_spring, set_limits, save_animation, compute_limits, create_gt_pred_legends, \
+    save_figure
+from hyperverlet.utils.measures import print_qp_mean_loss
 from hyperverlet.utils.misc import load_pickle, format_path
 
 
 def plot_springs(ax, q, i, colormap=None):
     # Plotted bob circle radius
-    r = 0.4
+    r = 0.5
     num_particles = q.shape[1]
 
     for particle in range(num_particles):
@@ -75,8 +76,8 @@ def animate_tbsm(config, show_trail=True, show_springs=False, show_plot=True, cf
     result_dict = load_pickle(result_path)
     save_plot = config["plotting"]["save_plot"]
 
-    print_qp_loss(result_dict["q"], result_dict["p"], result_dict["gt_q"], result_dict["gt_p"], label='total loss')
-    print_qp_loss(result_dict["q"][:, cfg], result_dict["p"][:, cfg], result_dict["gt_q"][:, cfg], result_dict["gt_p"][:, cfg], label='cfg loss')
+    print_qp_mean_loss(result_dict["q"], result_dict["p"], result_dict["gt_q"], result_dict["gt_p"], label='total loss')
+    print_qp_mean_loss(result_dict["q"][:, cfg], result_dict["p"][:, cfg], result_dict["gt_q"][:, cfg], result_dict["gt_p"][:, cfg], label='cfg loss')
 
     # Predicted results
     q = result_dict["q"][::plot_every, cfg]
@@ -225,12 +226,8 @@ def tbsm_snapshot(config, cfg=0, slices=6):
 
     config_name = config["train_args_path"].split('/')[-2]
     solver_name = config["model_args"]["solver"]
-    plot_path = f"visualization/{config_name}"
-    os.makedirs(plot_path, exist_ok=True)
-    filepath = os.path.join(plot_path, solver_name)
-    plt.savefig(f'{filepath}.pdf', bbox_inches='tight')
-    print(f"Plot saved at {filepath}.pdf")
 
+    save_figure(f"visualization/{config_name}", solver_name)
 
 
 def init_line_plot(ax, trajectory, line, title=None, x_color='blue', y_color='orange', ylabel="Difference", xlabel="Time"):

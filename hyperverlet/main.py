@@ -4,89 +4,24 @@ from dataclasses import dataclass
 
 import torch
 
+from hyperverlet.config_container import preset_config_paths
 from hyperverlet.factories.dataset_factory import construct_dataset
 from hyperverlet.factories.solver_factory import construct_solver
 from hyperverlet.lyapunov import lyapunov_solvers_plot
 from hyperverlet.plotting.energy import total_energy_plot
+from hyperverlet.plotting.generalization import generalization_plot
 from hyperverlet.plotting.pendulum import animate_pendulum, pendulum_snapshot
 from hyperverlet.plotting.spring_mass import animate_sm, sm_snapshot
 from hyperverlet.plotting.three_body_spring_mass import animate_tbsm, tbsm_snapshot
+from hyperverlet.plotting.utils import ablation_barplots
 from hyperverlet.test import test
 from hyperverlet.train import train
-from hyperverlet.utils.measures import print_valid_prediction_time, print_qp_loss
+from hyperverlet.utils.measures import print_valid_prediction_time, print_qp_mean_loss
 from hyperverlet.utils.misc import seed_randomness, load_config, save_pickle, format_path, load_pickle
 
 systems = ['pendulum', 'pendulum20', 'pendulum40', 'pendulum60', 'pendulum80', 'pendulum100',
            'spring_mass', 'spring_mass25', 'spring_mass50', 'spring_mass100', 'spring_mass200',
            'three_body_spring_mass', 'three_body_spring_mass25', 'three_body_spring_mass50', 'three_body_spring_mass100', 'three_body_spring_mass200']
-
-evaluate_config_paths = {
-    'integrator_comparison': [
-        'configurations/integrator_comparison/{system}/euler.json',
-        'configurations/integrator_comparison/{system}/hypereuler.json',
-        'configurations/integrator_comparison/{system}/heun.json',
-        'configurations/integrator_comparison/{system}/hyperheun.json',
-        'configurations/integrator_comparison/{system}/velocityverlet.json',
-        'configurations/integrator_comparison/{system}/hyperverlet.json',
-        'configurations/integrator_comparison/{system}/ruth4.json',
-        'configurations/integrator_comparison/{system}/rk4.json'
-    ],
-    'hypersolver_placement': [
-        'configurations/ablation/hypersolver_placement/{system}/hyperverlet.json',
-        'configurations/ablation/hypersolver_placement/{system}/alternating_hyperverlet.json',
-        'configurations/ablation/hypersolver_placement/{system}/ponly_hyperverlet.json',
-        'configurations/ablation/hypersolver_placement/{system}/qonly_hyperverlet.json',
-        'configurations/ablation/hypersolver_placement/{system}/sequentialpost_hyperverlet.json'
-    ],
-    'shared_unshared': [
-        'configurations/ablation/shared_unshared/{system}/hyperverlet_shared.json',
-        'configurations/ablation/shared_unshared/{system}/hyperverlet_unshared.json'
-    ],
-    'model_input': [
-        'configurations/ablation/model_input/{system}/hyperverlet_post.json',
-        'configurations/ablation/model_input/{system}/hyperverlet_prepost.json',
-        'configurations/ablation/model_input/{system}/hyperverlet_statepost.json',
-        'configurations/ablation/model_input/{system}/hyperverlet_timepost.json'
-    ],
-    'loss_function': [
-        'configurations/ablation/loss_function/{system}/hyperverlet_residual_l1.json',
-        'configurations/ablation/loss_function/{system}/hyperverlet_residual_l2.json',
-        'configurations/ablation/loss_function/{system}/hyperverlet_trajectory_l1.json',
-        'configurations/ablation/loss_function/{system}/hyperverlet_trajectory_l2.json',
-        'configurations/ablation/loss_function/{system}/hyperverlet_trajectory_timedecay.json'
-    ],
-    'generalization': [
-        'configurations/generalization/out_of_distribution/pendulum_length/hyperverlet.json',
-        'configurations/generalization/out_of_distribution/pendulum_mass/hyperverlet.json',
-        'configurations/generalization/variable_parameters/pendulum_not_variable/hyperverlet.json',
-        'configurations/generalization/variable_parameters/pendulum_variable/hyperverlet.json',
-        'configurations/generalization/train_duration/pendulum_00/hyperverlet.json',
-        'configurations/generalization/train_duration/pendulum_01/hyperverlet.json',
-        'configurations/generalization/train_duration/pendulum_02/hyperverlet.json',
-        'configurations/generalization/train_duration/pendulum_03/hyperverlet.json',
-        'configurations/generalization/train_duration/pendulum_04/hyperverlet.json'
-    ]
-}
-
-
-plot_config_paths = {
-    'total_energy': [
-            'configurations/integrator_comparison/{system}/velocityverlet.json',
-            'configurations/integrator_comparison/{system}/hyperheun.json',
-            'configurations/integrator_comparison/{system}/hyperverlet.json',
-            'configurations/integrator_comparison/{system}/ruth4.json',
-            'configurations/integrator_comparison/{system}/rk4.json'
-    ],
-    'total_energy_full': [
-            'configurations/integrator_comparison/{system}/velocityverlet.json',
-            'configurations/integrator_comparison/{system}/hypereuler.json',
-            'configurations/integrator_comparison/{system}/heun.json',
-            'configurations/integrator_comparison/{system}/hyperheun.json',
-            'configurations/integrator_comparison/{system}/hyperverlet.json',
-            'configurations/integrator_comparison/{system}/ruth4.json',
-            'configurations/integrator_comparison/{system}/rk4.json'
-    ]
-}
 
 
 @dataclass
@@ -114,17 +49,17 @@ def parse_arguments():
     full_parse.set_defaults(func=full_run)
 
     lyapunov_parse = commands.add_parser('lyapunov', help='Create a boxplot showing lyapunov exponent for solvers')
-    lyapunov_parse.add_argument('--experiment', type=str, required=True, choices=evaluate_config_paths.keys(), help="Run experiment on set of predefined json files")
+    lyapunov_parse.add_argument('--experiment', type=str, required=True, choices=preset_config_paths.keys(), help="Run experiment on set of predefined json files")
     lyapunov_parse.add_argument('--system', type=str, required=True, choices=systems, help="Name of the system to test")
     lyapunov_parse.set_defaults(func=lyapunov)
 
     combined_parse = commands.add_parser('combined', help="Used for plotting multiple configs in the same plot")
-    combined_parse.add_argument('--experiment', type=str, required=True, choices=plot_config_paths.keys(), help="Predefined set of json files used for plotting")
+    combined_parse.add_argument('--experiment', type=str, required=True, choices=preset_config_paths.keys(), help="Predefined set of json files used for plotting")
     combined_parse.add_argument('--system', type=str, required=True, choices=systems, help="Name of the system to test")
     combined_parse.set_defaults(func=combined)
 
     sequential_parse = commands.add_parser('sequential', help='Execute evaluate or plot sequentially')
-    sequential_parse.add_argument('--experiment', type=str, required=True, choices=evaluate_config_paths.keys(), help="Run experiment on set of predefined json files")
+    sequential_parse.add_argument('--experiment', type=str, required=True, choices=preset_config_paths.keys(), help="Run experiment on set of predefined json files")
     sequential_parse.add_argument('--system', type=str, required=True, choices=systems, help="Name of the system to test")
     sequential_parse.set_defaults(func=sequential)
 
@@ -148,20 +83,29 @@ def replace_system(path, args):
 
 def combined(args):
     replace_system_closure = functools.partial(replace_system, args=args)
-    expArgs = map(replace_system_closure, plot_config_paths[args.experiment])
+    expArgs = map(replace_system_closure, preset_config_paths[args.experiment])
 
-    return total_energy_plot(expArgs, args.experiment)
+    plot_total_energy = False
+    plot_ablation = False
+    plot_generalization = True
+
+    if plot_total_energy:
+        total_energy_plot(expArgs, args.experiment)
+    if plot_ablation:
+        ablation_barplots(expArgs, args.experiment)
+    if plot_generalization:
+        generalization_plot(expArgs, args.experiment)
 
 
 def lyapunov(args):
     replace_system_closure = functools.partial(replace_system, args=args)
-    configs = map(replace_system_closure, evaluate_config_paths[args.experiment])
+    configs = map(replace_system_closure, preset_config_paths[args.experiment])
     lyapunov_solvers_plot(configs)
 
 
 def sequential(args):
     replace_system_closure = functools.partial(replace_system, args=args)
-    experiment_args = map(replace_system_closure, evaluate_config_paths[args.experiment])
+    experiment_args = map(replace_system_closure, preset_config_paths[args.experiment])
 
     for experiment_arg in experiment_args:
         print('Running: {}'.format(experiment_arg.config_path))
@@ -201,7 +145,7 @@ def plot(args):
     dataset = config["dataset_args"]['dataset']
 
     make_animation = False
-    take_snapshot = False
+    take_snapshot = True
     gather_data = False
 
     if make_animation:
@@ -231,7 +175,7 @@ def log_data(config):
     method = 'qp_loss'
 
     if method == 'qp_loss':
-        print_qp_loss(result_dict["q"], result_dict["p"], result_dict["gt_q"], result_dict["gt_p"], label='')
+        print_qp_mean_loss(result_dict["q"], result_dict["p"], result_dict["gt_q"], result_dict["gt_p"], label='')
     elif method == 'vpt':
         print_valid_prediction_time(result_dict["q"], result_dict["p"], result_dict["gt_q"], result_dict["gt_p"], label='')
 
@@ -242,7 +186,7 @@ def snapshot(config, dataset, slices=6):
     elif dataset == 'spring_mass':
         sm_snapshot(config, slices=slices)
     elif dataset == 'three_body_spring_mass':
-        tbsm_snapshot(config, slices=slices)
+        tbsm_snapshot(config, slices=slices, cfg=3)
 
 
 def full_run(args):

@@ -16,10 +16,14 @@ def qp_loss(q, p, gt_q, gt_p):
     return q_loss, p_loss
 
 
-def print_qp_loss(q, p, gt_q, gt_p, label='final loss'):
+def qp_mean(q, p, gt_q, gt_p):
     q_loss, p_loss = qp_loss(q, p, gt_q, gt_p)
+    return (q_loss + p_loss) / 2
 
-    print("{:.3e} {}".format((q_loss + p_loss) / 2, label))
+
+def print_qp_mean_loss(q, p, gt_q, gt_p, label='final loss'):
+    qp_mean_loss = qp_mean(q, p, gt_q, gt_p)
+    print("{:.3e} {}".format(qp_mean_loss, label))
 
 
 def valid_prediction_time(q, p, gt_q, gt_p, threshold=0.01):
