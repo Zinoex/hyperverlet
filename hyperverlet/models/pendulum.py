@@ -137,5 +137,5 @@ class TimePostPendulumModel(nn.Module):
         return self.model_p(hp)
 
     def hq(self, q, p, dq1, dq2, dp1, dp2, m, t, dt, length, **kwargs):
-        hq = torch.cat([t, dt, dq2, dp2, length], dim=-1)
+        hq = torch.cat([t, dt, dq2, dp2, m, length], dim=-1)
         return self.model_q(hq)
