@@ -132,7 +132,7 @@ def evaluate(args):
         train(solver, train_dataset, device, config)
 
     # Test Solver
-    result_dict = test(solver, test_dataset, device, config)
+    result_dict = test(solver, train_dataset, test_dataset, device, config)
     result_dict['config'] = config
 
     save_path = format_path(config, config['result_path'])
