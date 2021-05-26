@@ -14,8 +14,13 @@ def test(solver: nn.Module, train_dataset, test_dataset, device, config):
     test_results = inference(solver, test_dataset, device, train_args, label='test')
 
     if train_args.get('save_train_inference', False):
+        old_sequence_length = train_dataset.sequence_length
+        train_dataset.sequence_length = None
+
         train_results = inference(solver, train_dataset, device, train_args, label='train')
         test_results['train'] = train_results
+
+        train_dataset.sequence_length = old_sequence_length
 
     return test_results
 
