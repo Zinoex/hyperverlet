@@ -10,8 +10,8 @@ from hyperverlet.energy import SpringMassEnergy
 from hyperverlet.plotting.energy import init_energy_plot, plot_energy, energy_animate_update
 from hyperverlet.plotting.grid_spec import gs_3_2_3, gs_line
 from hyperverlet.plotting.phasespace import init_phasespace_plot, update_phasespace_plot
-from hyperverlet.plotting.utils import plot_spring, save_animation, compute_spring, create_gt_pred_legends
-from hyperverlet.utils.measures import print_qp_loss
+from hyperverlet.plotting.utils import plot_spring, save_animation, compute_spring, create_gt_pred_legends, save_figure
+from hyperverlet.utils.measures import print_qp_mean_loss
 from hyperverlet.utils.misc import load_pickle, format_path
 
 
@@ -37,8 +37,8 @@ def animate_sm(config, show_gt=False, show_plot=True, cfg=0):
     result_dict = load_pickle(result_path)
     save_plot = config["plotting"]["save_plot"]
 
-    print_qp_loss(result_dict["q"], result_dict["p"], result_dict["gt_q"], result_dict["gt_p"], label='total loss')
-    print_qp_loss(result_dict["q"][:, cfg], result_dict["p"][:, cfg], result_dict["gt_q"][:, cfg], result_dict["gt_p"][:, cfg], label='cfg loss')
+    print_qp_mean_loss(result_dict["q"], result_dict["p"], result_dict["gt_q"], result_dict["gt_p"], label='total loss')
+    print_qp_mean_loss(result_dict["q"][:, cfg], result_dict["p"][:, cfg], result_dict["gt_q"][:, cfg], result_dict["gt_p"][:, cfg], label='cfg loss')
 
     # Predicted results
     q = result_dict["q"][::plot_every, cfg]
@@ -113,14 +113,11 @@ def sm_snapshot(config, cfg=0, slices=6):
 
     config_name = config["train_args_path"].split('/')[-2]
     solver_name = config["model_args"]["solver"]
-    plot_path = f"visualization/{config_name}"
-    os.makedirs(plot_path, exist_ok=True)
-    filepath = os.path.join(plot_path, solver_name)
-    plt.savefig(f'{filepath}.pdf', bbox_inches='tight')
-    print(f"Plot saved at {filepath}.pdf")
+
+    save_figure(f"visualization/{config_name}", solver_name)
 
 
-def init_sm(ax, q, gt_q, show_gt, wall_bottom=0.5, wall_top=-0.5, r=0.05, title="Spring mass experiment", set_ylabel=True):
+def init_sm(ax, q, gt_q, show_gt, wall_bottom=-0.5, wall_top=0.5, r=0.05, title="Spring mass experiment", set_ylabel=True):
     ax.set_xlim(-r, np.max(q) * 1.05 + r)
     ax.set_ylim(wall_bottom * 1.05, wall_top * 1.05)
     ax.set_aspect('equal')
@@ -130,7 +127,6 @@ def init_sm(ax, q, gt_q, show_gt, wall_bottom=0.5, wall_top=-0.5, r=0.05, title=
         ax.set_ylabel('Y')
     else:
         ax.get_yaxis().set_visible(False)
-
 
     spring = plot_spring(ax, q[0])
 
