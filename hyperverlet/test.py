@@ -27,7 +27,7 @@ def inference(solver: nn.Module, dataset, device, train_args, label):
     loader = DataLoader(dataset, num_workers=num_workers, pin_memory=device.type == 'cuda', batch_size=len(dataset))
 
     def run():
-        solver.trajectory(dataset.experiment, q_base[0], p_base[0], mass, trajectory, **extra_args)
+        return solver.trajectory(dataset.experiment, q_base[0], p_base[0], mass, trajectory, **extra_args)
 
     with torch.no_grad():
         batch = next(iter(loader))
