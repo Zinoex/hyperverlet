@@ -31,24 +31,36 @@ def valid_prediction_time(q, p, gt_q, gt_p, trajectory, threshold=0.006):
         z = torch.cat([q, p], dim=-1)
         gt_z = torch.cat([gt_q, gt_p], dim=-1)
 
+        num_config = z.size(1)
+
         squared_diff = (z - gt_z) ** 2
 
-        mean_axis = tuple(range(1, squared_diff.dim()))
+        mean_axis = tuple(range(2, squared_diff.dim()))
         z_loss = squared_diff.mean(dim=mean_axis).sqrt()
 
-        idx = torch.where(z_loss > threshold)[0][0].item()
+        mask = torch.cat([z_loss > threshold, torch.full((1, num_config), True)])
+
+        tidx = torch.argmax(mask, dim=1) - 1
+        cidx = torch.arange(num_config)
+        return trajectory[tidx, cidx].mean().item()
+
+
     else:
         z = np.concatenate([q, p], axis=-1)
         gt_z = np.concatenate([gt_q, gt_p], axis=-1)
+
+        num_config = z.size(1)
 
         squared_diff = (z - gt_z) ** 2
 
         mean_axis = tuple(range(1, squared_diff.ndim))
         z_loss = np.sqrt(squared_diff.mean(axis=mean_axis))
 
-        idx = np.where(z_loss > threshold)[0][0]
+        mask = np.concatenate([z_loss > threshold, np.full((1, num_config), True)])
 
-    return trajectory[idx, 0]
+        tidx = np.argmax(mask, dim=1) - 1
+        cidx = np.arange(num_config)
+        return trajectory[tidx, cidx].mean()
 
 
 def print_valid_prediction_time(q, p, gt_q, gt_p, trajectory, threshold=0.1, label='vpt'):
