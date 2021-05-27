@@ -4,6 +4,6 @@
     "num_workers": 8,
     "loss": "residual",
     "time_decay": 1,
-    "regularization": ["center_mass", "total_momentum"],
+    "regularization": [],
     "criterion": "L1Loss"
 }
