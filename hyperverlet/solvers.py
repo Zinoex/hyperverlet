@@ -207,12 +207,23 @@ class FullHyperVelocityVerlet(BaseSolver, ResidualMixin):
         self.hypersolver = hypersolver
 
     def forward(self, experiment: Experiment, q: torch.Tensor, p: torch.Tensor, m: torch.Tensor, t, dt, **kwargs):
+        one_half = 1 / 2
         dq1, dp1 = experiment(q, p, m, t, **kwargs)
 
-        q, p = self.base(experiment, q, p, m, t, dt, **kwargs)
+        dp = experiment.dp(q, m, t, **kwargs)
+        p = p + one_half * dp * dt
+        dq2, dp2 = experiment(q, p, m, t, **kwargs)
+
+        dq = experiment.dq(p, m, t, **kwargs)
+        q = experiment.shift(q + dq * dt, **kwargs)
+        dq3, dp3 = experiment(q, p, m, t, **kwargs)
+
+        dp = experiment.dp(q, m, t, **kwargs)
+        p = p + one_half * dp * dt
+        dq4, dp4 = experiment(q, p, m, t, **kwargs)
 
         dq2, dp2 = experiment(q, p, m, t, **kwargs)
-        hq, hp = self.hypersolver(q, p, dq1, dq2, dp1, dp2, m, t, dt, **kwargs)
+        hq, hp = self.hypersolver(q, p, dq1, dq2, dq3, dq4, dp1, dp2, dp3, dp4, m, t, dt, **kwargs)
         q, p = experiment.shift(q + hq * dt ** (self.q_order + 1), **kwargs), p + hp * dt ** (self.p_order + 1)
 
         return q, p
@@ -232,6 +243,7 @@ class FullHyperVelocityVerlet(BaseSolver, ResidualMixin):
         return q, p
 
     def hyper_trajectory(self, experiment: Experiment, gt_q: torch.Tensor, gt_p: torch.Tensor, m: torch.Tensor, trajectory: torch.Tensor, disable_print=False, **kwargs):
+        one_half = 1 / 2
         q_traj = torch.zeros_like(gt_q)
         p_traj = torch.zeros_like(gt_p)
 
@@ -244,10 +256,19 @@ class FullHyperVelocityVerlet(BaseSolver, ResidualMixin):
             q, p = gt_q[i], gt_p[i]
             dq1, dp1 = experiment(q, p, m, t, **kwargs)
 
-            q, p = self.base(experiment, q, p, m, t, dt, **kwargs)
-
+            dp = experiment.dp(q, m, t, **kwargs)
+            p = p + one_half * dp * dt
             dq2, dp2 = experiment(q, p, m, t, **kwargs)
-            hq, hp = self.hypersolver(q, p, dq1, dq2, dp1, dp2, m, t, dt, **kwargs)
+
+            dq = experiment.dq(p, m, t, **kwargs)
+            q = experiment.shift(q + dq * dt, **kwargs)
+            dq3, dp3 = experiment(q, p, m, t, **kwargs)
+
+            dp = experiment.dp(q, m, t, **kwargs)
+            p = p + one_half * dp * dt
+            dq4, dp4 = experiment(q, p, m, t, **kwargs)
+
+            hq, hp = self.hypersolver(q, p, dq1, dq2, dq3, dq4, dp1, dp2, dp3, dp4, m, t, dt, **kwargs)
 
             q_traj[i], p_traj[i] = hq, hp
 

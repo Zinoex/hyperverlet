@@ -23,6 +23,7 @@ preset_config_paths = {
         'configurations/ablation/shared_unshared/{system}/hyperverlet_unshared.json'
     ],
     'model_input': [
+        'configurations/ablation/model_input/{system}/hyperverlet_curvature.json',
         'configurations/ablation/model_input/{system}/hyperverlet_post.json',
         'configurations/ablation/model_input/{system}/hyperverlet_prepost.json',
         'configurations/ablation/model_input/{system}/hyperverlet_statepost.json',
