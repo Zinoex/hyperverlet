@@ -410,21 +410,21 @@ class AlternatingHyperVelocityVerlet(BaseSolver):
 
         dq2, dp2 = experiment(q, p, m, t, **kwargs)
         hp = self.hypersolver.hp(dq1, dq2, dp1, dp2, m, t, dt, **kwargs)
-        p = p + one_half * hp * dt ** (self.p_order + 1)
+        p = p + one_half * hp * dt ** 2
 
         dq = experiment.dq(p, m, t, **kwargs)
         q = experiment.shift(q + dq * dt, **kwargs)
 
         dq2, dp2 = experiment(q, p, m, t, **kwargs)
         hq = self.hypersolver.hq(dq1, dq2, dp1, dp2, m, t, dt, **kwargs)
-        q = experiment.shift(q + hq * dt ** (self.q_order + 1), **kwargs)
+        q = experiment.shift(q + hq * dt ** 2, **kwargs)
 
         dp = experiment.dp(q, m, t, **kwargs)
         p = p + one_half * dp * dt
 
         dq2, dp2 = experiment(q, p, m, t, **kwargs)
         hp = self.hypersolver.hp(dq1, dq2, dp1, dp2, m, t, dt, **kwargs)
-        p = p + one_half * hp * dt ** (self.p_order + 1)
+        p = p + one_half * hp * dt ** 2
 
         return q, p
 
