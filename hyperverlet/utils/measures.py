@@ -40,25 +40,24 @@ def valid_prediction_time(q, p, gt_q, gt_p, trajectory, threshold=0.006):
 
         mask = torch.cat([z_loss > threshold, torch.full((1, num_config), True)])
 
-        tidx = torch.argmax(mask, dim=1) - 1
+        tidx = torch.argmax(mask, dim=0) - 1
         cidx = torch.arange(num_config)
         return trajectory[tidx, cidx].mean().item()
-
 
     else:
         z = np.concatenate([q, p], axis=-1)
         gt_z = np.concatenate([gt_q, gt_p], axis=-1)
 
-        num_config = z.size(1)
+        num_config = z.shape[1]
 
         squared_diff = (z - gt_z) ** 2
 
-        mean_axis = tuple(range(1, squared_diff.ndim))
+        mean_axis = tuple(range(2, squared_diff.ndim))
         z_loss = np.sqrt(squared_diff.mean(axis=mean_axis))
 
         mask = np.concatenate([z_loss > threshold, np.full((1, num_config), True)])
 
-        tidx = np.argmax(mask, dim=1) - 1
+        tidx = np.argmax(mask, axis=0) - 1
         cidx = np.arange(num_config)
         return trajectory[tidx, cidx].mean()
 
