@@ -222,7 +222,6 @@ class FullHyperVelocityVerlet(BaseSolver, ResidualMixin):
         p = p + one_half * dp * dt
         dq4, dp4 = experiment(q, p, m, t, **kwargs)
 
-        dq2, dp2 = experiment(q, p, m, t, **kwargs)
         hq, hp = self.hypersolver(q, p, dq1, dq2, dq3, dq4, dp1, dp2, dp3, dp4, m, t, dt, **kwargs)
         q, p = experiment.shift(q + hq * dt ** (self.q_order + 1), **kwargs), p + hp * dt ** (self.p_order + 1)
 
