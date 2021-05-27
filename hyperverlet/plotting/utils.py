@@ -153,7 +153,8 @@ def ablation_barplots(expargs, experiment):
                          hyperverlet_statepost="Statepost", hyperverlet_timepost="Timepost",
                          hyperverlet_shared="Shared", hyperverlet_unshared="Unshared",
                          hyperverlet="HyperVerlet", alternating_hyperverlet="Interleaving", ponly_hyperverlet="Only $p$ correction",
-                         qonly_hyperverlet="Only $q$ correction", sequentialpost_hyperverlet="Alternating")
+                         qonly_hyperverlet="Only $q$ correction", sequentialpost_hyperverlet="Alternating",
+                         hyperverlet_curvature="Intermediate")
 
     for idx, args in enumerate(expargs):
         config_path = args.config_path

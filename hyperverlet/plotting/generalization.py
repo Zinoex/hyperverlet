@@ -19,8 +19,8 @@ def generalization_plot(expargs, experiment):
     data = []
 
     label_mapping = dict(pendulum_length="Length", pendulum_mass="Mass",
-                         pendulum_00="0", pendulum_01="0.1", pendulum_02="0.2", pendulum_03="0.3", pendulum_04="0.4",
-                         pendulum_not_variable="Pendulum constant", pendulum_variable="Pendulum variable")
+                         pendulum_00="$0\%$", pendulum_01="$10\%$", pendulum_02="$20\%$", pendulum_03="$30\%$", pendulum_04="$40\%$",
+                         pendulum_not_variable="Pendulum fixed", pendulum_variable="Pendulum random")
 
     mse_label = "MSE"
     vpt_label = "VPT"
@@ -41,7 +41,6 @@ def generalization_plot(expargs, experiment):
 
         qp_loss = qp_mean(result_dict["q"], result_dict["p"], result_dict["gt_q"], result_dict["gt_p"])
         vpt_loss = valid_prediction_time(result_dict["q"], result_dict["p"], result_dict["gt_q"], result_dict["gt_p"])
-
         data.append([label, 'test', qp_loss, vpt_loss])
 
         if experiment == "generalization_out_of_distribution":
@@ -51,7 +50,7 @@ def generalization_plot(expargs, experiment):
             data.append([label, 'train', qp_train_loss, vpt_train_loss])
 
     if experiment == "generalization_train_duration":
-        x_label = "Train duration std."
+        x_label = "Step size std. $\%$"
 
         df = pd.DataFrame(data=data, columns=[x_label, split_label, mse_label, vpt_label])
         sns.lineplot(x=x_label, y=mse_label, data=df)

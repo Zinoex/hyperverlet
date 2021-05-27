@@ -26,7 +26,7 @@ def print_qp_mean_loss(q, p, gt_q, gt_p, label='final loss'):
     print("{:.3e} {}".format(qp_mean_loss, label))
 
 
-def valid_prediction_time(q, p, gt_q, gt_p, threshold=0.01):
+def valid_prediction_time(q, p, gt_q, gt_p, trajectory, threshold=0.006):
     if torch.is_tensor(q):
         z = torch.cat([q, p], dim=-1)
         gt_z = torch.cat([gt_q, gt_p], dim=-1)
@@ -36,7 +36,7 @@ def valid_prediction_time(q, p, gt_q, gt_p, threshold=0.01):
         mean_axis = tuple(range(1, squared_diff.dim()))
         z_loss = squared_diff.mean(dim=mean_axis).sqrt()
 
-        return torch.where(z_loss > threshold)[0][0].item()
+        idx = torch.where(z_loss > threshold)[0][0].item()
     else:
         z = np.concatenate([q, p], axis=-1)
         gt_z = np.concatenate([gt_q, gt_p], axis=-1)
@@ -46,10 +46,12 @@ def valid_prediction_time(q, p, gt_q, gt_p, threshold=0.01):
         mean_axis = tuple(range(1, squared_diff.ndim))
         z_loss = np.sqrt(squared_diff.mean(axis=mean_axis))
 
-        return np.where(z_loss > threshold)[0][0]
+        idx = np.where(z_loss > threshold)[0][0]
+
+    return trajectory[idx, 0]
 
 
-def print_valid_prediction_time(q, p, gt_q, gt_p, threshold=0.01, label='vpt'):
-    vpt = valid_prediction_time(q, p, gt_q, gt_p, threshold=threshold)
+def print_valid_prediction_time(q, p, gt_q, gt_p, trajectory, threshold=0.1, label='vpt'):
+    vpt = valid_prediction_time(q, p, gt_q, gt_p, trajectory, threshold=threshold)
 
-    print("{:.3e} {}".format(vpt, label))
+    print("{} {}".format(round(vpt), label))

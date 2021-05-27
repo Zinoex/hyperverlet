@@ -177,7 +177,7 @@ def log_data(config):
     if method == 'qp_loss':
         print_qp_mean_loss(result_dict["q"], result_dict["p"], result_dict["gt_q"], result_dict["gt_p"], label='')
     elif method == 'vpt':
-        print_valid_prediction_time(result_dict["q"], result_dict["p"], result_dict["gt_q"], result_dict["gt_p"], label='')
+        print_valid_prediction_time(result_dict["q"], result_dict["p"], result_dict["gt_q"], result_dict["gt_p"], result_dict["trajectory"], label='')
 
 
 def snapshot(config, dataset, slices=6):
