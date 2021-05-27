@@ -109,7 +109,7 @@ class PendulumDataset(ExperimentDataset):
         if random_parameters:
             self.mass = torch.randn(num_configurations, 1) * mass_std + mass_mean
             self.extra_args = {
-                'length': torch.randn(num_configurations, 1) * length_std + length_mean,
+                'length': sample_parameterized_truncated_normal((num_configurations, 1), length_mean, length_std, 0.01, length_mean + 5 * length_std),
                 'g': torch.full((num_configurations, 1), g)
             }
         else:
@@ -118,6 +118,9 @@ class PendulumDataset(ExperimentDataset):
                 'length': torch.full((num_configurations, 1), length_mean),
                 'g': torch.full((num_configurations, 1), g)
             }
+
+        assert torch.all(self.extra_args['length'] > 0).item()
+        assert torch.all(self.extra_args['g'] > 0).item()
 
         super().__init__(base_solver, duration, duration_stddev, num_samples, num_configurations, coarsening_factor, cache_path, sequence_length)
 
@@ -144,6 +147,9 @@ class SpringMassDataset(ExperimentDataset):
 
         self.q0 = torch.rand(num_configurations, 1) * length * 2
         self.p0 = torch.randn(num_configurations, 1) * 0.1
+
+        assert torch.all(self.extra_args['length'] > 0).item()
+        assert torch.all(self.extra_args['k'] > 0).item()
 
         super().__init__(base_solver, duration, duration_stddev, num_samples, num_configurations, coarsening_factor, cache_path, sequence_length)
 
@@ -177,6 +183,9 @@ class ThreeBodySpringMassDataset(ExperimentDataset):
 
         p0 = torch.randn(num_configurations, num_particles, num_euclid) * 0.1
         self.p0 = p0 - torch.mean(p0, dim=1, keepdim=True)
+
+        assert torch.all(self.extra_args['length'] > 0).item()
+        assert torch.all(self.extra_args['k'] > 0).item()
 
         super().__init__(base_solver, duration, duration_stddev, num_samples, num_configurations, coarsening_factor, cache_path, sequence_length)
 
