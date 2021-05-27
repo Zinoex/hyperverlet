@@ -107,7 +107,7 @@ class PendulumDataset(ExperimentDataset):
         self.p0 = torch.randn(num_configurations, 1) * 0.1
 
         if random_parameters:
-            self.mass = torch.randn(num_configurations, 1) * mass_std + mass_mean
+            self.mass = sample_parameterized_truncated_normal((num_configurations, 1), mass_mean, mass_std, 0.01, mass_mean + 5 * mass_std)
             self.extra_args = {
                 'length': sample_parameterized_truncated_normal((num_configurations, 1), length_mean, length_std, 0.01, length_mean + 5 * length_std),
                 'g': torch.full((num_configurations, 1), g)
@@ -121,6 +121,7 @@ class PendulumDataset(ExperimentDataset):
 
         assert torch.all(self.extra_args['length'] > 0).item()
         assert torch.all(self.extra_args['g'] > 0).item()
+        assert torch.all(self.mass > 0).item()
 
         super().__init__(base_solver, duration, duration_stddev, num_samples, num_configurations, coarsening_factor, cache_path, sequence_length)
 
@@ -132,7 +133,7 @@ class SpringMassDataset(ExperimentDataset):
 
         if random_parameters:
             length = sample_parameterized_truncated_normal((num_configurations, 1), 0.8, 0.35, 0.1, 1.5)
-            self.mass = torch.randn(num_configurations, 1) * mass_std + mass_mean
+            self.mass = sample_parameterized_truncated_normal((num_configurations, 1), mass_mean, mass_std, 0.01, mass_mean + 5 * mass_std)
             self.extra_args = {
                 'length': length,
                 'k': sample_parameterized_truncated_normal((num_configurations, 1), 0.8, 0.35, 0.1, 1.5)
@@ -150,6 +151,7 @@ class SpringMassDataset(ExperimentDataset):
 
         assert torch.all(self.extra_args['length'] > 0).item()
         assert torch.all(self.extra_args['k'] > 0).item()
+        assert torch.all(self.mass > 0).item()
 
         super().__init__(base_solver, duration, duration_stddev, num_samples, num_configurations, coarsening_factor, cache_path, sequence_length)
 
@@ -165,7 +167,7 @@ class ThreeBodySpringMassDataset(ExperimentDataset):
 
         if random_parameters:
             length = sample_parameterized_truncated_normal((num_configurations, num_springs), 5, 2, 0.1, 10)
-            self.mass = torch.randn(num_configurations, num_particles, 1) * mass_std + mass_mean
+            self.mass = sample_parameterized_truncated_normal((num_configurations, num_particles, 1), mass_mean, mass_std, 0.01, mass_mean + 5 * mass_std)
             self.extra_args = {
                 'length': self.fill_particle_matrix(num_configurations, num_particles, length),
                 'k': self.fill_particle_matrix(num_configurations, num_particles, sample_parameterized_truncated_normal((num_configurations, num_springs), 0.8, 0.35, 0.1, 1.5))
@@ -186,6 +188,7 @@ class ThreeBodySpringMassDataset(ExperimentDataset):
 
         assert torch.all(self.extra_args['length'] > 0).item()
         assert torch.all(self.extra_args['k'] > 0).item()
+        assert torch.all(self.mass > 0).item()
 
         super().__init__(base_solver, duration, duration_stddev, num_samples, num_configurations, coarsening_factor, cache_path, sequence_length)
 
