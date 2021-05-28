@@ -106,14 +106,17 @@ class PendulumDataset(ExperimentDataset):
         self.q0 = (torch.rand(num_configurations, 1) * 2 - 1) * (np.pi / 2)
         self.p0 = torch.randn(num_configurations, 1) * 0.1
 
-        if random_parameters:
+        if random_parameters and mass_std != 0:
             self.mass = sample_parameterized_truncated_normal((num_configurations, 1), mass_mean, mass_std, 0.01, mass_mean + 5 * mass_std)
+        else:
+            self.mass = torch.full((num_configurations, 1), mass_mean)
+
+        if random_parameters and length_std != 0:
             self.extra_args = {
                 'length': sample_parameterized_truncated_normal((num_configurations, 1), length_mean, length_std, 0.01, length_mean + 5 * length_std),
                 'g': torch.full((num_configurations, 1), g)
             }
         else:
-            self.mass = torch.full((num_configurations, 1), mass_mean)
             self.extra_args = {
                 'length': torch.full((num_configurations, 1), length_mean),
                 'g': torch.full((num_configurations, 1), g)
