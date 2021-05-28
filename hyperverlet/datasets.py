@@ -134,16 +134,19 @@ class SpringMassDataset(ExperimentDataset):
 
         self.experiment = SpringMass()
 
+        if random_parameters and mass_std != 0:
+            self.mass = sample_parameterized_truncated_normal((num_configurations, 1), mass_mean, mass_std, 0.01, mass_mean + 5 * mass_std)
+        else:
+            self.mass = torch.full((num_configurations, 1), mass_mean)
+
         if random_parameters:
             length = sample_parameterized_truncated_normal((num_configurations, 1), 0.8, 0.35, 0.1, 1.5)
-            self.mass = sample_parameterized_truncated_normal((num_configurations, 1), mass_mean, mass_std, 0.01, mass_mean + 5 * mass_std)
             self.extra_args = {
                 'length': length,
                 'k': sample_parameterized_truncated_normal((num_configurations, 1), 0.8, 0.35, 0.1, 1.5)
             }
         else:
             length = torch.full((num_configurations, 1), 0.8)
-            self.mass = torch.full((num_configurations, 1), mass_mean)
             self.extra_args = {
                 'length': length,
                 'k': torch.full((num_configurations, 1), 0.8)
@@ -168,16 +171,19 @@ class ThreeBodySpringMassDataset(ExperimentDataset):
 
         self.experiment = ThreeBodySpringMass()
 
+        if random_parameters and mass_std != 0:
+            self.mass = sample_parameterized_truncated_normal((num_configurations, num_particles, 1), mass_mean, mass_std, 0.01, mass_mean + 5 * mass_std)
+        else:
+            self.mass = torch.full((num_configurations, num_particles, 1), mass_mean)
+
         if random_parameters:
             length = sample_parameterized_truncated_normal((num_configurations, num_springs), 5, 2, 0.1, 10)
-            self.mass = sample_parameterized_truncated_normal((num_configurations, num_particles, 1), mass_mean, mass_std, 0.01, mass_mean + 5 * mass_std)
             self.extra_args = {
                 'length': self.fill_particle_matrix(num_configurations, num_particles, length),
                 'k': self.fill_particle_matrix(num_configurations, num_particles, sample_parameterized_truncated_normal((num_configurations, num_springs), 0.8, 0.35, 0.1, 1.5))
             }
         else:
             length = torch.full((num_configurations, num_springs), 5.0)
-            self.mass = torch.full((num_configurations, num_particles, 1), mass_mean)
             self.extra_args = {
                 'length': self.fill_particle_matrix(num_configurations, num_particles, length),
                 'k':  self.fill_particle_matrix(num_configurations, num_particles, torch.full((num_configurations, num_springs), 0.8))
