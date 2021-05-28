@@ -1,6 +1,6 @@
 {
    "dataset": "pendulum",
-   "cache_path": "cache/generalization/out_of_distribution/{dataset}_{split}/{train_duration}_{train_trajectory_length}_{train_num_configurations}_{test_duration}_{test_trajectory_length}_{test_num_configurations}.pickle",
+   "cache_path": "cache/generalization/out_of_distribution/length/{dataset}_{split}/{train_duration}_{train_trajectory_length}_{train_num_configurations}_{test_duration}_{test_trajectory_length}_{test_num_configurations}.pickle",
    "gt_solver": "FourthOrderRuth",
    "train_duration": 600,
    "train_trajectory_length": 600001,
