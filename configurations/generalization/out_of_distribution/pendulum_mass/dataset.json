@@ -13,10 +13,16 @@
    "duration_stddev": 0.1,
    "test_experiment_args": {
       "random_parameters": true,
-      "mass_mean": 2.1
+      "length_mean": 1.0,
+      "length_std": 0,
+      "mass_mean": 2.1,
+      "mass_std": 0.1
    },
    "train_experiment_args": {
       "random_parameters": true,
-      "mass_mean": 0.9
+      "length_mean": 1.0,
+      "length_std": 0,
+      "mass_mean": 0.9,
+      "mass_std": 0.6
    }
 }
