@@ -6,7 +6,10 @@ from torch import nn
 def qp_loss(q, p, gt_q, gt_p, dim=None):
     if torch.is_tensor(q):
         def mse(pred, target):
-            return torch.mean((pred - target) ** 2, dim=dim)
+            if dim is None:
+                return torch.mean((pred - target) ** 2)
+            else:
+                return torch.mean((pred - target) ** 2, dim=dim)
 
         q_loss, p_loss = mse(q, gt_q).item(), mse(p, gt_p).item()
     else:
@@ -29,7 +32,7 @@ def print_qp_mean_loss(q, p, gt_q, gt_p, label='final loss'):
 
 
 def valid_prediction_time_mean(q, p, gt_q, gt_p, trajectory, threshold=0.1):
-    vpt = valid_prediction_time(q, p, gt_q, gt_p, trajectory, threshold=0.1)
+    vpt = valid_prediction_time(q, p, gt_q, gt_p, trajectory, threshold=threshold)
     if torch.is_tensor(q):
         return vpt.mean().item()
     else:
