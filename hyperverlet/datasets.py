@@ -100,7 +100,7 @@ class ExperimentDataset(Dataset):
 
 class PendulumDataset(ExperimentDataset):
     def __init__(self, base_solver, duration, duration_stddev, num_samples, num_configurations, coarsening_factor, cache_path, sequence_length=None,
-                 length_mean=1.0, length_std=0.5, mass_mean=0.9, mass_std=0.1, g=9.807, random_parameters=False):
+                 length_mean=1.0, length_std=0.1, mass_mean=0.9, mass_std=0.1, g=9.807, random_parameters=False):
 
         self.experiment = Pendulum()
         self.q0 = (torch.rand(num_configurations, 1) * 2 - 1) * (np.pi / 2)
