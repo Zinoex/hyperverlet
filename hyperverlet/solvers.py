@@ -497,3 +497,17 @@ class FourthOrderRuth(SymplecticSolver):
             c=[c1, c2, c3, c4],
             d=[d1, d2, d3, d4]
         )
+
+
+class HyperFourthOrderRuth(FourthOrderRuth, ResidualMixin):
+    trainable = True
+    q_order = 4
+    p_order = 4
+
+    def __init__(self, hypersolver):
+        super().__init__()
+
+        self.hypersolver = hypersolver
+
+    def forward(self, experiment: Experiment, q: torch.Tensor, p: torch.Tensor, m: torch.Tensor, t, dt, **kwargs):
+        return self.hyper_forward(experiment, q, p, m, t, dt, **kwargs)
