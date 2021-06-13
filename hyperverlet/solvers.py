@@ -501,8 +501,8 @@ class FourthOrderRuth(SymplecticSolver):
 
 class HyperFourthOrderRuth(FourthOrderRuth, ResidualMixin):
     trainable = True
-    q_order = 4
-    p_order = 4
+    q_order = 3
+    p_order = 3
 
     def __init__(self, hypersolver):
         super().__init__()

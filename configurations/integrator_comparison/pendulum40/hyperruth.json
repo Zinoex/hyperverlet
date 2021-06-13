@@ -1,7 +1,7 @@
 {
   "result_path": "results/integrator_comparison/{dataset}/{solver}_trd{train_duration}_trtl{train_trajectory_length}_trsl{train_sequence_length}_cf{coarsening_factor}_ted{test_duration}_tetl{test_trajectory_length}.pickle",
   "plot_path": "visualization/integrator_comparison/{dataset}/{solver}_trd{train_duration}_trtl{train_trajectory_length}_trsl{train_sequence_length}_cf{coarsening_factor}_ted{test_duration}_tetl{test_trajectory_length}_{datetime}.mp4",
-  "train_args_path": "configurations/integrator_comparison/pendulum80/training.json",
+  "train_args_path": "configurations/integrator_comparison/pendulum40/training.json",
   "model_args": {
     "solver": "HyperFourthOrderRuth",
     "nn_path": "configurations/integrator_comparison/pendulum40/nn.json"
