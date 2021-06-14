@@ -75,7 +75,7 @@ def valid_prediction_time(q, p, gt_q, gt_p, trajectory, threshold=0.1):
 
 
 def print_valid_prediction_time(q, p, gt_q, gt_p, trajectory, threshold=0.1, label='vpt'):
-    vpt = valid_prediction_time(q, p, gt_q, gt_p, trajectory, threshold=threshold)
+    vpt = valid_prediction_time_mean(q, p, gt_q, gt_p, trajectory, threshold=threshold)
 
     print("{:.1f}\t {}".format(vpt, label))
 

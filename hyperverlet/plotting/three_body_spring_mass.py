@@ -211,6 +211,10 @@ def tbsm_snapshot(config, cfg=0, slices=6):
     for idx, (slice, ax_tbsm) in enumerate(zip(range(slices), ax_tbsms)):
         if idx == 0:
             ax_tbsm.legend(handles=legend_elements, loc='lower left', bbox_to_anchor=(0, 0), ncol=2, fancybox=True, shadow=True, fontsize=9)
+            ax_tbsm.set_ylabel("Y")
+        else:
+            ax_tbsm.get_yaxis().set_visible(False)
+        ax_tbsm.set_xlabel("X")
         index = step_size * slice
         label = f"Time {round(trajectory[index])}"
 

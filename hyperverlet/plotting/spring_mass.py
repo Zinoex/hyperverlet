@@ -108,7 +108,7 @@ def sm_snapshot(config, cfg=0, slices=6):
         index = step_size * slice
         label = f"Time {int(trajectory[index])}"
 
-        spring_plot = init_sm(ax_sm, q, gt_q, True, title=label, set_ylabel=idx==0)
+        spring_plot = init_sm(ax_sm, q, gt_q, True, title=label, set_ylabel=False, wall_top=0.75, wall_bottom=-0.75)
         update_sm(spring_plot, q, gt_q, index, True)
 
     config_name = config["train_args_path"].split('/')[-2]

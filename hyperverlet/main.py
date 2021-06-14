@@ -108,7 +108,7 @@ def sequential(args):
     experiment_args = map(replace_system_closure, preset_config_paths[args.experiment])
 
     for experiment_arg in experiment_args:
-        print('Running: {}'.format(experiment_arg.config_path))
+        #print('Running: {}'.format(experiment_arg.config_path))
         args.sequential_func(experiment_arg)
 
 
@@ -144,8 +144,8 @@ def plot(args):
     config = load_config(config_path)
     dataset = config["dataset_args"]['dataset']
 
-    make_animation = False
-    take_snapshot = True
+    make_animation = True
+    take_snapshot = False
     gather_data = False
 
     if make_animation:
@@ -172,12 +172,10 @@ def log_data(config):
     result_path = format_path(config, config["result_path"])
     result_dict = load_pickle(result_path)
 
-    method = 'qp_loss'
+    method = 'vpt'
 
-    if method == 'qp_loss':
-        print_qp_mean_loss(result_dict["q"], result_dict["p"], result_dict["gt_q"], result_dict["gt_p"], label='')
-    elif method == 'vpt':
-        print_valid_prediction_time(result_dict["q"], result_dict["p"], result_dict["gt_q"], result_dict["gt_p"], result_dict["trajectory"], label='')
+    print_qp_mean_loss(result_dict["q"], result_dict["p"], result_dict["gt_q"], result_dict["gt_p"], label='')
+    print_valid_prediction_time(result_dict["q"], result_dict["p"], result_dict["gt_q"], result_dict["gt_p"], result_dict["trajectory"], label='')
 
 
 def snapshot(config, dataset, slices=6):
@@ -197,4 +195,3 @@ def full_run(args):
 if __name__ == '__main__':
     args = parse_arguments()
     args.func(args)
-

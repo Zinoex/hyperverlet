@@ -9,6 +9,12 @@ preset_config_paths = {
         'configurations/integrator_comparison/{system}/ruth4.json',
         'configurations/integrator_comparison/{system}/rk4.json'
     ],
+    'hyperruth': [
+        'configurations/integrator_comparison/{system}/velocityverlet.json',
+        'configurations/integrator_comparison/{system}/hyperverlet.json',
+        'configurations/integrator_comparison/{system}/ruth4.json',
+        'configurations/integrator_comparison/{system}/hyperruth.json',
+    ],
     'hypersolver_placement_both': [
         'configurations/ablation/hypersolver_placement/{system}/hyperverlet.json',
         'configurations/ablation/hypersolver_placement/{system}/alternating_hyperverlet.json',
@@ -23,9 +29,9 @@ preset_config_paths = {
         'configurations/ablation/shared_unshared/{system}/hyperverlet_unshared.json'
     ],
     'model_input': [
-        'configurations/ablation/model_input/{system}/hyperverlet_curvature.json',
-        'configurations/ablation/model_input/{system}/hyperverlet_post.json',
         'configurations/ablation/model_input/{system}/hyperverlet_prepost.json',
+        'configurations/ablation/model_input/{system}/hyperverlet_post.json',
+        'configurations/ablation/model_input/{system}/hyperverlet_curvature.json',
         'configurations/ablation/model_input/{system}/hyperverlet_statepost.json',
         'configurations/ablation/model_input/{system}/hyperverlet_timepost.json'
     ],
@@ -59,8 +65,8 @@ preset_config_paths = {
         'configurations/generalization/variable_parameters/pendulum_variable/hyperverlet.json',
     ],
     'generalization_out_of_distribution': [
-        'configurations/generalization/out_of_distribution/pendulum_length/hyperverlet.json',
         'configurations/generalization/out_of_distribution/pendulum_mass/hyperverlet.json',
+        'configurations/generalization/out_of_distribution/pendulum_length/hyperverlet.json',
     ],
     'total_energy': [
             'configurations/integrator_comparison/{system}/velocityverlet.json',

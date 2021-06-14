@@ -27,14 +27,16 @@ def pendulum_energy_plot(q, p, trajectory, m, length, g, plot_every=1):
     plot_energy(trajectory, te, ke, pe)
 
 
-def animate_pendulum(config, show_gt=False, show_plot=True, cfg=1):
+def animate_pendulum(config, show_gt=False, show_plot=False, cfg=1):
     plot_every = config["plotting"]["plot_every"]
     result_path = format_path(config, config["result_path"])
     result_dict = load_pickle(result_path)
     save_plot = config["plotting"]["save_plot"]
 
-    print_qp_mean_loss(result_dict["q"], result_dict["p"], result_dict["gt_q"], result_dict["gt_p"], label='total loss')
-    print_qp_mean_loss(result_dict["q"][:, cfg], result_dict["p"][:, cfg], result_dict["gt_q"][:, cfg], result_dict["gt_p"][:, cfg], label='cfg loss')
+    result_dict = result_dict.get("train", result_dict)
+
+    #print_qp_mean_loss(result_dict["q"], result_dict["p"], result_dict["gt_q"], result_dict["gt_p"], label='total loss')
+    #print_qp_mean_loss(result_dict["q"][:, cfg], result_dict["p"][:, cfg], result_dict["gt_q"][:, cfg], result_dict["gt_p"][:, cfg], label='cfg loss')
 
     q = result_dict["q"][::plot_every, cfg]
     p = result_dict["p"][::plot_every, cfg]
@@ -60,7 +62,7 @@ def animate_pendulum(config, show_gt=False, show_plot=True, cfg=1):
     ax_pendulum, ax_energy, ax_phase_space = gs_3_2_3(fig)
 
     # Initialize plots
-    init_pendulum_plot(ax_pendulum, x, length)
+    init_pendulum_animate(ax_pendulum, x, length)
     pe_plot, ke_plot, te_plot = init_energy_plot(ax_energy, trajectory, te, ke, pe)
     ps_plot = init_phasespace_plot(ax_phase_space, q, p)
     ax_energy.set_ylim(-0.3 * te.max(), te.max() * 1.05)

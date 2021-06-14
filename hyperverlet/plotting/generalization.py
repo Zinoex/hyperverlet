@@ -41,20 +41,20 @@ def generalization_plot(expargs, experiment):
         label = label_mapping[exp_variation]
 
         if experiment in ['generalization_variable_parameters', "generalization_out_of_distribution"]:
-            qp_loss = np.log(qp_mean(result_dict["q"], result_dict["p"], result_dict["gt_q"], result_dict["gt_p"], dim=0))
+            qp_loss = qp_mean(result_dict["q"], result_dict["p"], result_dict["gt_q"], result_dict["gt_p"], dim=0)
             vpt_loss = valid_prediction_time(result_dict["q"], result_dict["p"], result_dict["gt_q"], result_dict["gt_p"], result_dict["trajectory"])
+            print(np.mean(qp_loss))
+            print(qp_loss)
+            if experiment == "generalization_out_of_distribution":
+                qp_train_loss = np.log(qp_mean(result_dict["train"]["q"], result_dict["train"]["p"], result_dict["train"]["gt_q"], result_dict["train"]["gt_p"], dim=0))
+                vpt_train_loss = valid_prediction_time(result_dict["train"]["q"], result_dict["train"]["p"], result_dict["train"]["gt_q"], result_dict["train"]["gt_p"], result_dict["train"]["trajectory"])
+                for qp_config_loss, vpt_config_loss in zip(qp_train_loss, vpt_train_loss):
+                    data_mse.append([label, 'train', qp_config_loss[0]])
+                    data_vpt.append([label, 'train', vpt_config_loss])
 
             for qp_config_loss, vpt_config_loss in zip(qp_loss, vpt_loss):
                 data_mse.append([label, 'test', qp_config_loss[0]])
                 data_vpt.append([label, 'test', vpt_config_loss])
-
-            if experiment == "generalization_out_of_distribution":
-                qp_train_loss = np.log(qp_mean(result_dict["train"]["q"], result_dict["train"]["p"], result_dict["train"]["gt_q"], result_dict["train"]["gt_p"], dim=0))
-                vpt_train_loss = valid_prediction_time(result_dict["train"]["q"], result_dict["train"]["p"], result_dict["train"]["gt_q"], result_dict["train"]["gt_p"], result_dict["train"]["trajectory"])
-
-                for qp_config_loss, vpt_config_loss in zip(qp_train_loss, vpt_train_loss):
-                    data_mse.append([label, 'train', qp_config_loss[0]])
-                    data_vpt.append([label, 'train', vpt_config_loss])
 
         else:
             qp_loss = qp_mean(result_dict["q"], result_dict["p"], result_dict["gt_q"], result_dict["gt_p"])
@@ -88,6 +88,7 @@ def generalization_plot(expargs, experiment):
         save_figure("visualization/generalization", f"{experiment}_vpt")
     elif experiment == "generalization_out_of_distribution":
         x_label = " "
+        mse_label = "log(MSE)"
 
         df_mse = pd.DataFrame(data=data_mse, columns=[x_label, split_label, mse_label])
         sns.boxplot(x=x_label, y=mse_label, hue=split_label, data=df_mse)

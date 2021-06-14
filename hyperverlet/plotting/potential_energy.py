@@ -43,15 +43,18 @@ if __name__ == '__main__':
     axes[0].set_ylim(-0.6, 1.2)
     axes[1].set_ylim(-1, 1)
 
-    axes[0].set_title('Potential energy')
-    axes[1].set_title('Force')
-
     axes[0].legend()
     axes[1].legend()
 
     axes[0].axhline(linestyle='--', c='k')
     axes[1].axhline(linestyle='--', c='k')
 
-    plt.show()
+    axes[0].set_xlabel('Distance')
+    axes[0].set_ylabel('Energy')
+
+    axes[1].set_xlabel('Distance')
+    axes[1].set_ylabel('Force')
+
+    #plt.show()
     os.makedirs('visualization/example', exist_ok=True)
-    fig.savefig('visualization/example/potential_energy.png', bbox_inches='tight')
+    fig.savefig('visualization/example/potential_energy.pdf', bbox_inches='tight')

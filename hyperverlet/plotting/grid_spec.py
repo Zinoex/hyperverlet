@@ -65,3 +65,7 @@ def gs_6_4_2(fig):
 def gs_line(fig, ncol):
     gs = GridSpec(1, ncol)
     return [fig.add_subplot(gs[0, i]) for i in range(ncol)]
+
+def gs_square(fig, ncol):
+    gs = GridSpec(ncol, ncol)
+    return [[fig.add_subplot(gs[j, i]) for j in range(ncol)] for i in range(ncol)]

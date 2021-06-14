@@ -1,4 +1,3 @@
-# hyperverlet
 
 # Results
 

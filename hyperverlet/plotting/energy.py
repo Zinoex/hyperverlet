@@ -86,7 +86,8 @@ def total_energy_plot(expargs, experiment, cfg=0):
             num_samples = int((trajectory.shape[0] - 1) * 0.4 + 1)
 
         plt.plot(trajectory[:num_samples], te[:num_samples], label=label, linewidth=linewidth, color=cm[idx], alpha=alpha, linestyle=linestyle)
-
+    plt.xlabel('Time')
+    plt.ylabel('Energy')
     plt.legend(loc=loc)
 
     plot_path = f"visualization/{experiment}"
