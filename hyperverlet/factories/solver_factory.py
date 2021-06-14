@@ -23,6 +23,7 @@ def construct_solver(solver_name, nn_args=None):
         "POnlyHyperVelocityVerlet": POnlyHyperVelocityVerlet,
         "FullHyperVelocityVerlet": FullHyperVelocityVerlet,
         "HyperFourthOrderRuth": HyperFourthOrderRuth,
+        "SymplecticHyperVelocityVerlet": SymplecticHyperVelocityVerlet,
     }
 
     solver = solvers[solver_name]

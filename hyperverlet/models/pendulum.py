@@ -2,6 +2,7 @@ import torch
 from torch import nn
 
 from hyperverlet.models.misc import NDenseBlock
+from hyperverlet.models.symplectic import SymplecticLinear, SymplecticActivation, SymplecticGradient
 
 
 class PendulumModel(nn.Module):
@@ -163,3 +164,36 @@ class TimePostPendulumModel(nn.Module):
     def hq(self, dq2, dp2, m, t, dt, length, **kwargs):
         hq = torch.cat([t, dt, dq2, dp2, m, length], dim=-1)
         return self.model_q(hq)
+
+
+class SymplecticPendulumModel(nn.Module):
+    def __init__(self, model_args):
+        super().__init__()
+
+        self.model = nn.ModuleList([
+            SymplecticLinear(model_args),
+            SymplecticActivation(model_args, 'sigmoid', 'up'),
+            SymplecticLinear(model_args),
+            SymplecticActivation(model_args, 'sigmoid', 'low'),
+            SymplecticLinear(model_args),
+            SymplecticActivation(model_args, 'sigmoid', 'up'),
+            SymplecticLinear(model_args),
+            SymplecticActivation(model_args, 'sigmoid', 'low'),
+        ])
+
+        # self.model = nn.ModuleList([
+        #     SymplecticGradient(model_args, 'sigmoid', 'up'),
+        #     SymplecticGradient(model_args, 'sigmoid', 'low'),
+        #     SymplecticGradient(model_args, 'sigmoid', 'up'),
+        #     SymplecticGradient(model_args, 'sigmoid', 'low'),
+        #     SymplecticGradient(model_args, 'sigmoid', 'up'),
+        #     SymplecticGradient(model_args, 'sigmoid', 'low'),
+        # ])
+
+    def forward(self, q, p, dq1, dp1, dq2, dp2, m, t, dt, length, **kwargs):
+        cat = torch.cat([dq1, dp1, dq2, dp2, m, length], dim=-1)
+
+        for module in self.model:
+            q, p = module(q, p, cat, dt)
+
+        return q, p
