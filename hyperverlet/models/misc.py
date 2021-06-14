@@ -5,7 +5,7 @@ import torch
 from torch import nn
 
 
-_act = {
+ACT = {
     'silu': nn.SiLU,
     'relu': nn.ReLU,
     'prelu': nn.PReLU,
@@ -19,7 +19,7 @@ class DenseBlock(nn.Sequential):
     def __init__(self, input_dim, output_dim, activation='tanh'):
         super().__init__(
             nn.Linear(input_dim, output_dim, bias=True),
-            _act[activation]()
+            ACT[activation]()
         )
 
         self.reset_parameters()
@@ -65,7 +65,7 @@ class MergeNDenseBlock(nn.Module):
         self.first_layer = nn.ModuleList([nn.Linear(input_dim, h_dim, bias=False) for input_dim in input_dims])
         self.bias = nn.Parameter(torch.Tensor(h_dim))
         nn.init.zeros_(self.bias)
-        self.activation = _act[activation]()
+        self.activation = ACT[activation]()
 
         self.other_layers = NDenseBlock(h_dim, h_dim, output_dim, n_dense - 1, activate_last=activate_last, activation=activation)
 
