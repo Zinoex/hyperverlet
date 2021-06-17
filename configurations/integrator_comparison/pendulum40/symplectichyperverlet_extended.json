@@ -2,7 +2,7 @@
   "result_path": "results/integrator_comparison/{dataset}/{solver}_extended_trd{train_duration}_trtl{train_trajectory_length}_trsl{train_sequence_length}_cf{coarsening_factor}_ted{test_duration}_tetl{test_trajectory_length}.pickle",
   "plot_path": "visualization/integrator_comparison/{dataset}/{solver}_extended_trd{train_duration}_trtl{train_trajectory_length}_trsl{train_sequence_length}_cf{coarsening_factor}_ted{test_duration}_tetl{test_trajectory_length}_{datetime}.mp4",
   "train_args": {
-    "epoch": 100,
+    "epoch": 20,
     "batch_size": 1000,
     "num_workers": 8,
     "loss": "phase_space",
