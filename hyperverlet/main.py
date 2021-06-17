@@ -108,7 +108,7 @@ def sequential(args):
     experiment_args = map(replace_system_closure, preset_config_paths[args.experiment])
 
     for experiment_arg in experiment_args:
-        #print('Running: {}'.format(experiment_arg.config_path))
+        print('Running: {}'.format(experiment_arg.config_path))
         args.sequential_func(experiment_arg)
 
 

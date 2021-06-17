@@ -9,6 +9,10 @@ preset_config_paths = {
         'configurations/integrator_comparison/{system}/ruth4.json',
         'configurations/integrator_comparison/{system}/rk4.json'
     ],
+    'symplectic_integrator_comparison': [
+        'configurations/integrator_comparison/{system}/symplectichyperverlet.json',
+        'configurations/integrator_comparison/{system}/symplectichyperverlet_extended.json',
+    ],
     'hyperruth': [
         'configurations/integrator_comparison/{system}/velocityverlet.json',
         'configurations/integrator_comparison/{system}/hyperverlet.json',
