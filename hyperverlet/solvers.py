@@ -440,12 +440,8 @@ class SymplecticHyperVelocityVerlet(BaseSolver, ResidualMixin):
         self.hypersolver = hypersolver
 
     def forward(self, experiment: Experiment, q: torch.Tensor, p: torch.Tensor, m: torch.Tensor, t, dt, **kwargs):
-        dq1, dp1 = experiment(q, p, m, t, **kwargs)
-
         q, p = self.base(experiment, q, p, m, t, dt, **kwargs)
-
-        dq2, dp2 = experiment(q, p, m, t, **kwargs)
-        q, p = self.hypersolver(q, p, dq1, dp1, dq2, dp2, m, t, dt, **kwargs)
+        q, p = self.hypersolver(q, p, m, t, dt, **kwargs)
 
         return q, p
 
@@ -475,12 +471,8 @@ class SymplecticHyperVelocityVerlet(BaseSolver, ResidualMixin):
         for i, (t, dt) in enumerate(zip(tqdm(trajectory[:-1], disable=disable_print), dtrajectory)):
             q, p = gt_q[i], gt_p[i]
 
-            dq1, dp1 = experiment(q, p, m, t, **kwargs)
-
             q_base, p_base = self.base(experiment, q, p, m, t, dt, **kwargs)
-
-            dq2, dp2 = experiment(q_base, p_base, m, t, **kwargs)
-            q, p = self.hypersolver(q_base, p_base, dq1, dp1, dq2, dp2, m, t, dt, **kwargs)
+            q, p = self.hypersolver(q_base, p_base, m, t, dt, **kwargs)
 
             q_traj[i], p_traj[i] = q - q_base, p - p_base
 

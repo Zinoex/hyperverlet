@@ -4,7 +4,7 @@
    "gt_solver": "FourthOrderRuth",
    "train_duration": 600,
    "train_trajectory_length": 600001,
-   "train_sequence_length": 10,
+   "train_sequence_length": 50,
    "train_num_configurations": 100,
    "test_duration": 600,
    "test_trajectory_length": 600001,

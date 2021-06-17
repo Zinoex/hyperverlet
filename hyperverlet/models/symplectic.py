@@ -16,7 +16,7 @@ class SymplecticLinear(nn.Module):
         self.extended = model_args['extended']
 
         if self.extended:
-            kwargs = dict(n_dense=2, activate_last=True, activation='sigmoid')
+            kwargs = dict(n_dense=2, activate_last=True, activation='tanh')
             cat_dim = model_args['cat_dim']
             h_dim = model_args['h_dim']
 
@@ -40,9 +40,9 @@ class SymplecticLinear(nn.Module):
             S = S + S.transpose(-2, -1)
 
             if i % 2 == 0:
-                p = p + torch.matmul(S, q.unsqueeze(-1))[..., 0] * dt
+                p = p + torch.matmul(S, q.unsqueeze(-1))[..., 0] * dt ** 3
             else:
-                q = q + torch.matmul(S, p.unsqueeze(-1))[..., 0] * dt
+                q = q + torch.matmul(S, p.unsqueeze(-1))[..., 0] * dt ** 3
 
         if self.extended:
             bq = self.bq(cat)
@@ -51,7 +51,7 @@ class SymplecticLinear(nn.Module):
             bq = self.bq
             bp = self.bp
 
-        return q + bq * dt, p + bp * dt
+        return q + bq * dt ** 3, p + bp * dt ** 3
 
 
 class SymplecticActivation(nn.Module):
@@ -68,7 +68,7 @@ class SymplecticActivation(nn.Module):
         self.extended = model_args['extended']
 
         if self.extended:
-            kwargs = dict(n_dense=2, activate_last=True, activation='sigmoid')
+            kwargs = dict(n_dense=2, activate_last=True, activation='tanh')
             cat_dim = model_args['cat_dim']
             h_dim = model_args['h_dim']
 
@@ -83,9 +83,9 @@ class SymplecticActivation(nn.Module):
             a = self.a
 
         if self.mode == 'up':
-            return q, p + self.act(q) * a * dt
+            return q, p + self.act(q) * a * dt ** 3
         elif self.mode == 'low':
-            return q + self.act(p) * a * dt, p
+            return q + self.act(p) * a * dt ** 3, p
 
 
 class SymplecticGradient(nn.Module):
@@ -122,13 +122,13 @@ class SymplecticGradient(nn.Module):
             a = self.a(cat)
             b = self.b(cat)
         else:
-            K = self.K.unsqueeze(-1)
+            K = self.K.unsqueeze(0)
             a = self.a
             b = self.b
 
         if self.mode == 'up':
-            gradH = torch.matmul(K.transpose(-2, -1), (self.act(torch.matmul(K, q.unsqueeze(-1))[..., 0] + b) * a).unsqueeze(-1), )[..., 0]
-            return q, p + gradH * dt
+            gradH = torch.matmul(K.transpose(-2, -1), (self.act(torch.matmul(K, q.unsqueeze(-1))[..., 0] + b) * a).unsqueeze(-1))[..., 0]
+            return q, p + gradH * dt ** 3
         elif self.mode == 'low':
-            gradH = torch.matmul(K.transpose(-2, -1), (self.act(torch.matmul(p.unsqueeze(1), K)[:, 0] + b) * a).unsqueeze(-1))[..., 0]
-            return q + gradH * dt, p
+            gradH = torch.matmul(K.transpose(-2, -1), (self.act(torch.matmul(K, p.unsqueeze(-1))[..., 0] + b) * a).unsqueeze(-1))[..., 0]
+            return q + gradH * dt ** 3, p

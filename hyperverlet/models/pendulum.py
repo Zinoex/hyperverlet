@@ -172,26 +172,26 @@ class SymplecticPendulumModel(nn.Module):
 
         self.model = nn.ModuleList([
             SymplecticLinear(model_args),
-            SymplecticActivation(model_args, 'sigmoid', 'up'),
-            SymplecticLinear(model_args),
             SymplecticActivation(model_args, 'sigmoid', 'low'),
             SymplecticLinear(model_args),
             SymplecticActivation(model_args, 'sigmoid', 'up'),
             SymplecticLinear(model_args),
             SymplecticActivation(model_args, 'sigmoid', 'low'),
+            SymplecticLinear(model_args),
+            SymplecticActivation(model_args, 'sigmoid', 'up'),
         ])
 
         # self.model = nn.ModuleList([
-        #     SymplecticGradient(model_args, 'sigmoid', 'up'),
         #     SymplecticGradient(model_args, 'sigmoid', 'low'),
         #     SymplecticGradient(model_args, 'sigmoid', 'up'),
         #     SymplecticGradient(model_args, 'sigmoid', 'low'),
         #     SymplecticGradient(model_args, 'sigmoid', 'up'),
         #     SymplecticGradient(model_args, 'sigmoid', 'low'),
+        #     SymplecticGradient(model_args, 'sigmoid', 'up'),
         # ])
 
-    def forward(self, q, p, dq1, dp1, dq2, dp2, m, t, dt, length, **kwargs):
-        cat = torch.cat([dq1, dp1, dq2, dp2, m, length], dim=-1)
+    def forward(self, q, p, m, t, dt, length, **kwargs):
+        cat = torch.cat([m, length], dim=-1)
 
         for module in self.model:
             q, p = module(q, p, cat, dt)

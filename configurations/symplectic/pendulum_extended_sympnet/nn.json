@@ -3,7 +3,7 @@
   "extended": true,
   "h_dim": 32,
   "width": 32,
-  "cat_dim": 6,
+  "cat_dim": 2,
   "input_dim": 2,
   "layers": 4
 }
