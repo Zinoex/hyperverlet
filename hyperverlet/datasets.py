@@ -9,7 +9,7 @@ from torch.utils.data import Dataset
 import numpy as np
 
 from hyperverlet.distributions import sample_parameterized_truncated_normal
-from hyperverlet.experiments import Pendulum, SpringMass, ThreeBodySpringMass, LennardJones
+from hyperverlet.experiments import Pendulum, SpringMass, ThreeBodySpringMass, LennardJones, ThreeBodyGravity
 from hyperverlet.timer import timer
 from hyperverlet.transforms import Coarsening
 from hyperverlet.utils.misc import load_pickle, save_pickle
@@ -209,6 +209,45 @@ class ThreeBodySpringMassDataset(ExperimentDataset):
         second_index = [j for i in range(0, num_particles) for j in range(i + 1, num_particles)]
 
         matrix = torch.zeros((num_configurations, num_particles, num_particles))
+        matrix[:, first_index, second_index] = lower_triangle
+        matrix = matrix + matrix.transpose(1, 2)
+
+        return matrix
+
+
+class ThreeBodyGravityDataset(ExperimentDataset):
+    def __init__(self, base_solver, duration, duration_stddev, num_samples, num_configurations, coarsening_factor, cache_path, sequence_length=None, mass_mean=0.9, mass_std=0.1, random_parameters=False):
+
+        num_planets = 3
+        num_euclid = 2
+
+        self.experiment = ThreeBodyGravity()
+
+        if random_parameters and mass_std != 0:
+            self.mass = sample_parameterized_truncated_normal((num_configurations, num_planets, 1), mass_mean, mass_std, 0.01, mass_mean + 5 * mass_std)
+        else:
+            self.mass = torch.full((num_configurations, num_planets, 1), mass_mean)
+
+        self.extra_args = {
+            'G': 1
+        }
+
+        q0 = torch.randn(num_configurations, num_planets, num_euclid)
+        self.q0 = q0 - (q0 * self.mass).sum(dim=1, keepdim=True) / self.mass.sum(dim=1, keepdim=True)
+
+        p0 = torch.randn(num_configurations, num_planets, num_euclid) * 0.1
+        self.p0 = p0 - torch.mean(p0, dim=1, keepdim=True)
+
+        assert torch.all(self.mass > 0).item()
+
+        super().__init__(base_solver, duration, duration_stddev, num_samples, num_configurations, coarsening_factor, cache_path, sequence_length)
+
+    def fill_particle_matrix(self, num_configurations, num_planets, lower_triangle):
+        # Don't judge, just accept
+        first_index = [i for i in range(0, num_planets) for j in range(i + 1, num_planets)]
+        second_index = [j for i in range(0, num_planets) for j in range(i + 1, num_planets)]
+
+        matrix = torch.zeros((num_configurations, num_planets, num_planets))
         matrix[:, first_index, second_index] = lower_triangle
         matrix = matrix + matrix.transpose(1, 2)
 

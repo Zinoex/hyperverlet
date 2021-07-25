@@ -48,7 +48,7 @@ class BasePairPotential(Experiment):
         disp = self.displacement(q, **kwargs)
         r = self.distance(disp, **kwargs)
 
-        return self.force(r, disp, **kwargs).sum(axis=-2)
+        return self.force(r, disp, m, **kwargs).sum(axis=-2)
 
     def displacement(self, q, **kwargs):
         a = torch.unsqueeze(q, -2)
@@ -63,7 +63,7 @@ class BasePairPotential(Experiment):
 class ThreeBodySpringMass(BasePairPotential):
     energy = ThreeBodySpringMassEnergy()
 
-    def force(self, r, disp, k, length, **kwargs):
+    def force(self, r, disp, m, k, length, **kwargs):
         num_particles = k.size(1)
         r_prime = (r + torch.eye(num_particles, num_particles, device=r.device)).unsqueeze(-1)
         direction = disp / r_prime
@@ -73,8 +73,24 @@ class ThreeBodySpringMass(BasePairPotential):
         return -(k * offset).unsqueeze(-1) * direction
 
 
+class ThreeBodyGravity(BasePairPotential):
+    energy = ThreeBodySpringMassEnergy()
+
+    def force(self, r, disp, m, G, **kwargs):
+        num_planets = m.size(1)
+        r_prime = (r ** 2 + torch.eye(num_planets, num_planets, device=r.device)).unsqueeze(-1)
+        direction = disp / r_prime
+
+        m1 = torch.unsqueeze(m, -2)
+        m2 = torch.unsqueeze(m, -3)
+
+        m = m1 * m2
+
+        return G * (m / r_prime) * direction
+
+
 class LennardJones(BasePairPotential):
-    def force(self, r, disp, eps, sigma, **kwargs):
+    def force(self, r, disp, m, eps, sigma, **kwargs):
         prefix = 24 * eps
         sigma12 = sigma ** 12
         sigma6 = sigma ** 6
