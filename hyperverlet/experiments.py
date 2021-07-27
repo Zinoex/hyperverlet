@@ -11,11 +11,11 @@ class Experiment(nn.Module, abc.ABC):
     def forward(self, q, p, m, t, **kwargs):
         return self.dq(p, m, t, **kwargs), self.dp(q, m, t, **kwargs)
 
-    def dq(self, p, m, t, length, **kwargs):
+    def dq(self, p, m, t, **kwargs):
         return p / m
 
     @abc.abstractmethod
-    def dp(self, q, m, t, length, g, **kwargs):
+    def dp(self, q, m, t, **kwargs):
         raise NotImplementedError()
 
     def shift(self, q, **kwargs):
@@ -74,7 +74,6 @@ class ThreeBodySpringMass(BasePairPotential):
 
 
 class ThreeBodyGravity(BasePairPotential):
-    energy = ThreeBodySpringMassEnergy()
 
     def force(self, r, disp, m, G, **kwargs):
         num_planets = m.size(1)
@@ -86,7 +85,10 @@ class ThreeBodyGravity(BasePairPotential):
 
         m = m1 * m2
 
-        return G * (m / r_prime) * direction
+        sizes = [1 for _ in range(m.dim())]
+        sizes[0] = -1
+
+        return G.view(*sizes) * (m / r_prime) * direction
 
 
 class LennardJones(BasePairPotential):

@@ -15,24 +15,26 @@ class BaseSolver(nn.Module):
         raise NotImplemented()
 
     def trajectory(self, experiment: Experiment, q0: torch.Tensor, p0: torch.Tensor, m: torch.Tensor, trajectory: torch.Tensor, disable_print=False, **kwargs):
-        q_traj = torch.zeros((trajectory.size(0), *q0.size()), dtype=q0.dtype, device=q0.device)
-        p_traj = torch.zeros((trajectory.size(0), *p0.size()), dtype=p0.dtype, device=p0.device)
+        q_traj = [q0]#torch.zeros((trajectory.size(0), *q0.size()), dtype=q0.dtype, device=q0.device)
+        p_traj = [p0]#torch.zeros((trajectory.size(0), *p0.size()), dtype=p0.dtype, device=p0.device)
 
-        q_traj[0], p_traj[0] = q0, p0
+        # q_traj[0], p_traj[0] = q0, p0
         q, p = experiment.shift(q0, **kwargs), p0
 
-        trajectory = self.view_like_q(trajectory, q_traj)
+        trajectory = self.view_like_q(trajectory, q0.dim() + 1)
         dtrajectory = trajectory[1:] - trajectory[:-1]
 
         for i, (t, dt) in enumerate(zip(tqdm(trajectory[:-1], disable=disable_print), dtrajectory)):
             q, p = self(experiment, q, p, m, t, dt, **kwargs)
-            q_traj[i + 1], p_traj[i + 1] = q, p
+            q_traj.append(q)
+            p_traj.append(p)
 
-        return q_traj, p_traj
+        return torch.stack(q_traj, 0), torch.stack(p_traj, 0)
 
     def view_like_q(self, trajectory, q):
         traj_size = list(trajectory.size())
-        remaining_size = [1] * (len(q.size()) - len(traj_size))
+        q_size = q.dim() if torch.is_tensor(q) else q
+        remaining_size = [1] * (q_size - len(traj_size))
 
         return trajectory.view(*traj_size, *remaining_size)
 
@@ -57,20 +59,21 @@ class ResidualMixin:
         return q, p
 
     def base_trajectory(self, experiment: Experiment, gt_q: torch.Tensor, gt_p: torch.Tensor, m: torch.Tensor, trajectory: torch.Tensor, dtrajectory: torch.Tensor, disable_print=False, **kwargs):
-        q_traj = torch.zeros_like(gt_q)
-        p_traj = torch.zeros_like(gt_p)
+        q_traj = [gt_q[0]]#torch.zeros_like(gt_q)
+        p_traj = [gt_p[0]]#torch.zeros_like(gt_p)
 
-        q_traj[0], p_traj[0] = gt_q[0], gt_p[0]
+        #q_traj[0], p_traj[0] = gt_q[0], gt_p[0]
 
         for i, (t, dt) in enumerate(zip(tqdm(trajectory[:-1], disable=disable_print), dtrajectory)):
             q, p = self.base(experiment, gt_q[i], gt_p[i], m, t, dt, **kwargs)
-            q_traj[i + 1], p_traj[i + 1] = q, p
+            q_traj.append(q)
+            p_traj.append(p)
 
-        return q_traj, p_traj
+        return torch.stack(q_traj, 0), torch.stack(p_traj, 0)
 
     def hyper_trajectory(self, experiment: Experiment, gt_q: torch.Tensor, gt_p: torch.Tensor, m: torch.Tensor, trajectory: torch.Tensor, disable_print=False, **kwargs):
-        q_traj = torch.zeros_like(gt_q)
-        p_traj = torch.zeros_like(gt_p)
+        q_traj = [] #torch.zeros_like(gt_q)
+        p_traj = [] #torch.zeros_like(gt_p)
 
         gt_q = experiment.shift(gt_q, **kwargs)
 
@@ -86,9 +89,10 @@ class ResidualMixin:
             dq2, dp2 = experiment(q, p, m, t, **kwargs)
             hq, hp = self.hypersolver(dq1, dq2, dp1, dp2, m, t, dt, **kwargs)
 
-            q_traj[i], p_traj[i] = hq, hp
+            q_traj.append(hq)
+            p_traj.append(hp)
 
-        return q_traj[:-1], p_traj[:-1]
+        return torch.stack(q_traj, 0), torch.stack(p_traj, 0)
 
     def get_residuals(self, experiment, gt_q, gt_p, m, trajectory, **kwargs):
         trajectory = self.view_like_q(trajectory, gt_q)
@@ -460,8 +464,8 @@ class SymplecticHyperVelocityVerlet(BaseSolver, ResidualMixin):
         return q, p
 
     def hyper_trajectory(self, experiment: Experiment, gt_q: torch.Tensor, gt_p: torch.Tensor, m: torch.Tensor, trajectory: torch.Tensor, disable_print=False, **kwargs):
-        q_traj = torch.zeros_like(gt_q)
-        p_traj = torch.zeros_like(gt_p)
+        q_traj = [] #torch.zeros_like(gt_q)
+        p_traj = [] # torch.zeros_like(gt_p)
 
         gt_q = experiment.shift(gt_q, **kwargs)
 
@@ -474,9 +478,10 @@ class SymplecticHyperVelocityVerlet(BaseSolver, ResidualMixin):
             q_base, p_base = self.base(experiment, q, p, m, t, dt, **kwargs)
             q, p = self.hypersolver(q_base, p_base, m, t, dt, **kwargs)
 
-            q_traj[i], p_traj[i] = q - q_base, p - p_base
+            q_traj.append(q - q_base)
+            p_traj.append(p - p_base)
 
-        return q_traj[:-1], p_traj[:-1]
+        return torch.stack(q_traj, 0), torch.stack(p_traj, 0)
 
     def get_residuals(self, experiment, gt_q, gt_p, m, trajectory, **kwargs):
         trajectory = self.view_like_q(trajectory, gt_q)

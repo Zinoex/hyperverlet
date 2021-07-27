@@ -1,0 +1,9 @@
+{
+    "epoch": 100,
+    "batch_size": 1000,
+    "num_workers": 0,
+    "loss": "residual",
+    "time_decay": 1,
+    "regularization": ["center_mass", "total_momentum"],
+    "criterion": "L1Loss"
+}

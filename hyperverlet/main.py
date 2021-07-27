@@ -144,9 +144,9 @@ def plot(args):
     config = load_config(config_path)
     dataset = config["dataset_args"]['dataset']
 
-    make_animation = True
+    make_animation = False
     take_snapshot = False
-    gather_data = False
+    gather_data = True
 
     if make_animation:
         animate(config, dataset)

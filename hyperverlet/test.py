@@ -34,17 +34,16 @@ def inference(solver: nn.Module, dataset, device, train_args, label):
     def run():
         return solver.trajectory(dataset.experiment, q_base[0], p_base[0], mass, trajectory, **extra_args)
 
-    with torch.no_grad():
-        batch = next(iter(loader))
+    batch = next(iter(loader))
 
-        q_base = batch['q'].transpose(0, 1).contiguous().to(device, non_blocking=True)
-        p_base = batch['p'].transpose(0, 1).contiguous().to(device, non_blocking=True)
-        mass = batch['mass'].to(device, non_blocking=True)
-        trajectory = batch['trajectory'].transpose(0, 1).contiguous().to(device, non_blocking=True)
-        extra_args = send_to_device(batch['extra_args'], device, non_blocking=True)
+    q_base = batch['q'].transpose(0, 1).contiguous().to(device, non_blocking=True)
+    p_base = batch['p'].transpose(0, 1).contiguous().to(device, non_blocking=True)
+    mass = batch['mass'].to(device, non_blocking=True)
+    trajectory = batch['trajectory'].transpose(0, 1).contiguous().to(device, non_blocking=True)
+    extra_args = send_to_device(batch['extra_args'], device, non_blocking=True)
 
-        (q, p), inference_time = timer(run, f'solving {label}', return_time=True)
-        print_qp_mean_loss(q, p, q_base, p_base, label=f'final loss {label}')
+    (q, p), inference_time = timer(run, f'solving {label}', return_time=True)
+    print_qp_mean_loss(q, p, q_base, p_base, label=f'final loss {label}')
 
     return {
         "inference_time": inference_time,

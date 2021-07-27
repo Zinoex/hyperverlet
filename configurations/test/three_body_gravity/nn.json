@@ -1,0 +1,8 @@
+{
+  "module": "ThreeBodyGravityModel",
+  "extended": true,
+  "layers": 4,
+  "cat_dim": 1,
+  "h_dim": 32,
+  "input_dim": 2
+}

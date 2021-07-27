@@ -229,7 +229,7 @@ class ThreeBodyGravityDataset(ExperimentDataset):
             self.mass = torch.full((num_configurations, num_planets, 1), mass_mean)
 
         self.extra_args = {
-            'G': 1
+            'G': torch.full((num_configurations, 1), 1, dtype=torch.float32)
         }
 
         q0 = torch.randn(num_configurations, num_planets, num_euclid)

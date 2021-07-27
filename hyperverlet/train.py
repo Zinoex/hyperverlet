@@ -6,6 +6,7 @@ from tqdm import trange, tqdm
 
 from hyperverlet.factories.loss_factory import construct_loss
 from hyperverlet.utils.misc import send_to_device
+from torch.profiler import profile, record_function, ProfilerActivity
 
 
 def train(solver: nn.Module, dataset, device, config):
