@@ -188,13 +188,13 @@ class HyperVelocityVerlet(BaseSolver, ResidualMixin):
     def base(self, experiment: Experiment, q: torch.Tensor, p: torch.Tensor, m: torch.Tensor, t, dt, **kwargs):
         one_half = 1 / 2
 
-        dp = experiment.dp(q, m, t, **kwargs)
+        dp = experiment.dp(q, p, m, t, **kwargs)
         p = p + one_half * dp * dt
 
-        dq = experiment.dq(p, m, t, **kwargs)
+        dq = experiment.dq(q, p, m, t, **kwargs)
         q = experiment.shift(q + dq * dt, **kwargs)
 
-        dp = experiment.dp(q, m, t, **kwargs)
+        dp = experiment.dp(q, p, m, t, **kwargs)
         p = p + one_half * dp * dt
 
         return q, p
@@ -214,15 +214,15 @@ class FullHyperVelocityVerlet(BaseSolver, ResidualMixin):
         one_half = 1 / 2
         dq1, dp1 = experiment(q, p, m, t, **kwargs)
 
-        dp = experiment.dp(q, m, t, **kwargs)
+        dp = experiment.dp(q, p, m, t, **kwargs)
         p = p + one_half * dp * dt
         dq2, dp2 = experiment(q, p, m, t, **kwargs)
 
-        dq = experiment.dq(p, m, t, **kwargs)
+        dq = experiment.dq(q, p, m, t, **kwargs)
         q = experiment.shift(q + dq * dt, **kwargs)
         dq3, dp3 = experiment(q, p, m, t, **kwargs)
 
-        dp = experiment.dp(q, m, t, **kwargs)
+        dp = experiment.dp(q, p, m, t, **kwargs)
         p = p + one_half * dp * dt
         dq4, dp4 = experiment(q, p, m, t, **kwargs)
 
@@ -234,13 +234,13 @@ class FullHyperVelocityVerlet(BaseSolver, ResidualMixin):
     def base(self, experiment: Experiment, q: torch.Tensor, p: torch.Tensor, m: torch.Tensor, t, dt, **kwargs):
         one_half = 1 / 2
 
-        dp = experiment.dp(q, m, t, **kwargs)
+        dp = experiment.dp(q, p, m, t, **kwargs)
         p = p + one_half * dp * dt
 
-        dq = experiment.dq(p, m, t, **kwargs)
+        dq = experiment.dq(q, p, m, t, **kwargs)
         q = experiment.shift(q + dq * dt, **kwargs)
 
-        dp = experiment.dp(q, m, t, **kwargs)
+        dp = experiment.dp(q, p, m, t, **kwargs)
         p = p + one_half * dp * dt
 
         return q, p
@@ -259,15 +259,15 @@ class FullHyperVelocityVerlet(BaseSolver, ResidualMixin):
             q, p = gt_q[i], gt_p[i]
             dq1, dp1 = experiment(q, p, m, t, **kwargs)
 
-            dp = experiment.dp(q, m, t, **kwargs)
+            dp = experiment.dp(q, p, m, t, **kwargs)
             p = p + one_half * dp * dt
             dq2, dp2 = experiment(q, p, m, t, **kwargs)
 
-            dq = experiment.dq(p, m, t, **kwargs)
+            dq = experiment.dq(q, p, m, t, **kwargs)
             q = experiment.shift(q + dq * dt, **kwargs)
             dq3, dp3 = experiment(q, p, m, t, **kwargs)
 
-            dp = experiment.dp(q, m, t, **kwargs)
+            dp = experiment.dp(q, p, m, t, **kwargs)
             p = p + one_half * dp * dt
             dq4, dp4 = experiment(q, p, m, t, **kwargs)
 
@@ -302,13 +302,13 @@ class QOnlyHyperVelocityVerlet(BaseSolver):
     def base(self, experiment: Experiment, q: torch.Tensor, p: torch.Tensor, m: torch.Tensor, t, dt, **kwargs):
         one_half = 1 / 2
 
-        dp = experiment.dp(q, m, t, **kwargs)
+        dp = experiment.dp(q, p, m, t, **kwargs)
         p = p + one_half * dp * dt
 
-        dq = experiment.dq(p, m, t, **kwargs)
+        dq = experiment.dq(q, p, m, t, **kwargs)
         q = experiment.shift(q + dq * dt, **kwargs)
 
-        dp = experiment.dp(q, m, t, **kwargs)
+        dp = experiment.dp(q, p, m, t, **kwargs)
         p = p + one_half * dp * dt
 
         return q, p
@@ -338,13 +338,13 @@ class POnlyHyperVelocityVerlet(BaseSolver):
     def base(self, experiment: Experiment, q: torch.Tensor, p: torch.Tensor, m: torch.Tensor, t, dt, **kwargs):
         one_half = 1 / 2
 
-        dp = experiment.dp(q, m, t, **kwargs)
+        dp = experiment.dp(q, p, m, t, **kwargs)
         p = p + one_half * dp * dt
 
-        dq = experiment.dq(p, m, t, **kwargs)
+        dq = experiment.dq(q, p, m, t, **kwargs)
         q = experiment.shift(q + dq * dt, **kwargs)
 
-        dp = experiment.dp(q, m, t, **kwargs)
+        dp = experiment.dp(q, p, m, t, **kwargs)
         p = p + one_half * dp * dt
 
         return q, p
@@ -383,13 +383,13 @@ class SequentialPostHyperVelocityVerlet(BaseSolver):
     def base(self, experiment: Experiment, q: torch.Tensor, p: torch.Tensor, m: torch.Tensor, t, dt, **kwargs):
         one_half = 1 / 2
 
-        dp = experiment.dp(q, m, t, **kwargs)
+        dp = experiment.dp(q, p, m, t, **kwargs)
         p = p + one_half * dp * dt
 
-        dq = experiment.dq(p, m, t, **kwargs)
+        dq = experiment.dq(q, p, m, t, **kwargs)
         q = experiment.shift(q + dq * dt, **kwargs)
 
-        dp = experiment.dp(q, m, t, **kwargs)
+        dp = experiment.dp(q, p, m, t, **kwargs)
         p = p + one_half * dp * dt
 
         return q, p
@@ -409,21 +409,21 @@ class AlternatingHyperVelocityVerlet(BaseSolver):
         one_half = 1 / 2
         dq1, dp1 = experiment(q, p, m, t, **kwargs)
 
-        dp = experiment.dp(q, m, t, **kwargs)
+        dp = experiment.dp(q, p, m, t, **kwargs)
         p = p + dp * dt
 
         dq2, dp2 = experiment(q, p, m, t, **kwargs)
         hp = self.hypersolver.hp(dq1, dq2, dp1, dp2, m, t, dt, **kwargs)
         p = p + one_half * hp * dt ** 2
 
-        dq = experiment.dq(p, m, t, **kwargs)
+        dq = experiment.dq(q, p, m, t, **kwargs)
         q = experiment.shift(q + dq * dt, **kwargs)
 
         dq2, dp2 = experiment(q, p, m, t, **kwargs)
         hq = self.hypersolver.hq(dq1, dq2, dp1, dp2, m, t, dt, **kwargs)
         q = experiment.shift(q + hq * dt ** 2, **kwargs)
 
-        dp = experiment.dp(q, m, t, **kwargs)
+        dp = experiment.dp(q, p, m, t, **kwargs)
         p = p + one_half * dp * dt
 
         dq2, dp2 = experiment(q, p, m, t, **kwargs)
@@ -452,13 +452,13 @@ class SymplecticHyperVelocityVerlet(BaseSolver, ResidualMixin):
     def base(self, experiment: Experiment, q: torch.Tensor, p: torch.Tensor, m: torch.Tensor, t, dt, **kwargs):
         one_half = 1 / 2
 
-        dp = experiment.dp(q, m, t, **kwargs)
+        dp = experiment.dp(q, p, m, t, **kwargs)
         p = p + one_half * dp * dt
 
-        dq = experiment.dq(p, m, t, **kwargs)
+        dq = experiment.dq(q, p, m, t, **kwargs)
         q = experiment.shift(q + dq * dt, **kwargs)
 
-        dp = experiment.dp(q, m, t, **kwargs)
+        dp = experiment.dp(q, p, m, t, **kwargs)
         p = p + one_half * dp * dt
 
         return q, p
@@ -510,11 +510,11 @@ class SymplecticSolver(BaseSolver):
     def base(self, experiment: Experiment, q: torch.Tensor, p: torch.Tensor, m: torch.Tensor, t, dt, **kwargs):
         for c, d in zip(self.c, self.d):
             if c != 0:
-                dq = experiment.dq(p, m, t, **kwargs)
+                dq = experiment.dq(q, p, m, t, **kwargs)
                 q = experiment.shift(q + c * dq * dt, **kwargs)
 
             if d != 0:
-                dp = experiment.dp(q, m, t, **kwargs)
+                dp = experiment.dp(q, p, m, t, **kwargs)
                 p = p + d * dp * dt
 
         return q, p
