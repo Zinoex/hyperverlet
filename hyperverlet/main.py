@@ -20,7 +20,7 @@ from hyperverlet.utils.measures import print_valid_prediction_time, print_qp_mea
 from hyperverlet.utils.misc import seed_randomness, load_config, save_pickle, format_path, load_pickle
 
 systems = ['pendulum', 'pendulum20', 'pendulum40', 'pendulum60', 'pendulum80', 'pendulum100',
-           'double_pendulum20',
+           'double_pendulum50', 'double_pendulum100', 'double_pendulum150', 'double_pendulum200',
            'spring_mass', 'spring_mass25', 'spring_mass50', 'spring_mass100', 'spring_mass200',
            'three_body_spring_mass', 'three_body_spring_mass25', 'three_body_spring_mass50', 'three_body_spring_mass100', 'three_body_spring_mass200']
 

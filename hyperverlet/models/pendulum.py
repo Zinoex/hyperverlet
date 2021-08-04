@@ -11,11 +11,12 @@ class PendulumModel(nn.Module):
         self.h_dim = model_args['h_dim']
         self.q_input_dim = model_args['q_input_dim']
         self.p_input_dim = model_args['p_input_dim']
+        self.output_dim = model_args['output_dim']
 
         kwargs = dict(n_dense=5, activate_last=False, activation='sigmoid')
 
-        self.model_q = NDenseBlock(self.q_input_dim, self.h_dim, 1, **kwargs)
-        self.model_p = NDenseBlock(self.p_input_dim, self.h_dim, 1, **kwargs)
+        self.model_q = NDenseBlock(self.q_input_dim, self.h_dim, self.output_dim, **kwargs)
+        self.model_p = NDenseBlock(self.p_input_dim, self.h_dim, self.output_dim, **kwargs)
 
     def forward(self, dq1, dq2, dp1, dp2, m, t, dt, **kwargs):
         return self.hq(dq1, dq2, dp1, dp2, m, t, dt, **kwargs), self.hp(dq1, dq2, dp1, dp2, m, t, dt, **kwargs)
