@@ -51,7 +51,7 @@ class ThreeBodyGravityLinearModel(nn.Module):
                 # Planet-based expansion
                 S = S.view(-1, num_planets, num_planets, self.euclid, self.euclid)
                 # Ensure local symmetry
-                S = S + S.transpose(-1, -2)
+                # S = S + S.transpose(-1, -2)
             else:
                 # Local S matrix expanded to a global
                 S = Si.view(1, 1, 1, self.euclid, self.euclid)
