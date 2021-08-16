@@ -13,6 +13,7 @@ class ThreeBodyGravityLinearModel(nn.Module):
         self.euclid = model_args['input_dim']
 
         self.extended = model_args['extended']
+        self.power = model_args.get('power', 3)
 
         if self.extended:
             kwargs = dict(n_dense=2, activate_last=True, activation='tanh')
@@ -68,9 +69,9 @@ class ThreeBodyGravityLinearModel(nn.Module):
             q = q.view(-1, num_planets * self.euclid, 1)
 
             if i % 2 == 0:
-                p = p + torch.matmul(S, q) * dt ** 3
+                p = p + torch.matmul(S, q) * dt ** self.power
             else:
-                q = q + torch.matmul(S, p) * dt ** 3
+                q = q + torch.matmul(S, p) * dt ** self.power
 
             p = p.view(-1, num_planets, self.euclid)
             q = q.view(-1, num_planets, self.euclid)
@@ -82,7 +83,7 @@ class ThreeBodyGravityLinearModel(nn.Module):
             bq = self.bq.view(1, 1, self.euclid).repeat(1, num_planets)
             bp = self.bp.view(1, 1, self.euclid).repeat(1, num_planets)
 
-        return q + bq * dt ** 3, p + bp * dt ** 3
+        return q + bq * dt ** self.power, p + bp * dt ** self.power
 
 
 class ThreeBodyGravityModel(nn.Module):

@@ -14,6 +14,7 @@ class SymplecticLinear(nn.Module):
         self.d = dim // 2
 
         self.extended = model_args['extended']
+        self.power = model_args.get('power', 3)
 
         if self.extended:
             kwargs = dict(n_dense=2, activate_last=True, activation='tanh')
@@ -40,9 +41,9 @@ class SymplecticLinear(nn.Module):
             S = S + S.transpose(-2, -1)
 
             if i % 2 == 0:
-                p = p + torch.matmul(S, q.unsqueeze(-1))[..., 0] * dt ** 3
+                p = p + torch.matmul(S, q.unsqueeze(-1))[..., 0] * dt ** self.power
             else:
-                q = q + torch.matmul(S, p.unsqueeze(-1))[..., 0] * dt ** 3
+                q = q + torch.matmul(S, p.unsqueeze(-1))[..., 0] * dt ** self.power
 
         if self.extended:
             bq = self.bq(cat)
@@ -51,7 +52,7 @@ class SymplecticLinear(nn.Module):
             bq = self.bq
             bp = self.bp
 
-        return q + bq * dt ** 3, p + bp * dt ** 3
+        return q + bq * dt ** self.power, p + bp * dt ** self.power
 
 
 class SymplecticActivation(nn.Module):
@@ -66,6 +67,7 @@ class SymplecticActivation(nn.Module):
         self.d = dim // 2
 
         self.extended = model_args['extended']
+        self.power = model_args.get('power', 3)
 
         if self.extended:
             kwargs = dict(n_dense=2, activate_last=True, activation='tanh')
@@ -83,9 +85,9 @@ class SymplecticActivation(nn.Module):
             a = self.a
 
         if self.mode == 'up':
-            return q, p + self.act(q) * a * dt ** 3
+            return q, p + self.act(q) * a * dt ** self.power
         elif self.mode == 'low':
-            return q + self.act(p) * a * dt ** 3, p
+            return q + self.act(p) * a * dt ** self.power, p
 
 
 class SymplecticGradient(nn.Module):

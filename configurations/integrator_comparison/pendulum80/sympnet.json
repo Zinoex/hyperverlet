@@ -13,11 +13,12 @@
     "solver": "SymplecticHyperVelocityVerlet",
     "nn_args": {
       "module": "SymplecticPendulumModel",
-      "extended": true,
+      "extended": false,
       "h_dim": 32,
       "cat_dim": 2,
       "input_dim": 2,
-      "layers": 4
+      "layers": 4,
+      "power": 1
     }
   },
   "dataset_args": {
@@ -34,5 +35,5 @@
    "coarsening_factor": 80,
    "duration_stddev": 0.1
   },
-  "plotting_args_path": "configurations/integrator_comparison/pendulum80/plotting.json"
+  "plotting_args_path": "configurations/integrator_comparison/pendulum20/plotting.json"
 }

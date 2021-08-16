@@ -495,6 +495,47 @@ class SymplecticHyperVelocityVerlet(BaseSolver, ResidualMixin):
         return res_q, res_p
 
 
+class SympNet(BaseSolver, ResidualMixin):
+    trainable = True
+    q_order = 2
+    p_order = 2
+
+    def __init__(self, hypersolver):
+        super().__init__()
+
+        self.hypersolver = hypersolver
+
+    def forward(self, experiment: Experiment, q: torch.Tensor, p: torch.Tensor, m: torch.Tensor, t, dt, **kwargs):
+        q, p = self.hypersolver(q, p, m, t, dt, **kwargs)
+
+        return q, p
+
+    def hyper_trajectory(self, experiment: Experiment, gt_q: torch.Tensor, gt_p: torch.Tensor, m: torch.Tensor, trajectory: torch.Tensor, disable_print=False, **kwargs):
+        q_traj = []
+        p_traj = []
+
+        gt_q = experiment.shift(gt_q, **kwargs)
+
+        trajectory = self.view_like_q(trajectory, gt_q)
+        dtrajectory = trajectory[1:] - trajectory[:-1]
+
+        for i, (t, dt) in enumerate(zip(tqdm(trajectory[:-1], disable=disable_print), dtrajectory)):
+            q, p = gt_q[i], gt_p[i]
+            q_pred, p_pred = self.hypersolver(q, p, m, t, dt, **kwargs)
+
+            q_traj.append(q_pred - q)
+            p_traj.append(p_pred - p)
+
+        return torch.stack(q_traj, 0), torch.stack(p_traj, 0)
+
+    def get_residuals(self, experiment, gt_q, gt_p, m, trajectory, **kwargs):
+        gt_q = experiment.shift(gt_q, **kwargs)
+
+        res_q = gt_q[1:] - gt_q[:-1]
+        res_p = gt_p[1:] - gt_p[:-1]
+        return res_q, res_p
+
+
 class SymplecticSolver(BaseSolver):
     def __init__(self, c, d):
         super().__init__()

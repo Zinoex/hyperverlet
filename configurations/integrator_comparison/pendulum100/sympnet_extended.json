@@ -2,7 +2,7 @@
   "result_path": "results/integrator_comparison/{dataset}/{solver}_extended_trd{train_duration}_trtl{train_trajectory_length}_trsl{train_sequence_length}_cf{coarsening_factor}_ted{test_duration}_tetl{test_trajectory_length}.pickle",
   "plot_path": "visualization/integrator_comparison/{dataset}/{solver}_extended_trd{train_duration}_trtl{train_trajectory_length}_trsl{train_sequence_length}_cf{coarsening_factor}_ted{test_duration}_tetl{test_trajectory_length}_{datetime}.mp4",
   "train_args": {
-    "epoch": 40,
+    "epoch": 50,
     "batch_size": 1000,
     "num_workers": 8,
     "loss": "residual",
@@ -17,7 +17,8 @@
       "h_dim": 32,
       "cat_dim": 2,
       "input_dim": 2,
-      "layers": 4
+      "layers": 4,
+      "power": 1
     }
   },
   "dataset_args": {
@@ -31,8 +32,8 @@
    "test_duration": 600,
    "test_trajectory_length": 600001,
    "test_num_configurations": 100,
-   "coarsening_factor": 80,
+   "coarsening_factor": 100,
    "duration_stddev": 0.1
   },
-  "plotting_args_path": "configurations/integrator_comparison/pendulum80/plotting.json"
+  "plotting_args_path": "configurations/integrator_comparison/pendulum20/plotting.json"
 }

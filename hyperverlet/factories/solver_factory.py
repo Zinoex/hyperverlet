@@ -24,6 +24,7 @@ def construct_solver(solver_name, nn_args=None):
         "FullHyperVelocityVerlet": FullHyperVelocityVerlet,
         "HyperFourthOrderRuth": HyperFourthOrderRuth,
         "SymplecticHyperVelocityVerlet": SymplecticHyperVelocityVerlet,
+        "SympNet": SympNet,
     }
 
     solver = solvers[solver_name]
