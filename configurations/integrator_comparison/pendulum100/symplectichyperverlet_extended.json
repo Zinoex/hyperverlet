@@ -34,5 +34,5 @@
    "coarsening_factor": 100,
    "duration_stddev": 0.1
   },
-  "plotting_args_path": "configurations/integrator_comparison/pendulum80/plotting.json"
+  "plotting_args_path": "configurations/integrator_comparison/pendulum100/plotting.json"
 }

@@ -10,7 +10,7 @@
     "criterion": "TimeDecayMSELoss"
   },
   "model_args": {
-    "solver": "SymplecticHyperVelocityVerlet",
+    "solver": "SympNet",
     "nn_args": {
       "module": "SymplecticPendulumModel",
       "extended": false,
@@ -35,5 +35,5 @@
    "coarsening_factor": 80,
    "duration_stddev": 0.1
   },
-  "plotting_args_path": "configurations/integrator_comparison/pendulum20/plotting.json"
+  "plotting_args_path": "configurations/integrator_comparison/pendulum80/plotting.json"
 }

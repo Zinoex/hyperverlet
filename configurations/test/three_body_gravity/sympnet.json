@@ -10,15 +10,14 @@
     "criterion": "TimeDecayMSELoss"
   },
   "model_args": {
-    "solver": "SympNet",
+    "solver": "SymplecticHyperVelocityVerlet",
     "nn_args": {
       "module": "SymplecticPendulumModel",
-      "extended": true,
+      "extended": false,
       "h_dim": 32,
       "cat_dim": 2,
       "input_dim": 2,
-      "layers": 4,
-      "power": 1
+      "layers": 4
     }
   },
   "dataset_args": {
@@ -35,5 +34,13 @@
    "coarsening_factor": 20,
    "duration_stddev": 0.1
   },
-  "plotting_args_path": "configurations/integrator_comparison/pendulum20/plotting.json"
+  "result_path": "results/test/{dataset}/{solver}_trd{train_duration}_trtl{train_trajectory_length}_trsl{train_sequence_length}_cf{coarsening_factor}_ted{test_duration}_tetl{test_trajectory_length}.pickle",
+  "plot_path": "visualization/test/{dataset}/{solver}_trd{train_duration}_trtl{train_trajectory_length}_trsl{train_sequence_length}_cf{coarsening_factor}_ted{test_duration}_tetl{test_trajectory_length}_{datetime}.mp4",
+  "train_args_path": "configurations/test/three_body_gravity/training.json",
+  "model_args": {
+    "solver": "SymplecticHyperVelocityVerlet",
+    "nn_path": "configurations/test/three_body_gravity/nn.json"
+  },
+  "dataset_args_path": "configurations/test/three_body_gravity/dataset.json",
+  "plotting_args_path": "configurations/test/three_body_gravity/plotting.json"
 }
