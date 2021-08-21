@@ -135,7 +135,7 @@ class DoublePendulumDataset(ExperimentDataset):
                  length_mean=0.5, length_std=0.1, mass_mean=0.9, mass_std=0.1, g=9.807, random_parameters=False):
 
         self.experiment = DoublePendulum()
-        self.q0 = (torch.rand(num_configurations, 2) * 2 - 1) * (np.pi / 2)
+        self.q0 = (torch.rand(num_configurations, 2) * 2 - 1) * (np.pi / 4)
         self.p0 = torch.randn(num_configurations, 2) * 0.1
 
         if random_parameters and mass_std != 0:

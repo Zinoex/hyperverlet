@@ -1,6 +1,6 @@
 from hyperverlet.models.lennard_jones import LennardJonesMLP
 from hyperverlet.models.pendulum import *
-from hyperverlet.models.spring_mass import SpringMassModel
+from hyperverlet.models.spring_mass import SpringMassModel, SymplecticSpringMassModel
 from hyperverlet.models.three_body_gravity import ThreeBodyGravityModel
 from hyperverlet.models.three_body_spring_mass import ThreeBodySpringMassModel, ThreeBodySpringMassGraphModel
 
@@ -21,7 +21,8 @@ def construct_model(module_config):
         ThreeBodySpringMassModel=ThreeBodySpringMassModel,
         ThreeBodySpringMassGraphModel=ThreeBodySpringMassGraphModel,
         ThreeBodyGravityModel=ThreeBodyGravityModel,
-        LennardJonesMLP=LennardJonesMLP
+        LennardJonesMLP=LennardJonesMLP,
+        SymplecticSpringMassModel=SymplecticSpringMassModel
     )
 
     module = module_mapping[module]

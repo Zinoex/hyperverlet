@@ -80,8 +80,8 @@ class ThreeBodyGravityLinearModel(nn.Module):
             bq = self.bq(m).view(-1, num_planets, self.euclid)
             bp = self.bp(m).view(-1, num_planets, self.euclid)
         else:
-            bq = self.bq.view(1, 1, self.euclid).repeat(1, num_planets)
-            bp = self.bp.view(1, 1, self.euclid).repeat(1, num_planets)
+            bq = self.bq.view(1, 1, self.euclid).repeat(1, num_planets, 1)
+            bp = self.bp.view(1, 1, self.euclid).repeat(1, num_planets, 1)
 
         return q + bq * dt ** self.power, p + bp * dt ** self.power
 
@@ -91,6 +91,14 @@ class ThreeBodyGravityModel(nn.Module):
         super().__init__()
 
         self.model = nn.ModuleList([
+            ThreeBodyGravityLinearModel(model_args),
+            SymplecticActivation(model_args, 'sigmoid', 'low'),
+            ThreeBodyGravityLinearModel(model_args),
+            SymplecticActivation(model_args, 'sigmoid', 'up'),
+            ThreeBodyGravityLinearModel(model_args),
+            SymplecticActivation(model_args, 'sigmoid', 'low'),
+            ThreeBodyGravityLinearModel(model_args),
+            SymplecticActivation(model_args, 'sigmoid', 'up'),
             ThreeBodyGravityLinearModel(model_args),
             SymplecticActivation(model_args, 'sigmoid', 'low'),
             ThreeBodyGravityLinearModel(model_args),

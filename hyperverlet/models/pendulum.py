@@ -171,16 +171,17 @@ class SymplecticPendulumModel(nn.Module):
     def __init__(self, model_args):
         super().__init__()
 
-        self.model = nn.ModuleList([
-            SymplecticLinear(model_args),
-            SymplecticActivation(model_args, 'sigmoid', 'low'),
-            SymplecticLinear(model_args),
-            SymplecticActivation(model_args, 'sigmoid', 'up'),
-            SymplecticLinear(model_args),
-            SymplecticActivation(model_args, 'sigmoid', 'low'),
-            SymplecticLinear(model_args),
-            SymplecticActivation(model_args, 'sigmoid', 'up'),
-        ])
+        layers = []
+        repeats = model_args.get('repeats', 2)
+        for _ in range(repeats):
+            layers.extend([
+                SymplecticLinear(model_args),
+                SymplecticActivation(model_args, 'sigmoid', 'low'),
+                SymplecticLinear(model_args),
+                SymplecticActivation(model_args, 'sigmoid', 'up')
+            ])
+
+        self.model = nn.ModuleList(layers)
 
         # self.model = nn.ModuleList([
         #     SymplecticGradient(model_args, 'sigmoid', 'low'),

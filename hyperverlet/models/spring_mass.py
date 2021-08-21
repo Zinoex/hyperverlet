@@ -2,6 +2,7 @@ import torch
 from torch import nn
 
 from hyperverlet.models.misc import MergeNDenseBlock, NDenseBlock
+from hyperverlet.models.symplectic import SymplecticLinear, SymplecticActivation
 
 
 class SpringMassModel(nn.Module):
@@ -26,3 +27,37 @@ class SpringMassModel(nn.Module):
     def hq(self, dq1, dq2, dp1, dp2, m, t, dt, length, k, **kwargs):
         hq = torch.cat([dq1, dq2, dp1, dp2, m, length, k], dim=-1)
         return self.model_q(hq)
+
+
+class SymplecticSpringMassModel(nn.Module):
+    def __init__(self, model_args):
+        super().__init__()
+
+        layers = []
+        repeats = model_args.get('repeats', 2)
+        for _ in range(repeats):
+            layers.extend([
+                SymplecticLinear(model_args),
+                SymplecticActivation(model_args, 'sigmoid', 'low'),
+                SymplecticLinear(model_args),
+                SymplecticActivation(model_args, 'sigmoid', 'up')
+            ])
+
+        self.model = nn.ModuleList(layers)
+
+        # self.model = nn.ModuleList([
+        #     SymplecticGradient(model_args, 'sigmoid', 'low'),
+        #     SymplecticGradient(model_args, 'sigmoid', 'up'),
+        #     SymplecticGradient(model_args, 'sigmoid', 'low'),
+        #     SymplecticGradient(model_args, 'sigmoid', 'up'),
+        #     SymplecticGradient(model_args, 'sigmoid', 'low'),
+        #     SymplecticGradient(model_args, 'sigmoid', 'up'),
+        # ])
+
+    def forward(self, q, p, m, t, dt, length, k, **kwargs):
+        cat = torch.cat([m, length, k], dim=-1)
+
+        for module in self.model:
+            q, p = module(q, p, cat, dt)
+
+        return q, p

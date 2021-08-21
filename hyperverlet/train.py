@@ -16,13 +16,14 @@ def train(solver: nn.Module, dataset, device, config):
     train_args = config["train_args"]
     epochs = train_args["epoch"]
     loss_method = train_args["loss"]
+    learning_rate = train_args.get('learning_rate', 1e-3)
     batch_size = train_args["batch_size"]
     num_workers = train_args["num_workers"]
     regularization = train_args.get("regularization", [])
 
     assert loss_method in ['phase_space', 'energy', "residual"]
 
-    optimizer = optim.AdamW(solver.parameters(), lr=1e-3)
+    optimizer = optim.AdamW(solver.parameters(), lr=learning_rate)
     criterion = construct_loss(train_args)
 
     loader = DataLoader(dataset, num_workers=num_workers, pin_memory=device.type == 'cuda', batch_size=batch_size, shuffle=True)

@@ -17,8 +17,9 @@
       "h_dim": 32,
       "cat_dim": 4,
       "input_dim": 4,
-      "layers": 4,
-      "power": 1
+      "layers": 5,
+      "power": 1,
+      "repeats": 4
     }
   },
   "dataset_args": {
