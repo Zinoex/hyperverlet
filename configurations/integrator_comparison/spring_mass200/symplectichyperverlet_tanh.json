@@ -1,8 +1,8 @@
 {
-  "result_path": "results/integrator_comparison/{dataset}/{solver}_extended_trd{train_duration}_trtl{train_trajectory_length}_trsl{train_sequence_length}_cf{coarsening_factor}_ted{test_duration}_tetl{test_trajectory_length}.pickle",
-  "plot_path": "visualization/integrator_comparison/{dataset}/{solver}_extended_trd{train_duration}_trtl{train_trajectory_length}_trsl{train_sequence_length}_cf{coarsening_factor}_ted{test_duration}_tetl{test_trajectory_length}_{datetime}.mp4",
+  "result_path": "results/integrator_comparison/{dataset}/{solver}_tanh_trd{train_duration}_trtl{train_trajectory_length}_trsl{train_sequence_length}_cf{coarsening_factor}_ted{test_duration}_tetl{test_trajectory_length}.pickle",
+  "plot_path": "visualization/integrator_comparison/{dataset}/{solver}_tanh_trd{train_duration}_trtl{train_trajectory_length}_trsl{train_sequence_length}_cf{coarsening_factor}_ted{test_duration}_tetl{test_trajectory_length}_{datetime}.mp4",
   "train_args": {
-    "epoch": 10,
+    "epoch": 80,
     "batch_size": 1000,
     "num_workers": 8,
     "loss": "residual",
@@ -12,12 +12,10 @@
   "model_args": {
     "solver": "SymplecticHyperVelocityVerlet",
     "nn_args": {
-      "module": "SymplecticSpringMassModel",
-      "extended": true,
-      "h_dim": 32,
-      "cat_dim": 3,
-      "input_dim": 2,
-      "layers": 4
+      "module": "LASymplecticModel",
+      "input_dim": 3,
+      "layers": 4,
+      "activation": "tanh"
     }
   },
   "dataset_args": {
@@ -31,8 +29,8 @@
    "test_duration": 1000,
    "test_trajectory_length": 1000001,
    "test_num_configurations": 100,
-   "coarsening_factor": 25,
+   "coarsening_factor": 200,
    "duration_stddev": 0.1
   },
-  "plotting_args_path": "configurations/integrator_comparison/spring_mass25/plotting.json"
+  "plotting_args_path": "configurations/integrator_comparison/spring_mass200/plotting.json"
 }

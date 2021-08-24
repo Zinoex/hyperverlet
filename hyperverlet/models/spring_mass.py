@@ -35,29 +35,20 @@ class SymplecticSpringMassModel(nn.Module):
 
         layers = []
         repeats = model_args.get('repeats', 2)
+        activation_function = model_args.get('activation', 'sigmoid')
+
         for _ in range(repeats):
             layers.extend([
                 SymplecticLinear(model_args),
-                SymplecticActivation(model_args, 'sigmoid', 'low'),
+                SymplecticActivation(model_args, activation_function, 'low'),
                 SymplecticLinear(model_args),
-                SymplecticActivation(model_args, 'sigmoid', 'up')
+                SymplecticActivation(model_args, activation_function, 'up')
             ])
 
         self.model = nn.ModuleList(layers)
 
-        # self.model = nn.ModuleList([
-        #     SymplecticGradient(model_args, 'sigmoid', 'low'),
-        #     SymplecticGradient(model_args, 'sigmoid', 'up'),
-        #     SymplecticGradient(model_args, 'sigmoid', 'low'),
-        #     SymplecticGradient(model_args, 'sigmoid', 'up'),
-        #     SymplecticGradient(model_args, 'sigmoid', 'low'),
-        #     SymplecticGradient(model_args, 'sigmoid', 'up'),
-        # ])
-
-    def forward(self, q, p, m, t, dt, length, k, **kwargs):
-        cat = torch.cat([m, length, k], dim=-1)
-
+    def forward(self, q, p, m, t, dt, **kwargs):
         for module in self.model:
-            q, p = module(q, p, cat, dt)
+            q, p = module(q, p, dt)
 
         return q, p

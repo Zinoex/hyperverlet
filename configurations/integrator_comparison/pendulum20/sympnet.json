@@ -12,10 +12,8 @@
   "model_args": {
     "solver": "SympNet",
     "nn_args": {
-      "module": "SymplecticPendulumModel",
-      "extended": false,
+      "module": "LASymplecticModel",
       "h_dim": 32,
-      "cat_dim": 2,
       "input_dim": 2,
       "layers": 4,
       "power": 1

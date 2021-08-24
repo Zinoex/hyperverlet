@@ -12,9 +12,7 @@
   "model_args": {
     "solver": "SymplecticHyperVelocityVerlet",
     "nn_args": {
-      "module": "SymplecticSpringMassModel",
-      "extended": false,
-      "h_dim": 32,
+      "module": "LASymplecticModel",
       "input_dim": 3,
       "layers": 4
     }

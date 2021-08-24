@@ -12,10 +12,7 @@
   "model_args": {
     "solver": "SymplecticHyperVelocityVerlet",
     "nn_args": {
-      "module": "SymplecticPendulumModel",
-      "extended": false,
-      "h_dim": 32,
-      "cat_dim": 2,
+      "module": "LASymplecticModel",
       "input_dim": 2,
       "layers": 4
     }

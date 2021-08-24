@@ -16,28 +16,14 @@ class SymplecticLinear(nn.Module):
         self.extended = model_args['extended']
         self.power = model_args.get('power', 3)
 
-        if self.extended:
-            kwargs = dict(n_dense=2, activate_last=True, activation='tanh')
-            cat_dim = model_args['cat_dim']
-            h_dim = model_args['h_dim']
+        # Si is distributed N(0, 0.01), and b is set to zero.
+        self.params = nn.ParameterList([nn.Parameter(torch.randn(self.d, self.d) * 0.01) for i in range(layers)])
+        self.bq = nn.Parameter(torch.zeros(self.d))
+        self.bp = nn.Parameter(torch.zeros(self.d))
 
-            self.params = nn.ModuleList([NDenseBlock(cat_dim, h_dim, self.d * self.d, **kwargs) for i in range(layers)])
-            self.bq = NDenseBlock(cat_dim, h_dim, self.d, **kwargs)
-            self.bp = NDenseBlock(cat_dim, h_dim, self.d, **kwargs)
-        else:
-            # Si is distributed N(0, 0.01), and b is set to zero.
-            self.params = nn.ParameterList([nn.Parameter(torch.randn(self.d, self.d) * 0.01) for i in range(layers)])
-            self.bq = nn.Parameter(torch.zeros(self.d))
-            self.bp = nn.Parameter(torch.zeros(self.d))
-
-    def forward(self, q, p, cat, dt):
+    def forward(self, q, p, dt):
         for i, Si in enumerate(self.params):
-            if self.extended:
-                S = Si(cat)
-                S = S.view(-1, self.d, self.d)
-            else:
-                S = Si.unsqueeze(0)
-
+            S = Si.unsqueeze(0)
             S = S + S.transpose(-2, -1)
 
             if i % 2 == 0:
@@ -45,14 +31,7 @@ class SymplecticLinear(nn.Module):
             else:
                 q = q + torch.matmul(S, p.unsqueeze(-1))[..., 0] * dt ** self.power
 
-        if self.extended:
-            bq = self.bq(cat)
-            bp = self.bp(cat)
-        else:
-            bq = self.bq
-            bp = self.bp
-
-        return q + bq * dt ** self.power, p + bp * dt ** self.power
+        return q + self.bq * dt ** self.power, p + self.bp * dt ** self.power
 
 
 class SymplecticActivation(nn.Module):
@@ -66,28 +45,40 @@ class SymplecticActivation(nn.Module):
         dim = model_args['input_dim']
         self.d = dim // 2
 
-        self.extended = model_args['extended']
         self.power = model_args.get('power', 3)
+        self.a = nn.Parameter(torch.randn(self.d) * 0.01)
 
-        if self.extended:
-            kwargs = dict(n_dense=2, activate_last=True, activation='tanh')
-            cat_dim = model_args['cat_dim']
-            h_dim = model_args['h_dim']
-
-            self.a = NDenseBlock(cat_dim, h_dim, self.d, **kwargs)
-        else:
-            self.a = nn.Parameter(torch.randn(self.d) * 0.01)
-
-    def forward(self, q, p, cat, dt):
-        if self.extended:
-            a = self.a(cat)
-        else:
-            a = self.a
-
+    def forward(self, q, p, dt):
         if self.mode == 'up':
-            return q, p + self.act(q) * a * dt ** self.power
+            return q, p + self.act(q) * self.a * dt ** self.power
         elif self.mode == 'low':
-            return q + self.act(p) * a * dt ** self.power, p
+            return q + self.act(p) * self.a * dt ** self.power, p
+
+
+class LASymplecticModel(nn.Module):
+    def __init__(self, model_args):
+        super().__init__()
+
+        layers = []
+        repeats = model_args.get('repeats', 2)
+        activation_function = model_args.get('activation', 'sigmoid')
+
+        for _ in range(repeats):
+            layers.extend([
+                SymplecticLinear(model_args),
+                SymplecticActivation(model_args, activation_function, 'low'),
+                SymplecticLinear(model_args),
+                SymplecticActivation(model_args, activation_function, 'up')
+            ])
+
+        self.model = nn.ModuleList(layers)
+
+    def forward(self, q, p, m, t, dt, **kwargs):
+
+        for module in self.model:
+            q, p = module(q, p, dt)
+
+        return q, p
 
 
 class SymplecticGradient(nn.Module):
@@ -102,31 +93,14 @@ class SymplecticGradient(nn.Module):
         dim = model_args['input_dim']
         self.d = dim // 2
 
-        self.extended = model_args['extended']
+        self.K = nn.Parameter(torch.randn(self.width, self.d) * 0.01)
+        self.a = nn.Parameter(torch.randn(self.width) * 0.01)
+        self.b = nn.Parameter(torch.zeros(self.width))
 
-        if self.extended:
-            kwargs = dict(n_dense=2, activate_last=True, activation='sigmoid')
-            cat_dim = model_args['cat_dim']
-            h_dim = model_args['h_dim']
-
-            self.K = NDenseBlock(cat_dim, h_dim, self.d * self.width, **kwargs)
-            self.a = NDenseBlock(cat_dim, h_dim, self.d, **kwargs)
-            self.b = NDenseBlock(cat_dim, h_dim, self.d, **kwargs)
-        else:
-            self.K = nn.Parameter(torch.randn(self.width, self.d) * 0.01)
-            self.a = nn.Parameter(torch.randn(self.width) * 0.01)
-            self.b = nn.Parameter(torch.zeros(self.width))
-
-    def forward(self, q, p, cat, dt):
-        if self.extended:
-            K = self.K(cat)
-            K = K.view(-1, self.width, self.d)
-            a = self.a(cat)
-            b = self.b(cat)
-        else:
-            K = self.K.unsqueeze(0)
-            a = self.a
-            b = self.b
+    def forward(self, q, p, dt):
+        K = self.K.unsqueeze(0)
+        a = self.a
+        b = self.b
 
         if self.mode == 'up':
             gradH = torch.matmul(K.transpose(-2, -1), (self.act(torch.matmul(K, q.unsqueeze(-1))[..., 0] + b) * a).unsqueeze(-1))[..., 0]
