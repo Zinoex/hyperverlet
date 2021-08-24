@@ -1,0 +1,18 @@
+{
+  "result_path": "results/integrator_comparison/{dataset}/{solver}_tanh_trd{train_duration}_trtl{train_trajectory_length}_trsl{train_sequence_length}_cf{coarsening_factor}_ted{test_duration}_tetl{test_trajectory_length}.pickle",
+  "plot_path": "visualization/integrator_comparison/{dataset}/{solver}_tanh_trd{train_duration}_trtl{train_trajectory_length}_trsl{train_sequence_length}_cf{coarsening_factor}_ted{test_duration}_tetl{test_trajectory_length}_{datetime}.mp4",
+  "train_args_path": "configurations/integrator_comparison/pendulum20/training_sympnet.json",
+  "model_args": {
+    "solver": "SymplecticHyperVelocityVerlet",
+    "nn_args": {
+      "module": "LASymplecticModel",
+      "input_dim": 2,
+      "layers": 4,
+      "repeats": 2,
+      "power": 3,
+      "activation": "tanh"
+    }
+  },
+  "dataset_args_path": "configurations/integrator_comparison/pendulum20/dataset_sympnet.json",
+  "plotting_args_path": "configurations/integrator_comparison/pendulum20/plotting.json"
+}

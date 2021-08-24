@@ -10,7 +10,7 @@ import numpy as np
 
 from hyperverlet.distributions import sample_parameterized_truncated_normal
 from hyperverlet.experiments import Pendulum, SpringMass, ThreeBodySpringMass, LennardJones, ThreeBodyGravity, \
-    DoublePendulum, SymmetricSpringMass
+    SymmetricSpringMass
 from hyperverlet.timer import timer
 from hyperverlet.transforms import Coarsening
 from hyperverlet.utils.misc import load_pickle, save_pickle
@@ -186,7 +186,7 @@ class SymmetricSpringMassDataset(ExperimentDataset):
                 'k': torch.full((num_configurations, 1), 0.8)
             }
 
-        self.q0 = torch.randn(num_configurations, length.sqrt())
+        self.q0 = torch.randn(num_configurations, 1) * length.sqrt()
         self.p0 = torch.randn(num_configurations, 1) * 0.1
 
         assert torch.all(self.extra_args['length'] > 0).item()

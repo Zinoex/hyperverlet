@@ -13,7 +13,6 @@ class SymplecticLinear(nn.Module):
         dim = model_args['input_dim']
         self.d = dim // 2
 
-        self.extended = model_args['extended']
         self.power = model_args['power']
 
         # Si is distributed N(0, 0.01), and b is set to zero.
