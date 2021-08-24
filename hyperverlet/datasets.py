@@ -10,7 +10,7 @@ import numpy as np
 
 from hyperverlet.distributions import sample_parameterized_truncated_normal
 from hyperverlet.experiments import Pendulum, SpringMass, ThreeBodySpringMass, LennardJones, ThreeBodyGravity, \
-    DoublePendulum
+    DoublePendulum, SymmetricSpringMass
 from hyperverlet.timer import timer
 from hyperverlet.transforms import Coarsening
 from hyperverlet.utils.misc import load_pickle, save_pickle
@@ -130,37 +130,6 @@ class PendulumDataset(ExperimentDataset):
         super().__init__(base_solver, duration, duration_stddev, num_samples, num_configurations, coarsening_factor, cache_path, sequence_length)
 
 
-class DoublePendulumDataset(ExperimentDataset):
-    def __init__(self, base_solver, duration, duration_stddev, num_samples, num_configurations, coarsening_factor, cache_path, sequence_length=None,
-                 length_mean=0.5, length_std=0.1, mass_mean=0.9, mass_std=0.1, g=9.807, random_parameters=False):
-
-        self.experiment = DoublePendulum()
-        self.q0 = (torch.rand(num_configurations, 2) * 2 - 1) * (np.pi / 4)
-        self.p0 = torch.randn(num_configurations, 2) * 0.1
-
-        if random_parameters and mass_std != 0:
-            self.mass = sample_parameterized_truncated_normal((num_configurations, 2), mass_mean, mass_std, 0.01, mass_mean + 5 * mass_std)
-        else:
-            self.mass = torch.full((num_configurations, 2), mass_mean)
-
-        if random_parameters and length_std != 0:
-            self.extra_args = {
-                'length': sample_parameterized_truncated_normal((num_configurations, 2), length_mean, length_std, 0.01, length_mean + 5 * length_std),
-                'g': torch.full((num_configurations, 1), g)
-            }
-        else:
-            self.extra_args = {
-                'length': torch.full((num_configurations, 2), length_mean),
-                'g': torch.full((num_configurations, 1), g)
-            }
-
-        assert torch.all(self.extra_args['length'] > 0).item()
-        assert torch.all(self.extra_args['g'] > 0).item()
-        assert torch.all(self.mass > 0).item()
-
-        super().__init__(base_solver, duration, duration_stddev, num_samples, num_configurations, coarsening_factor, cache_path, sequence_length)
-
-
 class SpringMassDataset(ExperimentDataset):
     def __init__(self, base_solver, duration, duration_stddev, num_samples, num_configurations, coarsening_factor, cache_path, sequence_length=None, mass_mean=0.9, mass_std=0.1, random_parameters=False):
 
@@ -185,6 +154,39 @@ class SpringMassDataset(ExperimentDataset):
             }
 
         self.q0 = torch.rand(num_configurations, 1) * length * 2
+        self.p0 = torch.randn(num_configurations, 1) * 0.1
+
+        assert torch.all(self.extra_args['length'] > 0).item()
+        assert torch.all(self.extra_args['k'] > 0).item()
+        assert torch.all(self.mass > 0).item()
+
+        super().__init__(base_solver, duration, duration_stddev, num_samples, num_configurations, coarsening_factor, cache_path, sequence_length)
+
+
+class SymmetricSpringMassDataset(ExperimentDataset):
+    def __init__(self, base_solver, duration, duration_stddev, num_samples, num_configurations, coarsening_factor, cache_path, sequence_length=None, mass_mean=0.9, mass_std=0.1, random_parameters=False):
+
+        self.experiment = SymmetricSpringMass()
+
+        if random_parameters and mass_std != 0:
+            self.mass = sample_parameterized_truncated_normal((num_configurations, 1), mass_mean, mass_std, 0.01, mass_mean + 5 * mass_std)
+        else:
+            self.mass = torch.full((num_configurations, 1), mass_mean)
+
+        if random_parameters:
+            length = sample_parameterized_truncated_normal((num_configurations, 1), 0.8, 0.35, 0.1, 1.5)
+            self.extra_args = {
+                'length': length,
+                'k': sample_parameterized_truncated_normal((num_configurations, 1), 0.8, 0.35, 0.1, 1.5)
+            }
+        else:
+            length = torch.full((num_configurations, 1), 0.8)
+            self.extra_args = {
+                'length': length,
+                'k': torch.full((num_configurations, 1), 0.8)
+            }
+
+        self.q0 = torch.randn(num_configurations, length.sqrt())
         self.p0 = torch.randn(num_configurations, 1) * 0.1
 
         assert torch.all(self.extra_args['length'] > 0).item()

@@ -1,6 +1,6 @@
 from hyperverlet.factories.solver_factory import construct_solver
 from hyperverlet.datasets import PendulumDataset, SpringMassDataset, ThreeBodySpringMassDataset, \
-    ThreeBodyGravityDataset, DoublePendulumDataset
+    ThreeBodyGravityDataset, DoublePendulumDataset, SymmetricSpringMassDataset
 from hyperverlet.utils.misc import format_path
 
 
@@ -32,7 +32,7 @@ def construct_dataset(config, trainable=True):
 
     gt_solver = construct_solver(gt_solver_name)
 
-    ds_mapping = dict(pendulum=PendulumDataset, double_pendulum=DoublePendulumDataset, spring_mass=SpringMassDataset, three_body_spring_mass=ThreeBodySpringMassDataset, three_body_gravity=ThreeBodyGravityDataset)
+    ds_mapping = dict(pendulum=PendulumDataset, double_pendulum=DoublePendulumDataset, spring_mass=SpringMassDataset, symmetric_spring_mass=SymmetricSpringMassDataset, three_body_spring_mass=ThreeBodySpringMassDataset, three_body_gravity=ThreeBodyGravityDataset)
     ds_cls = ds_mapping[dataset]
 
     test_ds = ds_cls(gt_solver, test_duration, 0, test_trajectory_length, test_num_config, coarsening_factor, test_cache_path, sequence_length=None, **test_experiment_args)

@@ -36,51 +36,18 @@ class Pendulum(Experiment):
         return -m * g * length * sin_q
 
 
-class DoublePendulum(Experiment):
-    energy = PendulumEnergy()
-
-    def dq(self, q, p, m, t, length, **kwargs):
-
-        l1, l2 = length.split(1, dim=-1)
-        q1, q2 = q.split(1, dim=-1)
-        p1, p2 = p.split(1, dim=-1)
-        m1, m2 = m.split(1, dim=-1)
-
-        total_mass = m1 + m2
-        angle_diff = q1 - q2
-        common_denom = m1 + m2 * angle_diff.sin() ** 2
-
-        dq1 = (l2 * p1 - l1 * p2 * angle_diff.cos()) / (l1 ** 2 * l2 * common_denom)
-        dq2 = (l1 * total_mass * p2 - l2 * m2 * p1 * angle_diff.cos()) / (l1 * l2 ** 2 * m2 * common_denom)
-
-        return torch.cat([dq1, dq2], dim=-1)
-
-    def dp(self, q, p, m, t, length, g, **kwargs):
-
-        l1, l2 = length.split(1, dim=-1)
-        q1, q2 = q.split(1, dim=-1)
-        p1, p2 = p.split(1, dim=-1)
-        m1, m2 = m.split(1, dim=-1)
-
-        total_mass = m1 + m2
-        angle_diff = q1 - q2
-        common_denom = m1 + m2 * angle_diff.sin() ** 2
-
-        c1 = (p1 * p2 * angle_diff.sin()) / (l1 * l2 * common_denom)
-        c2 = (l2 ** 2 * m2 * p1 ** 2 + l1 ** 2 * total_mass * p2 ** 2 - l1 * l2 * m2 * p1 * p2 * angle_diff.cos()) * \
-             (2 * angle_diff).sin() / (2 * l1 ** 2 * l2 ** 2 * common_denom ** 2)
-
-        dp1 = -total_mass * g * l1 * q1.sin() - c1 + c2
-        dp2 = - m2 * g * l2 * q2.sin() + c1 - c2
-
-        return torch.cat([dp1, dp2], dim=-1)
-
-
 class SpringMass(Experiment):
     energy = SpringMassEnergy()
 
     def dp(self, q, p, m, t, length, k, **kwargs):
         return -k * (q - length)
+
+
+class SymmetricSpringMass(Experiment):
+    energy = SpringMassEnergy()
+
+    def dp(self, q, p, m, t, length, k, **kwargs):
+        return -k * q
 
 
 class BasePairPotential(Experiment):
