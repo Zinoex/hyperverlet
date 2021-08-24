@@ -2,7 +2,6 @@ import torch
 from torch import nn
 
 from hyperverlet.models.misc import NDenseBlock
-from hyperverlet.models.symplectic import SymplecticLinear, SymplecticActivation, SymplecticGradient
 
 
 class PendulumModel(nn.Module):
@@ -28,29 +27,3 @@ class PendulumModel(nn.Module):
     def hq(self, dq1, dq2, dp1, dp2, m, t, dt, length, **kwargs):
         hq = torch.cat([dq1, dq2, dp1, dp2, m, length], dim=-1)
         return self.model_q(hq)
-
-
-class SymplecticPendulumModel(nn.Module):
-    def __init__(self, model_args):
-        super().__init__()
-
-        layers = []
-        repeats = model_args.get('repeats', 2)
-        activation_function = model_args.get('activation', 'sigmoid')
-
-        for _ in range(repeats):
-            layers.extend([
-                SymplecticLinear(model_args),
-                SymplecticActivation(model_args, activation_function, 'low'),
-                SymplecticLinear(model_args),
-                SymplecticActivation(model_args, activation_function, 'up')
-            ])
-
-        self.model = nn.ModuleList(layers)
-
-    def forward(self, q, p, m, t, dt, **kwargs):
-
-        for module in self.model:
-            q, p = module(q, p, dt)
-
-        return q, p
