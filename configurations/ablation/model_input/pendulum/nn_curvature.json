@@ -1,6 +1,0 @@
-{
-  "module": "CurvaturePendulumModel",
-  "h_dim": 16,
-  "q_input_dim": 10,
-  "p_input_dim": 10
-}

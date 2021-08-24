@@ -1,6 +1,0 @@
-{
-  "module": "PrePostPendulumModel",
-  "h_dim": 16,
-  "q_input_dim": 6,
-  "p_input_dim": 6
-}

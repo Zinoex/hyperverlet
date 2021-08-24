@@ -1,9 +1,0 @@
-{
-  "module": "SymplecticPendulumModel",
-  "extended": false,
-  "h_dim": 32,
-  "width": 32,
-  "cat_dim": 6,
-  "input_dim": 2,
-  "layers": 4
-}
