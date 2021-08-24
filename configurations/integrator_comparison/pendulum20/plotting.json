@@ -1,5 +1,5 @@
 {
-    "plot_every": 5,
-    "save_plot": true,
-    "show_plot": false
+  "plot_every": 5,
+  "save_plot": true,
+  "show_plot": false
 }

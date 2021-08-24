@@ -1,8 +1,8 @@
 {
-    "epoch": 150,
-    "batch_size": 10000,
-    "num_workers": 8,
-    "loss": "residual",
-    "time_decay": 1,
-    "criterion": "TimeDecayMSELoss"
+  "epoch": 150,
+  "batch_size": 10000,
+  "num_workers": 8,
+  "loss": "residual",
+  "time_decay": 1,
+  "criterion": "TimeDecayMSELoss"
 }
