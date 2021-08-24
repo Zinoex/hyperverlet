@@ -14,7 +14,7 @@ class SymplecticLinear(nn.Module):
         self.d = dim // 2
 
         self.extended = model_args['extended']
-        self.power = model_args.get('power', 3)
+        self.power = model_args['power']
 
         # Si is distributed N(0, 0.01), and b is set to zero.
         self.params = nn.ParameterList([nn.Parameter(torch.randn(self.d, self.d) * 0.01) for i in range(layers)])
@@ -35,9 +35,10 @@ class SymplecticLinear(nn.Module):
 
 
 class SymplecticActivation(nn.Module):
-    def __init__(self, model_args, activation, mode):
+    def __init__(self, model_args, mode):
         super().__init__()
-        self.act = misc.ACT[activation]()
+        activation_function = model_args['activation']
+        self.act = misc.ACT[activation_function]()
 
         assert mode in ['up', 'low']
         self.mode = mode
@@ -45,7 +46,7 @@ class SymplecticActivation(nn.Module):
         dim = model_args['input_dim']
         self.d = dim // 2
 
-        self.power = model_args.get('power', 3)
+        self.power = model_args['power']
         self.a = nn.Parameter(torch.randn(self.d) * 0.01)
 
     def forward(self, q, p, dt):
@@ -60,15 +61,14 @@ class LASymplecticModel(nn.Module):
         super().__init__()
 
         layers = []
-        repeats = model_args.get('repeats', 2)
-        activation_function = model_args.get('activation', 'sigmoid')
+        repeats = model_args['repeats']
 
         for _ in range(repeats):
             layers.extend([
                 SymplecticLinear(model_args),
-                SymplecticActivation(model_args, activation_function, 'low'),
+                SymplecticActivation(model_args, 'low'),
                 SymplecticLinear(model_args),
-                SymplecticActivation(model_args, activation_function, 'up')
+                SymplecticActivation(model_args, 'up')
             ])
 
         self.model = nn.ModuleList(layers)
@@ -93,6 +93,7 @@ class SymplecticGradient(nn.Module):
         dim = model_args['input_dim']
         self.d = dim // 2
 
+        self.power = model_args['power']
         self.K = nn.Parameter(torch.randn(self.width, self.d) * 0.01)
         self.a = nn.Parameter(torch.randn(self.width) * 0.01)
         self.b = nn.Parameter(torch.zeros(self.width))
@@ -104,7 +105,7 @@ class SymplecticGradient(nn.Module):
 
         if self.mode == 'up':
             gradH = torch.matmul(K.transpose(-2, -1), (self.act(torch.matmul(K, q.unsqueeze(-1))[..., 0] + b) * a).unsqueeze(-1))[..., 0]
-            return q, p + gradH * dt ** 3
+            return q, p + gradH * dt ** self.power
         elif self.mode == 'low':
             gradH = torch.matmul(K.transpose(-2, -1), (self.act(torch.matmul(K, p.unsqueeze(-1))[..., 0] + b) * a).unsqueeze(-1))[..., 0]
-            return q + gradH * dt ** 3, p
+            return q + gradH * dt ** self.power, p
