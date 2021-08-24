@@ -1,0 +1,39 @@
+{
+  "result_path": "results/integrator_comparison/{dataset}/{solver}_extended_trd{train_duration}_trtl{train_trajectory_length}_trsl{train_sequence_length}_cf{coarsening_factor}_ted{test_duration}_tetl{test_trajectory_length}.pickle",
+  "plot_path": "visualization/integrator_comparison/{dataset}/{solver}_extended_trd{train_duration}_trtl{train_trajectory_length}_trsl{train_sequence_length}_cf{coarsening_factor}_ted{test_duration}_tetl{test_trajectory_length}_{datetime}.mp4",
+  "train_args": {
+    "epoch": 80,
+    "batch_size": 1000,
+    "num_workers": 8,
+    "loss": "residual",
+    "time_decay": 1,
+    "criterion": "TimeDecayMSELoss"
+  },
+  "model_args": {
+    "solver": "SympNet",
+    "nn_args": {
+      "module": "SymplecticSpringMassModel",
+      "extended": false,
+      "h_dim": 32,
+      "cat_dim": 3,
+      "input_dim": 2,
+      "layers": 4,
+      "power": 1
+    }
+  },
+  "dataset_args": {
+   "dataset": "spring_mass",
+   "cache_path": "cache/{dataset}_{split}/{train_duration}_{train_trajectory_length}_{train_num_configurations}_{test_duration}_{test_trajectory_length}_{test_num_configurations}.pickle",
+   "gt_solver": "FourthOrderRuth",
+   "train_duration": 100,
+   "train_trajectory_length": 100001,
+   "train_sequence_length": 50,
+   "train_num_configurations": 1000,
+   "test_duration": 1000,
+   "test_trajectory_length": 1000001,
+   "test_num_configurations": 100,
+   "coarsening_factor": 100,
+   "duration_stddev": 0.1
+  },
+  "plotting_args_path": "configurations/integrator_comparison/spring_mass200/plotting.json"
+}
