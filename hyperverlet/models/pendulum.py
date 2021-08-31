@@ -33,4 +33,4 @@ class PendulumModel(nn.Module):
 class SymplecticPendulumModel(LASymplecticModel):
     def forward(self,  q, p, m, t, dt, length, **kwargs):
         cat = torch.cat([m, length], dim=-1)
-        super(SymplecticPendulumModel, self).__call__(q, p, cat, m, t, dt)
+        return super(SymplecticPendulumModel, self).forward(q, p, cat, m, t, dt)

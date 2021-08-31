@@ -3,11 +3,8 @@ import os
 from matplotlib import pyplot as plt
 from matplotlib.lines import Line2D
 import numpy as np
-import pandas as pd
-import seaborn as sns
 
-from hyperverlet.utils.measures import qp_mean, valid_prediction_time
-from hyperverlet.utils.misc import format_path, load_config, load_pickle
+from hyperverlet.utils.misc import format_path
 
 
 def create_gt_pred_legends(q, cm):

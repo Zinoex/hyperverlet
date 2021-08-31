@@ -37,7 +37,7 @@ def construct_dataset(config, trainable=True):
     )
     ds_cls = ds_mapping[dataset]
 
-    test_ds = ds_cls(gt_solver, test_duration, 0, test_trajectory_length, test_num_config, coarsening_factor, test_cache_path, sequence_length=None, **test_experiment_args)
+    test_ds = ds_cls(gt_solver, test_duration, duration_stddev, test_trajectory_length, test_num_config, coarsening_factor, test_cache_path, sequence_length=None, **test_experiment_args)
 
     train_ds = None
     if trainable:

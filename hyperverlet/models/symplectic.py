@@ -108,7 +108,7 @@ class LASymplecticModel(nn.Module):
 
         self.model = nn.ModuleList(layers)
 
-    def forward(self, q, p, cat, m, t, dt, **kwargs):
+    def forward(self, q, p, cat, m, t, dt):
         for module in self.model:
             q, p = module(q, p, cat, dt)
 

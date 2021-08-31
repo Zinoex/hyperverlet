@@ -32,4 +32,4 @@ class SpringMassModel(nn.Module):
 class SymplecticSpringMassModel(LASymplecticModel):
     def forward(self,  q, p, m, t, dt, length, k, **kwargs):
         cat = torch.cat([m, length, k], dim=-1)
-        super(SymplecticSpringMassModel, self).__call__(q, p, cat, m, t, dt)
+        return super(SymplecticSpringMassModel, self).forward(q, p, cat, m, t, dt)

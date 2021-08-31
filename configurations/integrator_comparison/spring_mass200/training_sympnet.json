@@ -1,7 +1,7 @@
 {
   "epoch": 80,
   "batch_size": 1000,
-  "num_workers": 8,
+  "num_workers": 0,
   "loss": "residual",
   "time_decay": 1,
   "criterion": "TimeDecayMSELoss"

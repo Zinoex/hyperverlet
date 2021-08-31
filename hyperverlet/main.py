@@ -79,16 +79,16 @@ def combined(args):
 
 
 def sequential(args):
-    # for system in ['pendulum20', 'pendulum40', 'pendulum60', 'pendulum80',
-    #        'spring_mass25', 'spring_mass50', 'spring_mass100', 'spring_mass200']:
-    #     args.system = system
+    for system in ['pendulum20', 'pendulum40', 'pendulum60', 'pendulum80',
+           'spring_mass25', 'spring_mass50', 'spring_mass100', 'spring_mass200']:
+        args.system = system
 
-    replace_system_closure = functools.partial(replace_system, args=args)
-    experiment_args = map(replace_system_closure, preset_config_paths[args.experiment])
+        replace_system_closure = functools.partial(replace_system, args=args)
+        experiment_args = map(replace_system_closure, preset_config_paths[args.experiment])
 
-    for experiment_arg in experiment_args:
-        print('Running: {}'.format(experiment_arg.config_path))
-        args.sequential_func(experiment_arg)
+        for experiment_arg in experiment_args:
+            print('Running: {}'.format(experiment_arg.config_path))
+            args.sequential_func(experiment_arg)
 
 
 def evaluate(args):

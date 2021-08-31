@@ -13,7 +13,7 @@
       "layers": 4,
       "repeats": 2,
       "power": 1,
-      "activation": "tanh"
+      "activation": "sigmoid"
     }
   },
   "dataset_args_path": "configurations/integrator_comparison/pendulum20/dataset_sympnet.json",
