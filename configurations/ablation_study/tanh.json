@@ -6,7 +6,7 @@
     "solver": "SymplecticHyperVelocityVerlet",
     "nn_args": {
       "module": "SymplecticSpringMassModel",
-      "extended": true,
+      "extended": false,
       "cat_dim": 3,
       "h_dim": 16,
       "input_dim": 2,
