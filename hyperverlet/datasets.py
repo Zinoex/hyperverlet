@@ -23,8 +23,8 @@ class ExperimentDataset(Dataset):
         self.coarsening = Coarsening(coarsening_factor, num_samples)
         self.sequence_length = sequence_length
 
-        samples = distributions.Normal(duration, duration_stddev).sample(num_configurations)
-        self.trajectory = torch.stack([torch.linspace(0, duration + sample, num_samples) for sample in samples], dim=1)
+        samples = distributions.Normal(duration, duration * duration_stddev).sample(num_configurations)
+        self.trajectory = torch.stack([torch.linspace(0, sample, num_samples) for sample in samples], dim=1)
 
         self.load_data(cache_path)
 
