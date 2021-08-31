@@ -7,9 +7,7 @@ preset_config_paths = {
         'configurations/integrator_comparison/{system}/ruth4.json',
         'configurations/integrator_comparison/{system}/rk4.json',
         'configurations/integrator_comparison/{system}/symplectichyperverlet.json',
-        'configurations/integrator_comparison/{system}/symplectichyperverlet_extended.json',
         'configurations/integrator_comparison/{system}/sympnet.json',
-        'configurations/integrator_comparison/{system}/sympnet_extended.json',
     ],
     'total_energy': [
             'configurations/integrator_comparison/{system}/velocityverlet.json',

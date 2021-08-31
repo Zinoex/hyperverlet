@@ -1,6 +1,6 @@
 {
-  "epoch": 100,
-  "batch_size": 1000,
+  "epoch": 300,
+  "batch_size": 10000,
   "num_workers": 8,
   "loss": "residual",
   "time_decay": 1,
