@@ -1,5 +1,5 @@
 {
-  "epoch": 200,
+  "epoch": 80,
   "batch_size": 10000,
   "num_workers": 8,
   "loss": "residual",
