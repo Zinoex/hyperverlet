@@ -6,7 +6,7 @@
     "solver": "SymplecticHyperVelocityVerlet",
     "nn_args": {
       "module": "SymplecticPendulumModel",
-      "extended": false,
+      "extended": true,
       "cat_dim": 2,
       "h_dim": 16,
       "input_dim": 2,
