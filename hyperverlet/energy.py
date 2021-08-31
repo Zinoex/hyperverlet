@@ -45,30 +45,6 @@ class CartesianKineticEnergy(Energy, metaclass=ABCMeta):
         return self.trajectory_sum(0.5 * m * v ** 2)
 
 
-class ThreeBodySpringMassEnergy(CartesianKineticEnergy):
-    def displacement(self, q):
-        if torch.is_tensor(q):
-            a = torch.unsqueeze(q, -2)
-            b = torch.unsqueeze(q, -3)
-        else:
-            a = np.expand_dims(q, -2)
-            b = np.expand_dims(q, -3)
-        return a - b
-
-    def distance(self, disp):
-        if torch.is_tensor(disp):
-            return disp.norm(dim=-1)
-        else:
-            return np.linalg.norm(disp, axis=-1)
-
-    def potential_energy(self, m, q, k, length, **kwargs):
-        disp = self.displacement(q)
-        dist = self.distance(disp)
-        x = dist - length
-
-        return self.trajectory_sum(0.25 * k * x ** 2)
-
-
 class SpringMassEnergy(CartesianKineticEnergy):
     def potential_energy(self, m, q, k, length, **kwargs):
         x = q - length

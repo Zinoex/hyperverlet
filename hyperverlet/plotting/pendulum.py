@@ -8,7 +8,7 @@ from hyperverlet.plotting.energy import init_energy_plot, plot_energy, energy_an
 from hyperverlet.plotting.grid_spec import gs_3_2_3, gs_line
 from hyperverlet.plotting.phasespace import init_phasespace_plot, update_phasespace_plot
 from hyperverlet.plotting.utils import save_animation, create_gt_pred_legends, save_figure
-from hyperverlet.utils.measures import print_qp_mean_loss
+from hyperverlet.utils.measures import print_z_loss
 from hyperverlet.utils.misc import load_pickle, format_path
 
 

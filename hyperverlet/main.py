@@ -7,21 +7,16 @@ import torch
 from hyperverlet.config_container import preset_config_paths
 from hyperverlet.factories.dataset_factory import construct_dataset
 from hyperverlet.factories.solver_factory import construct_solver
-from hyperverlet.lyapunov import lyapunov_solvers_plot
 from hyperverlet.plotting.energy import total_energy_plot
-from hyperverlet.plotting.generalization import generalization_plot
 from hyperverlet.plotting.pendulum import animate_pendulum, pendulum_snapshot
 from hyperverlet.plotting.spring_mass import animate_sm, sm_snapshot
-from hyperverlet.plotting.three_body_spring_mass import animate_tbsm, tbsm_snapshot
-from hyperverlet.plotting.utils import ablation_barplots
 from hyperverlet.test import test
 from hyperverlet.train import train
-from hyperverlet.utils.measures import print_valid_prediction_time, print_qp_mean_loss
+from hyperverlet.utils.measures import print_z_loss
 from hyperverlet.utils.misc import seed_randomness, load_config, save_pickle, format_path, load_pickle
 
-systems = ['pendulum20', 'pendulum40', 'pendulum60', 'pendulum80', 'pendulum100',
-           'spring_mass25', 'spring_mass50', 'spring_mass100', 'spring_mass200',
-           'three_body_spring_mass25', 'three_body_spring_mass50', 'three_body_spring_mass100', 'three_body_spring_mass200']
+systems = ['pendulum20', 'pendulum40', 'pendulum60', 'pendulum80',
+           'spring_mass25', 'spring_mass50', 'spring_mass100', 'spring_mass200']
 
 
 @dataclass
@@ -47,11 +42,6 @@ def parse_arguments():
     full_parse = commands.add_parser("full", help="Run an evaluation and plotting")
     full_parse.add_argument('--config-path', type=str, required=True, help="Path to the configuration file")
     full_parse.set_defaults(func=full_run)
-
-    lyapunov_parse = commands.add_parser('lyapunov', help='Create a boxplot showing lyapunov exponent for solvers')
-    lyapunov_parse.add_argument('--experiment', type=str, required=True, choices=preset_config_paths.keys(), help="Run experiment on set of predefined json files")
-    lyapunov_parse.add_argument('--system', type=str, required=True, choices=systems, help="Name of the system to test")
-    lyapunov_parse.set_defaults(func=lyapunov)
 
     combined_parse = commands.add_parser('combined', help="Used for plotting multiple configs in the same plot")
     combined_parse.add_argument('--experiment', type=str, required=True, choices=preset_config_paths.keys(), help="Predefined set of json files used for plotting")
@@ -83,27 +73,16 @@ def replace_system(path, args):
 
 def combined(args):
     replace_system_closure = functools.partial(replace_system, args=args)
-    expArgs = map(replace_system_closure, preset_config_paths[args.experiment])
+    exp_args = map(replace_system_closure, preset_config_paths[args.experiment])
 
-    plot_total_energy = False
-    plot_ablation = False
-    plot_generalization = True
-
-    if plot_total_energy:
-        total_energy_plot(expArgs, args.experiment)
-    if plot_ablation:
-        ablation_barplots(expArgs, args.experiment)
-    if plot_generalization:
-        generalization_plot(expArgs, args.experiment)
-
-
-def lyapunov(args):
-    replace_system_closure = functools.partial(replace_system, args=args)
-    configs = map(replace_system_closure, preset_config_paths[args.experiment])
-    lyapunov_solvers_plot(configs)
+    total_energy_plot(exp_args, args.experiment)
 
 
 def sequential(args):
+    # for system in ['pendulum20', 'pendulum40', 'pendulum60', 'pendulum80',
+    #        'spring_mass25', 'spring_mass50', 'spring_mass100', 'spring_mass200']:
+    #     args.system = system
+
     replace_system_closure = functools.partial(replace_system, args=args)
     experiment_args = map(replace_system_closure, preset_config_paths[args.experiment])
 
@@ -164,8 +143,6 @@ def animate(config, dataset):
         animate_pendulum(config, show_gt=True, show_plot=show_plot)
     elif dataset == 'spring_mass':
         animate_sm(config, show_gt=True, show_plot=show_plot)
-    elif dataset == 'three_body_spring_mass':
-        animate_tbsm(config, show_trail=True, show_springs=True, show_plot=show_plot)
 
 
 def log_data(config):
@@ -174,8 +151,7 @@ def log_data(config):
 
     method = 'vpt'
 
-    print_qp_mean_loss(result_dict["q"], result_dict["p"], result_dict["gt_q"], result_dict["gt_p"], label='')
-    print_valid_prediction_time(result_dict["q"], result_dict["p"], result_dict["gt_q"], result_dict["gt_p"], result_dict["trajectory"], label='')
+    print_z_loss(result_dict["q"], result_dict["p"], result_dict["gt_q"], result_dict["gt_p"], label='')
 
 
 def snapshot(config, dataset, slices=6):
@@ -183,8 +159,6 @@ def snapshot(config, dataset, slices=6):
         pendulum_snapshot(config, slices=slices)
     elif dataset == 'spring_mass':
         sm_snapshot(config, slices=slices)
-    elif dataset == 'three_body_spring_mass':
-        tbsm_snapshot(config, slices=slices, cfg=3)
 
 
 def full_run(args):

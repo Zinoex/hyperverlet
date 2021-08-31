@@ -10,14 +10,10 @@ def construct_solver(solver_name, nn_args=None):
     solvers = {
         "HyperEuler": HyperEuler,
         "Euler": Euler,
-        "HyperHeun": HyperHeun,
-        "Heun": Heun,
         "RungeKutta4": RungeKutta4,
         "VelocityVerlet": VelocityVerlet,
         "HyperVelocityVerlet": HyperVelocityVerlet,
-        "ThirdOrderRuth": ThirdOrderRuth,
         "FourthOrderRuth": FourthOrderRuth,
-        "HyperFourthOrderRuth": HyperFourthOrderRuth,
         "SymplecticHyperVelocityVerlet": SymplecticHyperVelocityVerlet,
         "SympNet": SympNet,
     }

@@ -5,12 +5,12 @@
   "model_args": {
     "solver": "SymplecticHyperVelocityVerlet",
     "nn_args": {
-      "module": "LASymplecticModel",
+      "module": "SymplecticPendulumModel",
       "input_dim": 2,
       "layers": 4,
       "repeats": 2,
       "power": 3,
-      "activation": "sigmoid"
+      "activation": "tanh"
     }
   },
   "dataset_args_path": "configurations/integrator_comparison/pendulum40/dataset_sympnet.json",

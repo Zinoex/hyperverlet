@@ -15,10 +15,9 @@ class BaseSolver(nn.Module):
         raise NotImplemented()
 
     def trajectory(self, experiment: Experiment, q0: torch.Tensor, p0: torch.Tensor, m: torch.Tensor, trajectory: torch.Tensor, disable_print=False, **kwargs):
-        q_traj = [q0]#torch.zeros((trajectory.size(0), *q0.size()), dtype=q0.dtype, device=q0.device)
-        p_traj = [p0]#torch.zeros((trajectory.size(0), *p0.size()), dtype=p0.dtype, device=p0.device)
+        q_traj = [q0]
+        p_traj = [p0]
 
-        # q_traj[0], p_traj[0] = q0, p0
         q, p = experiment.shift(q0, **kwargs), p0
 
         trajectory = self.view_like_q(trajectory, q0.dim() + 1)
@@ -59,10 +58,8 @@ class ResidualMixin:
         return q, p
 
     def base_trajectory(self, experiment: Experiment, gt_q: torch.Tensor, gt_p: torch.Tensor, m: torch.Tensor, trajectory: torch.Tensor, dtrajectory: torch.Tensor, disable_print=False, **kwargs):
-        q_traj = [gt_q[0]]#torch.zeros_like(gt_q)
-        p_traj = [gt_p[0]]#torch.zeros_like(gt_p)
-
-        #q_traj[0], p_traj[0] = gt_q[0], gt_p[0]
+        q_traj = [gt_q[0]]
+        p_traj = [gt_p[0]]
 
         for i, (t, dt) in enumerate(zip(tqdm(trajectory[:-1], disable=disable_print), dtrajectory)):
             q, p = self.base(experiment, gt_q[i], gt_p[i], m, t, dt, **kwargs)
@@ -72,8 +69,8 @@ class ResidualMixin:
         return torch.stack(q_traj, 0), torch.stack(p_traj, 0)
 
     def hyper_trajectory(self, experiment: Experiment, gt_q: torch.Tensor, gt_p: torch.Tensor, m: torch.Tensor, trajectory: torch.Tensor, disable_print=False, **kwargs):
-        q_traj = [] #torch.zeros_like(gt_q)
-        p_traj = [] #torch.zeros_like(gt_p)
+        q_traj = []
+        p_traj = []
 
         gt_q = experiment.shift(gt_q, **kwargs)
 
@@ -126,37 +123,6 @@ class HyperEuler(BaseSolver, ResidualMixin):
         p_next = p + dp * dt
 
         return q_next, p_next
-
-
-class Heun(BaseSolver):
-    def forward(self, experiment: Experiment, q: torch.Tensor, p: torch.Tensor, m: torch.Tensor, t, dt, **kwargs):
-        dq, dp = experiment(q, p, m, t, **kwargs)
-        q_hat, p_hat = experiment.shift(q + dq * dt, **kwargs), p + dp * dt
-        dq_hat, dp_hat = experiment(q_hat, p_hat, m, t + dt, **kwargs)
-
-        return experiment.shift(q + dt / 2 * (dq + dq_hat), **kwargs), p + dt / 2 * (dp + dp_hat)
-
-
-class HyperHeun(BaseSolver, ResidualMixin):
-    trainable = True
-    q_order = 2
-    p_order = 2
-
-    def __init__(self, hypersolver):
-        super().__init__()
-
-        self.hypersolver = hypersolver
-
-    def forward(self, experiment: Experiment, q: torch.Tensor, p: torch.Tensor, m: torch.Tensor, t, dt, **kwargs):
-        return self.hyper_forward(experiment, q, p, m, t, dt, **kwargs)
-
-    def base(self, experiment: Experiment, q: torch.Tensor, p: torch.Tensor, m: torch.Tensor, t, dt, **kwargs):
-        dq1, dp1 = experiment(q, p, m, t, **kwargs)
-        q_hat, p_hat = experiment.shift(q + dq1 * dt, **kwargs), p + dp1 * dt
-        dq, dp = experiment(q_hat, p_hat, m, t + dt, **kwargs)
-        q, p = experiment.shift(q + dt / 2 * (dq + dq1), **kwargs), p + dt / 2 * (dp + dp1)
-
-        return q, p
 
 
 class RungeKutta4(BaseSolver):
@@ -231,8 +197,8 @@ class SymplecticHyperVelocityVerlet(BaseSolver, ResidualMixin):
         return q, p
 
     def hyper_trajectory(self, experiment: Experiment, gt_q: torch.Tensor, gt_p: torch.Tensor, m: torch.Tensor, trajectory: torch.Tensor, disable_print=False, **kwargs):
-        q_traj = [] #torch.zeros_like(gt_q)
-        p_traj = [] # torch.zeros_like(gt_p)
+        q_traj = []
+        p_traj = []
 
         gt_q = experiment.shift(gt_q, **kwargs)
 
@@ -338,21 +304,6 @@ class VelocityVerlet(SymplecticSolver):
         )
 
 
-class ThirdOrderRuth(SymplecticSolver):
-    def __init__(self):
-        c1 = 1
-        c2 = -2 / 3
-        c3 = 2 / 3
-        d1 = -1 / 24
-        d2 = 3 / 4
-        d3 = 7 / 24
-
-        super().__init__(
-            c=[c1, c2, c3],
-            d=[d1, d2, d3]
-        )
-
-
 class FourthOrderRuth(SymplecticSolver):
     def __init__(self):
         two_power_one_third = 2 ** (1 / 3)
@@ -371,17 +322,3 @@ class FourthOrderRuth(SymplecticSolver):
             c=[c1, c2, c3, c4],
             d=[d1, d2, d3, d4]
         )
-
-
-class HyperFourthOrderRuth(FourthOrderRuth, ResidualMixin):
-    trainable = True
-    q_order = 3
-    p_order = 3
-
-    def __init__(self, hypersolver):
-        super().__init__()
-
-        self.hypersolver = hypersolver
-
-    def forward(self, experiment: Experiment, q: torch.Tensor, p: torch.Tensor, m: torch.Tensor, t, dt, **kwargs):
-        return self.hyper_forward(experiment, q, p, m, t, dt, **kwargs)

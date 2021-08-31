@@ -3,7 +3,7 @@ import os
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-from hyperverlet.energy import PendulumEnergy, SpringMassEnergy, ThreeBodySpringMassEnergy
+from hyperverlet.energy import PendulumEnergy, SpringMassEnergy
 from hyperverlet.utils.misc import load_config, format_path, load_pickle
 
 
@@ -61,7 +61,7 @@ def total_energy_plot(expargs, experiment, cfg=0):
 
         extra_args = {k: v[cfg] for k, v in result_dict["extra_args"].items()}
 
-        energy_mapping = dict(pendulum=PendulumEnergy, spring_mass=SpringMassEnergy, three_body_spring_mass=ThreeBodySpringMassEnergy)
+        energy_mapping = dict(pendulum=PendulumEnergy, spring_mass=SpringMassEnergy)
         energy_cls = energy_mapping[dataset]()
         _, _, te = energy_cls.all_energies(mass, q, p, **extra_args)
 

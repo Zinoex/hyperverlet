@@ -5,12 +5,12 @@
   "model_args": {
     "solver": "SympNet",
     "nn_args": {
-      "module": "LASymplecticModel",
+      "module": "SymplecticSpringMassModel",
       "input_dim": 2,
       "layers": 4,
       "repeats": 2,
       "power": 1,
-      "activation": "sigmoid"
+      "activation": "tanh"
     }
   },
   "dataset_args_path": "configurations/integrator_comparison/spring_mass100/dataset_sympnet.json",

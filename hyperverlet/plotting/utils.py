@@ -135,47 +135,6 @@ def save_animation(animation, config):
     print(f"File saved at {plot_path}")
 
 
-def ablation_barplots(expargs, experiment):
-    data = []
-    x_label = "Models"
-    y_label = "MSE"
-
-    if experiment == "loss_function":
-        x_label = "Loss functions"
-
-    sns.set(font_scale=1, rc={'text.usetex': True})
-
-    # Alternating is interleaving, this is not a mistake. Same for sequential_hyperverlet
-    label_mapping = dict(hyperverlet_residual_l1=r"Residual $L_1$", hyperverlet_residual_l2=r"Residual $L_2$",
-                         hyperverlet_trajectory_l1=r"Trajectory $L_1$", hyperverlet_trajectory_l2=r"Trajectory $L_2$",
-                         hyperverlet_trajectory_timedecay="Trajectory \ntime decay",
-                         hyperverlet_post="Post", hyperverlet_prepost="Prepost",
-                         hyperverlet_statepost="Statepost", hyperverlet_timepost="Timepost",
-                         hyperverlet_shared="Shared", hyperverlet_unshared="Unshared",
-                         hyperverlet="HyperVerlet", alternating_hyperverlet="Interleaving", ponly_hyperverlet="Only $p$ correction",
-                         qonly_hyperverlet="Only $q$ correction", sequentialpost_hyperverlet="Alternating",
-                         hyperverlet_curvature="Intermediate")
-
-    for idx, args in enumerate(expargs):
-        config_path = args.config_path
-        config = load_config(config_path)
-
-        result_path = format_path(config, config["result_path"])
-        result_dict = load_pickle(result_path)
-
-        qp_loss = qp_mean(result_dict["q"], result_dict["p"], result_dict["gt_q"], result_dict["gt_p"])
-
-        config_name = os.path.splitext(os.path.basename(config_path))[0]
-        label = label_mapping[config_name]
-        data.append([label, qp_loss])
-
-    df = pd.DataFrame(data=data, columns=[x_label, y_label])
-    sns.barplot(x=x_label, y=y_label, data=df)
-    plt.xlabel(x_label, labelpad=10)
-
-    save_figure("visualization/ablation", experiment)
-
-
 def save_figure(foldername, filename, ext="pdf"):
     os.makedirs(foldername, exist_ok=True)
     filepath = os.path.join(foldername, filename)

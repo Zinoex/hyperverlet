@@ -1,6 +1,5 @@
 from hyperverlet.factories.solver_factory import construct_solver
-from hyperverlet.datasets import PendulumDataset, SpringMassDataset, ThreeBodySpringMassDataset, \
-    ThreeBodyGravityDataset, SymmetricSpringMassDataset
+from hyperverlet.datasets import PendulumDataset, SpringMassDataset
 from hyperverlet.utils.misc import format_path
 
 
@@ -34,10 +33,7 @@ def construct_dataset(config, trainable=True):
 
     ds_mapping = dict(
         pendulum=PendulumDataset,
-        spring_mass=SpringMassDataset,
-        symmetric_spring_mass=SymmetricSpringMassDataset,
-        three_body_spring_mass=ThreeBodySpringMassDataset,
-        three_body_gravity=ThreeBodyGravityDataset
+        spring_mass=SpringMassDataset
     )
     ds_cls = ds_mapping[dataset]
 

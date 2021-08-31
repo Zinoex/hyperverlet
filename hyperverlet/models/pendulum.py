@@ -2,6 +2,7 @@ import torch
 from torch import nn
 
 from hyperverlet.models.misc import NDenseBlock
+from hyperverlet.models.symplectic import LASymplecticModel
 
 
 class PendulumModel(nn.Module):
@@ -27,3 +28,9 @@ class PendulumModel(nn.Module):
     def hq(self, dq1, dq2, dp1, dp2, m, t, dt, length, **kwargs):
         hq = torch.cat([dq1, dq2, dp1, dp2, m, length], dim=-1)
         return self.model_q(hq)
+
+
+class SymplecticPendulumModel(LASymplecticModel):
+    def forward(self,  q, p, m, t, dt, length, **kwargs):
+        cat = torch.cat([m, length], dim=-1)
+        super(SymplecticPendulumModel, self).__call__(q, p, cat, m, t, dt)
