@@ -1,11 +1,11 @@
 {
-  "result_path": "results/integrator_comparison/{dataset}/{solver}_trd{train_duration}_trtl{train_trajectory_length}_trsl{train_sequence_length}_cf{coarsening_factor}_ted{test_duration}_tetl{test_trajectory_length}.pickle",
-  "plot_path": "visualization/integrator_comparison/{dataset}/{solver}_trd{train_duration}_trtl{train_trajectory_length}_trsl{train_sequence_length}_cf{coarsening_factor}_ted{test_duration}_tetl{test_trajectory_length}_{datetime}.mp4",
-  "train_args_path": "configurations/integrator_comparison/spring_mass200/training.json",
+  "result_path": "results/ablation_study/plain/{solver}_trd{train_duration}_trtl{train_trajectory_length}_trsl{train_sequence_length}_cf{coarsening_factor}_ted{test_duration}_tetl{test_trajectory_length}.pickle",
+  "plot_path": "visualization/ablation_study/plain/{solver}_trd{train_duration}_trtl{train_trajectory_length}_trsl{train_sequence_length}_cf{coarsening_factor}_ted{test_duration}_tetl{test_trajectory_length}_{datetime}.mp4",
+  "train_args_path": "configurations/ablation_study/training.json",
   "model_args": {
     "solver": "SymplecticHyperVelocityVerlet",
     "nn_args": {
-      "module": "SymplecticSpringMassModel",
+      "module": "SymplecticPendulumModel",
       "extended": false,
       "cat_dim": 3,
       "h_dim": 16,
@@ -16,6 +16,6 @@
       "activation": "sigmoid"
     }
   },
-  "dataset_args_path": "configurations/integrator_comparison/spring_mass200/dataset.json",
-  "plotting_args_path": "configurations/integrator_comparison/spring_mass200/plotting.json"
+  "dataset_args_path": "configurations/ablation_study/dataset.json",
+  "plotting_args_path": "configurations/ablation_study/plotting.json"
 }

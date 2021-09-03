@@ -9,6 +9,12 @@ preset_config_paths = {
         'configurations/integrator_comparison/{system}/symplectichyperverlet.json',
         'configurations/integrator_comparison/{system}/sympnet.json',
     ],
+    'ablation_study': [
+        'configurations/ablation_study/plain.json',
+        'configurations/ablation_study/tanh.json',
+        'configurations/ablation_study/extended.json',
+        'configurations/ablation_study/full.json',
+    ],
     'total_energy': [
             'configurations/integrator_comparison/{system}/velocityverlet.json',
             'configurations/integrator_comparison/{system}/hyperheun.json',

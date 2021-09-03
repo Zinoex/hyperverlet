@@ -16,6 +16,6 @@
       "activation": "tanh"
     }
   },
-  "dataset_args_path": "configurations/integrator_comparison/spring_mass25/dataset_sympnet.json",
+  "dataset_args_path": "configurations/integrator_comparison/spring_mass25/dataset.json",
   "plotting_args_path": "configurations/integrator_comparison/spring_mass25/plotting.json"
 }
