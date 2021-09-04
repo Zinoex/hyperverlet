@@ -10,7 +10,6 @@ def construct_solver(solver_name, nn_args=None):
     solvers = {
         "HyperEuler": HyperEuler,
         "Euler": Euler,
-        "RungeKutta4": RungeKutta4,
         "VelocityVerlet": VelocityVerlet,
         "HyperVelocityVerlet": HyperVelocityVerlet,
         "FourthOrderRuth": FourthOrderRuth,

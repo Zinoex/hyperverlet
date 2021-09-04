@@ -1,6 +1,0 @@
-{
-  "plot_every": 4,
-  "plot_types": ["energy", "canonical"],
-  "save_plot": true,
-  "show_plot": false
-}
