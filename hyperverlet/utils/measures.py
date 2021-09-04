@@ -28,16 +28,17 @@ def z_loss(q, p, gt_q, gt_p):
     z = torch.cat([q, p], dim=-1).view(q.size(0), q.size(1), -1)
     gt_z = torch.cat([gt_q, gt_p], dim=-1).view(q.size(0), q.size(1), -1)
 
-    def mse(pred, target):
-        return torch.mean((pred - target) ** 2, dim=(0, 2))
+    return torch.mean((z - gt_z) ** 2, dim=(0, 2))
 
-    z_mse = mse(z, gt_z)
+
+def z_loss_dist(q, p, gt_q, gt_p):
+    z_mse = z_loss(q, p, gt_q, gt_p)
     z_mean, z_std = z_mse.mean(), z_mse.std(0)
 
     return z_mean, z_std
 
 
 def print_z_loss(q, p, gt_q, gt_p, label='final loss'):
-    z_mean, z_std = z_loss(q, p, gt_q, gt_p)
+    z_mean, z_std = z_loss_dist(q, p, gt_q, gt_p)
 
     print("{:.3e}\\pm {:.3e} {}".format(z_mean, z_std, label))

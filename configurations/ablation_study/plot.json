@@ -1,0 +1,13 @@
+{
+  "dataset_args_path": "configurations/ablation_study/dataset.json",
+  "plot_types": ["performance_bar"],
+  "results": {
+    "Plain": "configurations/ablation_study/plain.json",
+    "Tanh": "configurations/ablation_study/tanh.json",
+    "Extended": "configurations/ablation_study/extended.json",
+    "Full": "configurations/ablation_study/full.json"
+  },
+  "performance_bar_plot": {
+    "plot_path": "visualization/ablation_study/barplot.pdf"
+  }
+}

@@ -4,7 +4,7 @@ from matplotlib import pyplot as plt
 from matplotlib.lines import Line2D
 import numpy as np
 
-from hyperverlet.utils.misc import format_path
+from hyperverlet.utils.misc import format_path, load_config, load_pickle
 
 
 def create_gt_pred_legends(q, cm):
@@ -140,6 +140,6 @@ def save_figure(foldername, filename, ext="pdf"):
 
 
 def fetch_result_dict(config_path):
-    solver_config = load_config(path)
+    solver_config = load_config(config_path)
     result_path = format_path(solver_config, solver_config['result_path'])
     return load_pickle(result_path)
