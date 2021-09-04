@@ -39,6 +39,10 @@ def parse_arguments():
     plot_parse.add_argument('--config-path', type=str, required=True, help="Path to the configuration file")
     plot_parse.set_defaults(func=plot)
 
+    result_parse = commands.add_parser('result', help="Print numerical results")
+    result_parse.add_argument('--config-path', type=str, required=True, help="Path to the configuration file")
+    result_parse.set_defaults(func=result)
+
     full_parse = commands.add_parser("full", help="Run an evaluation and plotting")
     full_parse.add_argument('--config-path', type=str, required=True, help="Path to the configuration file")
     full_parse.set_defaults(func=full_run)
@@ -60,6 +64,9 @@ def parse_arguments():
 
     plot_parse = commands_sequential.add_parser("plot", help="Plot the results")
     plot_parse.set_defaults(sequential_func=plot)
+
+    result_parse = commands_sequential.add_parser("result", help="Print numerical results")
+    result_parse.set_defaults(sequential_func=result)
 
     full_parse = commands_sequential.add_parser("full", help="Run an evaluation and plotting")
     full_parse.set_defaults(sequential_func=full_run)
@@ -119,20 +126,25 @@ def evaluate(args):
 
 
 def plot(args):
+    # Idea to update the plotting code:
+    # - Restructure such the the plotting config is at focus
+    # - Take systems as parameters in plotting config
+    # - For animate and snapshot: for-loop over systems
+    # - For energy, canonical and MSE bar plots: Combine in a single plot
+    # - Remember to take dataset as input in plotting config
+
     config_path = args.config_path
     config = load_config(config_path)
     dataset = config["dataset_args"]['dataset']
 
-    make_animation = False
-    take_snapshot = False
-    gather_data = True
+    plotting_types = config['plotting']['plot_types']
+    energy_plot = 'energy' in plotting_types
+    canonical_plots = 'canonical' in plotting_types
 
-    if make_animation:
+    if 'animation' in plotting_types:
         animate(config, dataset)
-    if take_snapshot:
+    if 'snapshot' in plotting_types:
         snapshot(config, dataset, slices=6)
-    if gather_data:
-        log_data(config)
 
 
 def animate(config, dataset):
@@ -145,20 +157,19 @@ def animate(config, dataset):
         animate_sm(config, show_gt=True, show_plot=show_plot)
 
 
-def log_data(config):
-    result_path = format_path(config, config["result_path"])
-    result_dict = load_pickle(result_path)
-
-    method = 'vpt'
-
-    print_z_loss(result_dict["q"], result_dict["p"], result_dict["gt_q"], result_dict["gt_p"], label='')
-
-
 def snapshot(config, dataset, slices=6):
     if dataset == 'pendulum':
         pendulum_snapshot(config, slices=slices)
     elif dataset == 'spring_mass':
         sm_snapshot(config, slices=slices)
+
+
+def result(args):
+    config = load_config(args.config_path)
+    result_path = format_path(config, config["result_path"])
+    result_dict = load_pickle(result_path)
+
+    print_z_loss(result_dict["q"], result_dict["p"], result_dict["gt_q"], result_dict["gt_p"], label='')
 
 
 def full_run(args):
