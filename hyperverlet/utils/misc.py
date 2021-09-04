@@ -16,13 +16,9 @@ def load_config(path):
         with open(base_config['dataset_args_path'], 'r') as f:
             base_config['dataset_args'] = json.load(f)
 
-    if 'nn_path' in base_config['model_args']:
+    if 'model_args' in base_config and 'nn_path' in base_config['model_args']:
         with open(base_config['model_args']["nn_path"], 'r') as f:
             base_config["model_args"]['nn_args'] = json.load(f)
-
-    if 'plotting_args_path' in base_config:
-        with open(base_config['plotting_args_path'], 'r') as f:
-            base_config['plotting'] = json.load(f)
 
     if 'train_args_path' in base_config:
         with open(base_config['train_args_path'], 'r') as f:

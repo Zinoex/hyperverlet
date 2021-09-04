@@ -7,8 +7,11 @@ import torch
 from hyperverlet.config_container import preset_config_paths
 from hyperverlet.factories.dataset_factory import construct_dataset
 from hyperverlet.factories.solver_factory import construct_solver
-from hyperverlet.plotting.energy import total_energy_plot
+from hyperverlet.plotting.canonical import canonical_plot
+from hyperverlet.plotting.energy import energy_plot
 from hyperverlet.plotting.pendulum import animate_pendulum, pendulum_snapshot
+from hyperverlet.plotting.performance_bar import performance_bar
+from hyperverlet.plotting.phasespace import plot_phasespace
 from hyperverlet.plotting.spring_mass import animate_sm, sm_snapshot
 from hyperverlet.test import test
 from hyperverlet.train import train
@@ -36,7 +39,7 @@ def parse_arguments():
     evaluate_parse.set_defaults(func=evaluate)
 
     plot_parse = commands.add_parser("plot", help="Plot the results")
-    plot_parse.add_argument('--config-path', type=str, required=True, help="Path to the configuration file")
+    plot_parse.add_argument('--plot-config-path', type=str, required=True, help="Path to the configuration file")
     plot_parse.set_defaults(func=plot)
 
     result_parse = commands.add_parser('result', help="Print numerical results")
@@ -117,18 +120,23 @@ def plot(args):
     # - For energy, canonical and MSE bar plots: Combine in a single plot
     # - Remember to take dataset as input in plotting config
 
-    config_path = args.config_path
+    config_path = args.plot_config_path
     config = load_config(config_path)
-    dataset = config["dataset_args"]['dataset']
 
-    plotting_types = config['plotting']['plot_types']
-    energy_plot = 'energy' in plotting_types
-    canonical_plots = 'canonical' in plotting_types
+    plot_types = config['plot_types']
 
-    if 'animation' in plotting_types:
-        animate(config, dataset)
-    if 'snapshot' in plotting_types:
-        snapshot(config, dataset, slices=6)
+    if 'animation' in plot_types:
+        animate(config)
+    if 'snapshot' in plot_types:
+        snapshot(config, slices=6)
+    if 'energy' in plot_types:
+        energy_plot(config)
+    if 'canonical' in plot_types:
+        canonical_plot(config)
+    if 'performance_bar' in plot_types:
+        performance_bar(config)
+    if 'phase_space' in plot_types:
+        plot_phasespace(config)
 
 
 def animate(config, dataset):

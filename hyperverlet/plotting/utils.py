@@ -137,3 +137,9 @@ def save_figure(foldername, filename, ext="pdf"):
     filepath = os.path.join(foldername, filename)
     plt.savefig(f'{filepath}.{ext}', bbox_inches='tight')
     print(f"Plot saved at {filepath}.{ext}")
+
+
+def fetch_result_dict(config_path):
+    solver_config = load_config(path)
+    result_path = format_path(solver_config, solver_config['result_path'])
+    return load_pickle(result_path)

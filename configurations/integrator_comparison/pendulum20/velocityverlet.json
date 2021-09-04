@@ -6,6 +6,5 @@
     "solver": "VelocityVerlet",
     "nn_path": "configurations/integrator_comparison/pendulum20/nn.json"
   },
-  "dataset_args_path": "configurations/integrator_comparison/pendulum20/dataset.json",
-  "plotting_args_path": "configurations/integrator_comparison/pendulum20/plotting.json"
+  "dataset_args_path": "configurations/integrator_comparison/pendulum20/dataset.json"
 }

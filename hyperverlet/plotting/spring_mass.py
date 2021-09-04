@@ -7,7 +7,6 @@ from matplotlib.gridspec import GridSpec
 from matplotlib.patches import Circle
 
 from hyperverlet.energy import SpringMassEnergy
-from hyperverlet.plotting.energy import init_energy_plot, plot_energy, energy_animate_update
 from hyperverlet.plotting.grid_spec import gs_3_2_3, gs_line
 from hyperverlet.plotting.phasespace import init_phasespace_plot, update_phasespace_plot
 from hyperverlet.plotting.utils import plot_spring, save_animation, compute_spring, create_gt_pred_legends, save_figure
