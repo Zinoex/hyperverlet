@@ -47,14 +47,9 @@ def parse_arguments():
     full_parse.add_argument('--config-path', type=str, required=True, help="Path to the configuration file")
     full_parse.set_defaults(func=full_run)
 
-    combined_parse = commands.add_parser('combined', help="Used for plotting multiple configs in the same plot")
-    combined_parse.add_argument('--experiment', type=str, required=True, choices=preset_config_paths.keys(), help="Predefined set of json files used for plotting")
-    combined_parse.add_argument('--system', type=str, required=True, choices=systems, help="Name of the system to test")
-    combined_parse.set_defaults(func=combined)
-
     sequential_parse = commands.add_parser('sequential', help='Execute evaluate or plot sequentially')
     sequential_parse.add_argument('--experiment', type=str, required=True, choices=preset_config_paths.keys(), help="Run experiment on set of predefined json files")
-    sequential_parse.add_argument('--system', type=str, required=True, choices=systems, help="Name of the system to test")
+    sequential_parse.add_argument('--system', type=str, required=False, choices=systems, help="Name of the system to test")
     sequential_parse.set_defaults(func=sequential)
 
     commands_sequential = sequential_parse.add_subparsers(help='commands', dest='command')
@@ -78,24 +73,13 @@ def replace_system(path, args):
     return ExpArgs(path.format(system=args.system), device=args.device)
 
 
-def combined(args):
-    replace_system_closure = functools.partial(replace_system, args=args)
-    exp_args = map(replace_system_closure, preset_config_paths[args.experiment])
-
-    total_energy_plot(exp_args, args.experiment)
-
-
 def sequential(args):
-    for system in ['pendulum20', 'pendulum40', 'pendulum60', 'pendulum80',
-           'spring_mass25', 'spring_mass50', 'spring_mass100', 'spring_mass200']:
-        args.system = system
+    replace_system_closure = functools.partial(replace_system, args=args)
+    experiment_args = map(replace_system_closure, preset_config_paths[args.experiment])
 
-        replace_system_closure = functools.partial(replace_system, args=args)
-        experiment_args = map(replace_system_closure, preset_config_paths[args.experiment])
-
-        for experiment_arg in experiment_args:
-            print('Running: {}'.format(experiment_arg.config_path))
-            args.sequential_func(experiment_arg)
+    for experiment_arg in experiment_args:
+        print('Running: {}'.format(experiment_arg.config_path))
+        args.sequential_func(experiment_arg)
 
 
 def evaluate(args):
