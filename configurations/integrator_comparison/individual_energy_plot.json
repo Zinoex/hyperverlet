@@ -1,0 +1,16 @@
+{
+  "dataset_args_path": "configurations/integrator_comparison/pendulum80/dataset.json",
+  "plot_types": ["individual_energy"],
+  "results": {
+    "HyperEuler": "configurations/integrator_comparison/pendulum80/hypereuler.json",
+    "Velocity Verlet": "configurations/integrator_comparison/pendulum80/velocityverlet.json",
+    "Symplectic Hyperverlet": "configurations/integrator_comparison/pendulum80/symplectichyperverlet.json"
+  },
+  "individual_energy_plot": {
+    "cfg_idx": 0,
+    "end": 250,
+    "limits": [4.30, 4.45],
+    "plot_path": "visualization/integrator_comparison/individual_energy/",
+    "ext": ".jpg"
+  }
+}

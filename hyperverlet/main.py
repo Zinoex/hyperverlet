@@ -8,7 +8,7 @@ from hyperverlet.config_container import preset_config_paths
 from hyperverlet.factories.dataset_factory import construct_dataset
 from hyperverlet.factories.solver_factory import construct_solver
 from hyperverlet.plotting.canonical import canonical_plot
-from hyperverlet.plotting.energy import energy_plot
+from hyperverlet.plotting.energy import energy_plot, individual_energy_plot
 from hyperverlet.plotting.pendulum import animate_pendulum, pendulum_snapshot
 from hyperverlet.plotting.performance_bar import performance_bar
 from hyperverlet.plotting.phasespace import plot_phasespace
@@ -131,6 +131,8 @@ def plot(args):
         snapshot(config, slices=6)
     if 'energy' in plot_types:
         energy_plot(config)
+    if 'individual_energy' in plot_types:
+        individual_energy_plot(config)
     if 'canonical' in plot_types:
         canonical_plot(config)
     if 'performance_bar' in plot_types:

@@ -85,3 +85,43 @@ def energy_plot(config):
     plt.savefig(plot_path, bbox_inches='tight')
     print(f'Plot saved at {plot_path}')
 
+
+def individual_energy_plot(config):
+    cm = sns.color_palette('muted')
+
+    energy_config = config['individual_energy_plot']
+    cfg = energy_config['cfg_idx']
+
+    energy_mapping = dict(pendulum=PendulumEnergy, spring_mass=SpringMassEnergy)
+    energy_cls = energy_mapping[config['dataset_args']['dataset']]()
+    end = energy_config['end']
+
+    for idx, (label, path) in enumerate(config['results'].items()):
+        result_dict = fetch_result_dict(path)
+
+        q = result_dict['q'][:end, cfg]
+        p = result_dict['p'][:end, cfg]
+        trajectory = result_dict['trajectory'][:end, cfg]
+        mass = result_dict['mass'][cfg]
+
+        extra_args = {k: v[cfg] for k, v in result_dict['extra_args'].items()}
+
+        ke, pe, te = energy_cls.all_energies(mass, q, p, **extra_args)
+
+        plt.plot(trajectory, te, label='Total energy', linewidth=2.0, color=cm[0])
+
+        if 'limits' in energy_config:
+            plt.ylim(*energy_config['limits'])
+
+        plt.xlabel('Time')
+        plt.ylabel('Total energy')
+
+        plot_path = energy_config['plot_path']
+        ext = energy_config['ext']
+        os.makedirs(plot_path, exist_ok=True)
+        save_path = os.path.join(plot_path, label.replace(' ', '_') + ext)
+        plt.savefig(save_path, bbox_inches='tight')
+        print(f"Plot saved at {save_path}")
+
+        plt.clf()
+
