@@ -108,7 +108,14 @@ def individual_energy_plot(config):
 
         ke, pe, te = energy_cls.all_energies(mass, q, p, **extra_args)
 
-        plt.plot(trajectory, te, label='Total energy', linewidth=2.0, color=cm[0])
+        plt.plot(trajectory, te, label='Prediction', linewidth=2.0, color=cm[0])
+
+        q = result_dict['gt_q'][:end, cfg]
+        p = result_dict['gt_p'][:end, cfg]
+
+        ke, pe, te = energy_cls.all_energies(mass, q, p, **extra_args)
+
+        plt.plot(trajectory, te, label='Ground truth', linewidth=2.0, color=cm[1], linestyle='dashed')
 
         if 'limits' in energy_config:
             plt.ylim(*energy_config['limits'])
