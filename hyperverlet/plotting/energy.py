@@ -55,26 +55,26 @@ def energy_plot(config):
     for idx, (label, path) in enumerate(config['results'].items()):
         result_dict = fetch_result_dict(path)
 
-        q = result_dict['q'][:end, cfg]
-        p = result_dict['p'][:end, cfg]
         trajectory = result_dict['trajectory'][:end, cfg]
         mass = result_dict['mass'][cfg]
-
         extra_args = {k: v[cfg] for k, v in result_dict['extra_args'].items()}
+
+        if energy_config['include_ground_truth'] and idx == 0:
+            q = result_dict['gt_q'][:end, cfg]
+            p = result_dict['gt_p'][:end, cfg]
+
+            _, _, te = energy_cls.all_energies(mass, q, p, **extra_args)
+
+            linestyle = linestyles[-1][1] if energy_config['linestyles'] else 'solid'
+            plt.plot(trajectory, te, label='Ground truth', linewidth=1.0, color=cm[0], linestyle=linestyle)
+
+        q = result_dict['q'][:end, cfg]
+        p = result_dict['p'][:end, cfg]
 
         _, _, te = energy_cls.all_energies(mass, q, p, **extra_args)
 
         linestyle = linestyles[idx][1] if energy_config['linestyles'] else 'solid'
-        plt.plot(trajectory, te, label=label, linewidth=1.0, color=cm[idx], linestyle=linestyle)
-
-    if energy_config['include_ground_truth']:
-        q = result_dict['gt_q'][:end, cfg]
-        p = result_dict['gt_p'][:end, cfg]
-
-        _, _, te = energy_cls.all_energies(mass, q, p, **extra_args)
-
-        linestyle = linestyles[-1][1] if energy_config['linestyles'] else 'solid'
-        plt.plot(trajectory, te, label='Ground truth', linewidth=1.0, color=cm[idx + 1], linestyle=linestyle)
+        plt.plot(trajectory, te, label=label, linewidth=1.0, color=cm[idx + 1 if energy_config['include_ground_truth'] else 0], linestyle=linestyle)
 
     plt.xlabel('Time')
     plt.ylabel('Total energy')

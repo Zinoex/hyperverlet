@@ -9,11 +9,11 @@ from hyperverlet.plotting.utils import fetch_result_dict
 def canonical_plot(config):
     cm = sns.color_palette("muted")
     linestyles = [
+         ('solid', 'solid'),
          ('dashed', 'dashed'),
          ('dotted', 'dotted'),
          ('dashdot', 'dashdot'),
          ('densely dashdotdotted', (0, (3, 1, 1, 1, 1, 1))),
-         ('solid', 'solid')
     ]
 
     canonical_config = config['canonical_plot']
@@ -26,23 +26,27 @@ def canonical_plot(config):
     for idx, (label, path) in enumerate(config['results'].items()):
         result_dict = fetch_result_dict(path)
 
-        q = result_dict["q"][start:end, cfg]
-        p = result_dict["p"][start:end, cfg]
         trajectory = result_dict["trajectory"][start:end, cfg]
 
+        if canonical_config['include_ground_truth'] and idx == 0:
+            q = result_dict['gt_q'][start:end, cfg]
+            p = result_dict['gt_p'][start:end, cfg]
+
+            kwargs = dict(label='Ground truth', linewidth=1.0, color=cm[0], linestyle=linestyles[0][1])
+
+            for axis_idx in range(spatial_size):
+                axs[axis_idx].plot(trajectory, q[..., axis_idx], **kwargs)
+                axs[axis_idx + spatial_size].plot(trajectory, p[..., axis_idx], **kwargs)
+
+        q = result_dict["q"][start:end, cfg]
+        p = result_dict["p"][start:end, cfg]
+
+        offset = 1 if canonical_config['include_ground_truth'] else 0
+        kwargs = dict(label=label, linewidth=1.0, color=cm[idx + offset], linestyle=linestyles[idx + offset][1])
+
         for axis_idx in range(spatial_size):
-            axs[axis_idx].plot(trajectory, q[..., axis_idx], label=label, linewidth=1.0, color=cm[idx], linestyle=linestyles[idx][1])
-            axs[axis_idx + spatial_size].plot(trajectory, p[..., axis_idx], label=label, linewidth=1.0, color=cm[idx], linestyle=linestyles[idx][1])
-
-    if canonical_config['include_ground_truth']:
-        q = result_dict['gt_q'][start:end, cfg]
-        p = result_dict['gt_p'][start:end, cfg]
-
-        idx += 1
-
-        for axis_idx in range(spatial_size):
-            axs[axis_idx].plot(trajectory, q[..., axis_idx], label='Ground truth', linewidth=1.0, color=cm[idx], linestyle=linestyles[-1][1])
-            axs[axis_idx + spatial_size].plot(trajectory, p[..., axis_idx], label='Ground truth', linewidth=1.0, color=cm[idx], linestyle=linestyles[-1][1])
+            axs[axis_idx].plot(trajectory, q[..., axis_idx], **kwargs)
+            axs[axis_idx + spatial_size].plot(trajectory, p[..., axis_idx], **kwargs)
 
     for axis_idx in range(spatial_size):
         axs[axis_idx].set_xlabel('Time')

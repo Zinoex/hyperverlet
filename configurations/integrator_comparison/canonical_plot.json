@@ -2,8 +2,7 @@
   "dataset_args_path": "configurations/integrator_comparison/pendulum80/dataset.json",
   "plot_types": ["canonical"],
   "results": {
-    "Symplectic Hyperverlet": "configurations/integrator_comparison/pendulum80/symplectichyperverlet.json",
-    "Hyperverlet": "configurations/integrator_comparison/pendulum80/hyperverlet.json",
+    "Hyperverlet": "configurations/integrator_comparison/pendulum80/symplectichyperverlet.json",
     "Velocity Verlet": "configurations/integrator_comparison/pendulum80/velocityverlet.json",
     "SympNet": "configurations/integrator_comparison/pendulum80/sympnet.json"
   },

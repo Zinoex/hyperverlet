@@ -1,0 +1,17 @@
+{
+  "result_path": "results/ablation_study/hyperverlet/{solver}_trd{train_duration}_trtl{train_trajectory_length}_trsl{train_sequence_length}_cf{coarsening_factor}_ted{test_duration}_tetl{test_trajectory_length}.pickle",
+  "plot_path": "visualization/ablation_study/hyperverlet/{solver}_trd{train_duration}_trtl{train_trajectory_length}_trsl{train_sequence_length}_cf{coarsening_factor}_ted{test_duration}_tetl{test_trajectory_length}_{datetime}.mp4",
+  "train_args_path": "configurations/ablation_study/training.json",
+  "model_args": {
+    "solver": "HyperVelocityVerlet",
+    "nn_args": {
+      "module": "PendulumModel",
+      "h_dim": 16,
+      "q_input_dim": 6,
+      "p_input_dim": 6,
+      "output_dim": 1
+    }
+  },
+  "dataset_args_path": "configurations/ablation_study/dataset.json",
+  "plotting_args_path": "configurations/ablation_study/plotting.json"
+}
