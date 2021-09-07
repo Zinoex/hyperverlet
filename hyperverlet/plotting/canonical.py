@@ -56,7 +56,9 @@ def canonical_plot(config):
         axs[axis_idx + spatial_size].set_xlabel('Time')
         ylabel = f'p{axis_idx}' if spatial_size > 1 else 'p'
         axs[axis_idx + spatial_size].set_ylabel(ylabel)
-    axs[0].legend(loc='lower right')
+
+    #axs[0].legend(loc='lower right')
+    axs[0].legend(loc='upper right', bbox_to_anchor=(1.025, 1.7), fancybox=True, shadow=True, ncol=2)
 
     plot_path = canonical_config['plot_path']
     os.makedirs(os.path.dirname(plot_path), exist_ok=True)

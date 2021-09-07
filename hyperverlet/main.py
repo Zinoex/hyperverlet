@@ -2,6 +2,7 @@ import functools
 from argparse import ArgumentParser
 from dataclasses import dataclass
 
+import matplotlib
 import torch
 
 from hyperverlet.config_container import preset_config_paths
@@ -113,12 +114,11 @@ def evaluate(args):
 
 
 def plot(args):
-    # Idea to update the plotting code:
-    # - Restructure such the the plotting config is at focus
-    # - Take systems as parameters in plotting config
-    # - For animate and snapshot: for-loop over systems
-    # - For energy, canonical and MSE bar plots: Combine in a single plot
-    # - Remember to take dataset as input in plotting config
+    font = {'family': 'sans-serif',
+            # 'weight': 'bold',
+            'size': 18}
+
+    matplotlib.rc('font', **font)
 
     config_path = args.plot_config_path
     config = load_config(config_path)

@@ -2,10 +2,10 @@
   "dataset_args_path": "configurations/ablation_study/dataset.json",
   "plot_types": ["performance_bar"],
   "results": {
-    "Non-symplectic": "configurations/ablation_study/hyperverlet.json",
+    "Non-symp": "configurations/ablation_study/hyperverlet.json",
     "SympNet": "configurations/ablation_study/plain.json",
     "Tanh": "configurations/ablation_study/tanh.json",
-    "Parameterized": "configurations/ablation_study/extended.json",
+    "Param": "configurations/ablation_study/extended.json",
     "Full": "configurations/ablation_study/full.json"
   },
   "performance_bar_plot": {

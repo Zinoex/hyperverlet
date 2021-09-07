@@ -36,6 +36,7 @@ def performance_bar(config):
     df = pd.DataFrame(data=data, columns=['Solver', 'MSE'])
 
     sns.barplot(x='Solver', y='MSE', data=df, ci=95, capsize=0.2)
+    plt.xticks(rotation=-30, horizontalalignment='center')
 
     plot_path = performance_bar_config['plot_path']
     os.makedirs(os.path.dirname(plot_path), exist_ok=True)
