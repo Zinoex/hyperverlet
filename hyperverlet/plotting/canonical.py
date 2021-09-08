@@ -32,7 +32,7 @@ def canonical_plot(config):
             q = result_dict['gt_q'][start:end, cfg]
             p = result_dict['gt_p'][start:end, cfg]
 
-            kwargs = dict(label='Ground truth', linewidth=1.0, color=cm[0], linestyle=linestyles[0][1])
+            kwargs = dict(label='Ground truth', linewidth=2.0, color=cm[0])
 
             for axis_idx in range(spatial_size):
                 axs[axis_idx].plot(trajectory, q[..., axis_idx], **kwargs)
@@ -42,7 +42,7 @@ def canonical_plot(config):
         p = result_dict["p"][start:end, cfg]
 
         offset = 1 if canonical_config['include_ground_truth'] else 0
-        kwargs = dict(label=label, linewidth=1.0, color=cm[idx + offset], linestyle=linestyles[idx + offset][1])
+        kwargs = dict(label=label, linewidth=2.0, color=cm[idx + offset])
 
         for axis_idx in range(spatial_size):
             axs[axis_idx].plot(trajectory, q[..., axis_idx], **kwargs)

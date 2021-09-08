@@ -9,7 +9,7 @@
   "energy_plot": {
     "cfg_idx": 0,
     "include_ground_truth": true,
-    "end": 375,
+    "end": 200,
     "linestyles": false,
     "plot_path": "visualization/integrator_comparison/energy_plot.pdf"
   }

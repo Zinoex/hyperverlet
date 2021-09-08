@@ -66,7 +66,7 @@ def energy_plot(config):
             _, _, te = energy_cls.all_energies(mass, q, p, **extra_args)
 
             linestyle = linestyles[-1][1] if energy_config['linestyles'] else 'solid'
-            plt.plot(trajectory, te, label='Ground truth', linewidth=1.0, color=cm[0], linestyle=linestyle)
+            plt.plot(trajectory, te, label='Ground truth', linewidth=2.0, color=cm[0], linestyle=linestyle)
 
         q = result_dict['q'][:end, cfg]
         p = result_dict['p'][:end, cfg]
@@ -74,7 +74,7 @@ def energy_plot(config):
         _, _, te = energy_cls.all_energies(mass, q, p, **extra_args)
 
         linestyle = linestyles[idx][1] if energy_config['linestyles'] else 'solid'
-        plt.plot(trajectory, te, label=label, linewidth=1.0, color=cm[idx + 1 if energy_config['include_ground_truth'] else 0], linestyle=linestyle)
+        plt.plot(trajectory, te, label=label, linewidth=2.0, color=cm[idx + 1 if energy_config['include_ground_truth'] else 0], linestyle=linestyle)
 
     plt.xlabel('Time')
     plt.ylabel('Total energy')
@@ -108,14 +108,14 @@ def individual_energy_plot(config):
 
         ke, pe, te = energy_cls.all_energies(mass, q, p, **extra_args)
 
-        plt.plot(trajectory, te, label='Prediction', linewidth=2.0, color=cm[0])
+        plt.plot(trajectory, te, label='Prediction', linewidth=4.0, color=cm[0])
 
         q = result_dict['gt_q'][:end, cfg]
         p = result_dict['gt_p'][:end, cfg]
 
         ke, pe, te = energy_cls.all_energies(mass, q, p, **extra_args)
 
-        plt.plot(trajectory, te, label='Ground truth', linewidth=2.0, color=cm[1], linestyle='dashed')
+        plt.plot(trajectory, te, label='Ground truth', linewidth=4.0, color=cm[1], linestyle='dashed')
 
         if 'limits' in energy_config:
             plt.ylim(*energy_config['limits'])
