@@ -1,0 +1,13 @@
+{
+  "plot_types": ["runtime"],
+  "results": {
+    "HyperEuler": "configurations/integrator_comparison/{system}/hypereuler.json",
+    "Velocity Verlet": "configurations/integrator_comparison/{system}/velocityverlet.json",
+    "Symplectic Hyperverlet": "configurations/integrator_comparison/{system}/symplectichyperverlet.json"
+  },
+  "runtime_plot": {
+    "systems": ["pendulum20", "pendulum40", "pendulum60", "pendulum80"],
+    "linestyles": false,
+    "plot_path": "visualization/integrator_comparison/runtime_comparison.pdf"
+  }
+}

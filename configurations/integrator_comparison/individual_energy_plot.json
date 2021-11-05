@@ -2,6 +2,7 @@
   "dataset_args_path": "configurations/integrator_comparison/pendulum80/dataset.json",
   "plot_types": ["individual_energy"],
   "results": {
+    "Euler": "configurations/integrator_comparison/pendulum80/euler.json",
     "HyperEuler": "configurations/integrator_comparison/pendulum80/hypereuler.json",
     "Velocity Verlet": "configurations/integrator_comparison/pendulum80/velocityverlet.json",
     "Symplectic Hyperverlet": "configurations/integrator_comparison/pendulum80/symplectichyperverlet.json"

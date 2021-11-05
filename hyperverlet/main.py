@@ -13,6 +13,7 @@ from hyperverlet.plotting.energy import energy_plot, individual_energy_plot
 from hyperverlet.plotting.pendulum import animate_pendulum, pendulum_snapshot
 from hyperverlet.plotting.performance_bar import performance_bar
 from hyperverlet.plotting.phasespace import plot_phasespace
+from hyperverlet.plotting.runtime import runtime_plot
 from hyperverlet.plotting.spring_mass import animate_sm, sm_snapshot
 from hyperverlet.test import test
 from hyperverlet.train import train
@@ -139,6 +140,8 @@ def plot(args):
         performance_bar(config)
     if 'phase_space' in plot_types:
         plot_phasespace(config)
+    if 'runtime' in plot_types:
+        runtime_plot(config)
 
 
 def animate(config, dataset):
