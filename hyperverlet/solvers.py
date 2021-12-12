@@ -125,6 +125,19 @@ class HyperEuler(BaseSolver, ResidualMixin):
         return q_next, p_next
 
 
+class RungeKutta4(BaseSolver):
+    def forward(self, experiment: Experiment, q: torch.Tensor, p: torch.Tensor, m: torch.Tensor, t, dt, **kwargs):
+        dq1, dp1 = experiment(q, p, m, t, **kwargs)
+        q1, p1, t1 = experiment.shift(q + dq1 * dt / 2, **kwargs), p + dp1 * dt / 2, t + dt / 2
+        dq2, dp2 = experiment(q1, p1, m, t1, **kwargs)
+        q2, p2, t2 = experiment.shift(q + dq2 * dt / 2, **kwargs), p + dp2 * dt / 2, t + dt / 2
+        dq3, dp3 = experiment(q2, p2, m, t2, **kwargs)
+        q3, p3, t3 = experiment.shift(q + dq3 * dt, **kwargs), p + dp3 * dt, t + dt
+        dq4, dp4 = experiment(q3, p3, m, t3, **kwargs)
+
+        return experiment.shift(q + (dq1 + 2 * dq2 + 2 * dq3 + dq4) / 6 * dt, **kwargs), p + (dp1 + 2 * dp2 + 2 * dp3 + dp4) / 6 * dt
+
+
 class HyperVelocityVerlet(BaseSolver, ResidualMixin):
     trainable = True
     q_order = 2

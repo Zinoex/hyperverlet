@@ -4,7 +4,9 @@
   "results": {
     "HyperEuler": "configurations/integrator_comparison/pendulum80/hypereuler.json",
     "Velocity Verlet": "configurations/integrator_comparison/pendulum80/velocityverlet.json",
-    "Hyperverlet": "configurations/integrator_comparison/pendulum80/symplectichyperverlet.json"
+    "Hyperverlet": "configurations/integrator_comparison/pendulum80/symplectichyperverlet.json",
+    "RK4": "configurations/integrator_comparison/pendulum80/rk4.json",
+    "FR4": "configurations/integrator_comparison/pendulum80/ruth4.json"
   },
   "energy_plot": {
     "cfg_idx": 0,

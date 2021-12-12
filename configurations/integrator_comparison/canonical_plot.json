@@ -4,6 +4,8 @@
   "results": {
     "Hyperverlet": "configurations/integrator_comparison/pendulum80/symplectichyperverlet.json",
     "Velocity Verlet": "configurations/integrator_comparison/pendulum80/velocityverlet.json",
+    "RK4": "configurations/integrator_comparison/pendulum80/rk4.json",
+    "FR4": "configurations/integrator_comparison/pendulum80/ruth4.json",
     "SympNet": "configurations/integrator_comparison/pendulum80/sympnet.json"
   },
   "canonical_plot": {
