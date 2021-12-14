@@ -78,7 +78,7 @@ def energy_plot(config):
 
     plt.xlabel('Time')
     plt.ylabel('Total energy')
-    plt.legend(loc='lower right')
+    plt.legend(loc='lower left')
 
     plot_path = energy_config['plot_path']
     os.makedirs(os.path.dirname(plot_path), exist_ok=True)
