@@ -1,5 +1,6 @@
 import os
 
+import matplotlib
 import matplotlib.pyplot as plt
 import seaborn as sns
 
@@ -89,6 +90,12 @@ def energy_plot(config):
 def individual_energy_plot(config):
     cm = sns.color_palette('muted')
 
+    font = {'family': 'DejaVu Sans',
+            'weight': 'bold',
+            'size': 32}
+
+    matplotlib.rc('font', **font)
+
     energy_config = config['individual_energy_plot']
     cfg = energy_config['cfg_idx']
 
@@ -119,6 +126,9 @@ def individual_energy_plot(config):
 
         if 'limits' in energy_config:
             plt.ylim(*energy_config['limits'])
+
+        plt.gca().xaxis.set_ticklabels([])
+        plt.gca().yaxis.set_ticklabels([])
 
         plt.xlabel('Time')
         plt.ylabel('Total energy')

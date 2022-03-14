@@ -10,7 +10,7 @@
     "cfg_idx": 0,
     "spatial_size": 1,
     "include_ground_truth": true,
-    "start": -100,
+    "start": -150,
     "end": -1,
     "plot_path": "visualization/integrator_comparison/canonical_plot.pdf"
   }

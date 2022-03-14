@@ -21,7 +21,7 @@ def canonical_plot(config):
     spatial_size = canonical_config['spatial_size']
     start = canonical_config['start']
     end = canonical_config['end']
-    fig, axs = plt.subplots(spatial_size * 2, sharex=True)
+    fig, axs = plt.subplots(spatial_size * 2, sharex=True, figsize=(6.4 * 2, 4.8))
 
     for idx, (label, path) in enumerate(config['results'].items()):
         result_dict = fetch_result_dict(path)
@@ -58,7 +58,7 @@ def canonical_plot(config):
         axs[axis_idx + spatial_size].set_ylabel(ylabel)
 
     #axs[0].legend(loc='lower right')
-    axs[0].legend(loc='upper right', bbox_to_anchor=(1.025, 1.7), fancybox=True, shadow=True, ncol=2)
+    axs[0].legend(loc='upper left', bbox_to_anchor=(0, 1.7), fancybox=True, shadow=True, ncol=2)
 
     plot_path = canonical_config['plot_path']
     os.makedirs(os.path.dirname(plot_path), exist_ok=True)
